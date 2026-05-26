@@ -13,7 +13,7 @@ test:
 	go test ./...
 
 build:
-	go build -o bin/issuetracker ./cmd/issuetracker
+	go build -o bin/zdzira ./cmd/zdzira
 
 install-tools:
 	go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
