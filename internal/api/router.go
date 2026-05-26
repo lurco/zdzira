@@ -41,6 +41,7 @@ func NewRouter(svcs *service.Services) http.Handler {
 				r.Post("/", issues.create)
 				r.Route("/{issueRef}", func(r chi.Router) {
 					r.Get("/", issues.get)
+					r.Put("/", issues.update)
 					r.Delete("/", issues.delete)
 					r.Post("/move", issues.move)
 

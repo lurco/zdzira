@@ -110,6 +110,27 @@ func (s *IssueService) Move(ctx context.Context, in MoveIssueInput) (*model.Issu
 	return issue, s.stores.Issues.Update(ctx, issue)
 }
 
+type UpdateIssueInput struct {
+	ProjectSlug string
+	IssueRef    string
+	Name        string
+	Description *string
+	Type        model.IssueType
+	Priority    model.Priority
+}
+
+func (s *IssueService) Update(ctx context.Context, in UpdateIssueInput) (*model.Issue, error) {
+	issue, err := s.Get(ctx, in.ProjectSlug, in.IssueRef)
+	if err != nil {
+		return nil, err
+	}
+	issue.Name = in.Name
+	issue.Description = in.Description
+	issue.Type = in.Type
+	issue.Priority = in.Priority
+	return issue, s.stores.Issues.Update(ctx, issue)
+}
+
 func (s *IssueService) Delete(ctx context.Context, projectSlug, ref string) error {
 	issue, err := s.Get(ctx, projectSlug, ref)
 	if err != nil {

@@ -14,6 +14,49 @@ func newProjectWithIssues(t *testing.T, svcs *service.Services) {
 	require.NoError(t, err)
 }
 
+func TestIssueUpdate_ChangesFields(t *testing.T) {
+	svcs := newTestServices(t)
+	newProjectWithIssues(t, svcs)
+
+	_, err := svcs.Issues.Create(ctx, service.CreateIssueInput{
+		ProjectSlug: "tracker",
+		Name:        "original name",
+		Type:        "TASK",
+		Priority:    "LOW",
+	})
+	require.NoError(t, err)
+
+	updated, err := svcs.Issues.Update(ctx, service.UpdateIssueInput{
+		ProjectSlug: "tracker",
+		IssueRef:    "TRK-1",
+		Name:        "updated name",
+		Type:        "BUG",
+		Priority:    "HIGH",
+	})
+	require.NoError(t, err)
+	assert.Equal(t, "updated name", updated.Name)
+	assert.Equal(t, "BUG", string(updated.Type))
+	assert.Equal(t, "HIGH", string(updated.Priority))
+
+	fetched, err := svcs.Issues.Get(ctx, "tracker", "TRK-1")
+	require.NoError(t, err)
+	assert.Equal(t, "updated name", fetched.Name)
+}
+
+func TestIssueUpdate_NonexistentIssue(t *testing.T) {
+	svcs := newTestServices(t)
+	newProjectWithIssues(t, svcs)
+
+	_, err := svcs.Issues.Update(ctx, service.UpdateIssueInput{
+		ProjectSlug: "tracker",
+		IssueRef:    "TRK-99",
+		Name:        "ghost",
+		Type:        "TASK",
+		Priority:    "LOW",
+	})
+	assert.Error(t, err)
+}
+
 func TestIssueList_ReturnsIssuesForProject(t *testing.T) {
 	svcs := newTestServices(t)
 	newProjectWithIssues(t, svcs)

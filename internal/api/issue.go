@@ -43,6 +43,22 @@ func (h *issueHandler) create(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, http.StatusCreated, issue)
 }
 
+func (h *issueHandler) update(w http.ResponseWriter, r *http.Request) {
+	var in service.UpdateIssueInput
+	if err := json.NewDecoder(r.Body).Decode(&in); err != nil {
+		writeError(w, http.StatusBadRequest, err.Error())
+		return
+	}
+	in.ProjectSlug = chi.URLParam(r, "slug")
+	in.IssueRef = chi.URLParam(r, "issueRef")
+	issue, err := h.svc.Update(r.Context(), in)
+	if err != nil {
+		writeError(w, http.StatusUnprocessableEntity, err.Error())
+		return
+	}
+	writeJSON(w, http.StatusOK, issue)
+}
+
 func (h *issueHandler) move(w http.ResponseWriter, r *http.Request) {
 	var body struct {
 		Swimlane string `json:"swimlane"`
