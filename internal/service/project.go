@@ -49,6 +49,20 @@ func (s *ProjectService) Delete(ctx context.Context, slug string) error {
 	if err != nil {
 		return err
 	}
+
+	if err := s.stores.Issues.DeleteByProject(ctx, p.ID); err != nil {
+		return err
+	}
+	if err := s.stores.Epics.DeleteByProject(ctx, p.ID); err != nil {
+		return err
+	}
+	if err := s.stores.Swimlanes.DeleteByProject(ctx, p.ID); err != nil {
+		return err
+	}
+	if err := s.stores.Comments.DeleteByProject(ctx, p.ID); err != nil {
+		return err
+	}
+
 	return s.stores.Projects.Delete(ctx, p.ID)
 }
 

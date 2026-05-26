@@ -34,3 +34,7 @@ func (s *gormCommentStore) ListByProject(ctx context.Context, projectID uint) ([
 func (s *gormCommentStore) Delete(ctx context.Context, id uint) error {
 	return s.db.WithContext(ctx).Delete(&model.Comment{}, id).Error
 }
+
+func (s *gormCommentStore) DeleteByProject(ctx context.Context, projectID uint) error {
+	return s.db.WithContext(ctx).Where("project_id = ?", projectID).Delete(&model.Comment{}).Error
+}

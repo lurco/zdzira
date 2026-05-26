@@ -37,3 +37,7 @@ func (s *gormSwimlaneStore) Update(ctx context.Context, sl *model.Swimlane) erro
 func (s *gormSwimlaneStore) Delete(ctx context.Context, id uint) error {
 	return s.db.WithContext(ctx).Delete(&model.Swimlane{}, id).Error
 }
+
+func (s *gormSwimlaneStore) DeleteByProject(ctx context.Context, projectID uint) error {
+	return s.db.WithContext(ctx).Where("project_id = ?", projectID).Delete(&model.Swimlane{}).Error
+}

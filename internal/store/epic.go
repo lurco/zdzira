@@ -34,3 +34,7 @@ func (s *gormEpicStore) Update(ctx context.Context, e *model.Epic) error {
 func (s *gormEpicStore) Delete(ctx context.Context, id uint) error {
 	return s.db.WithContext(ctx).Delete(&model.Epic{}, id).Error
 }
+
+func (s *gormEpicStore) DeleteByProject(ctx context.Context, projectID uint) error {
+	return s.db.WithContext(ctx).Where("project_id = ?", projectID).Delete(&model.Epic{}).Error
+}

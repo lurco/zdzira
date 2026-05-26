@@ -46,3 +46,7 @@ func (s *gormIssueStore) Update(ctx context.Context, i *model.Issue) error {
 func (s *gormIssueStore) Delete(ctx context.Context, id uint) error {
 	return s.db.WithContext(ctx).Delete(&model.Issue{}, id).Error
 }
+
+func (s *gormIssueStore) DeleteByProject(ctx context.Context, projectID uint) error {
+	return s.db.WithContext(ctx).Where("project_id = ?", projectID).Delete(&model.Issue{}).Error
+}

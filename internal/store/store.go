@@ -41,6 +41,7 @@ type EpicStore interface {
 	ListByProject(ctx context.Context, projectID uint) ([]model.Epic, error)
 	Update(ctx context.Context, e *model.Epic) error
 	Delete(ctx context.Context, id uint) error
+	DeleteByProject(ctx context.Context, projectID uint) error
 }
 
 type IssueStore interface {
@@ -50,6 +51,7 @@ type IssueStore interface {
 	ListBySwimlane(ctx context.Context, swimlaneID uint) ([]model.Issue, error)
 	Update(ctx context.Context, i *model.Issue) error
 	Delete(ctx context.Context, id uint) error
+	DeleteByProject(ctx context.Context, projectID uint) error
 }
 
 type SwimlaneStore interface {
@@ -58,6 +60,7 @@ type SwimlaneStore interface {
 	GetByName(ctx context.Context, projectID uint, name string) (*model.Swimlane, error)
 	Update(ctx context.Context, s *model.Swimlane) error
 	Delete(ctx context.Context, id uint) error
+	DeleteByProject(ctx context.Context, projectID uint) error
 }
 
 type CommentStore interface {
@@ -66,6 +69,7 @@ type CommentStore interface {
 	ListByEpic(ctx context.Context, epicID uint) ([]model.Comment, error)
 	ListByProject(ctx context.Context, projectID uint) ([]model.Comment, error)
 	Delete(ctx context.Context, id uint) error
+	DeleteByProject(ctx context.Context, projectID uint) error
 }
 
 type LinkStore interface {
