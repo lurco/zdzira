@@ -1,0 +1,1205 @@
+<!doctype html>
+<html lang="en" data-mode="light">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Zdzira — Board</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=JetBrains+Mono:wght@400;500;700;800&display=swap" />
+<style>
+/* ===== tokens (carried from design system) ===== */
+:root,[data-mode="light"]{
+  --paper:#F4F1E8; --paper-2:#EAE5D2; --paper-3:#DED7BF;
+  --ink:#0A0908; --ink-soft:#2A2724; --muted:#6B655A; --line:#0A0908;
+  --acc-yellow:#F5D547; --acc-red:#E63946; --acc-green:#2A9D5A;
+  --acc-blue:#2A6FDB; --acc-violet:#7A4FD6;
+  --chip-fg:#0A0908;
+  --border:3px; --shadow:6px 6px 0 0 var(--ink); --shadow-sm:3px 3px 0 0 var(--ink);
+  --shadow-lg:10px 10px 0 0 var(--ink);
+  color-scheme: light;
+}
+[data-mode="dark"]{
+  --paper:#13110E; --paper-2:#1E1B16; --paper-3:#2A2620;
+  --ink:#EFEAD8; --ink-soft:#C9C2AC; --muted:#7A7567; --line:#EFEAD8;
+  --acc-yellow:#F5D547; --acc-red:#FF5A66; --acc-green:#4ED38A;
+  --acc-blue:#6FA0F5; --acc-violet:#B796F7;
+  --chip-fg:#0A0908;
+  color-scheme: dark;
+}
+[data-mode="contrast"]{
+  --paper:#FFFFFF; --paper-2:#FFFFFF; --paper-3:#FFFFFF;
+  --ink:#000000; --ink-soft:#000000; --muted:#000000; --line:#000000;
+  --acc-yellow:#FFD60A; --acc-red:#FF0000; --acc-green:#008000;
+  --acc-blue:#0000FF; --acc-violet:#000000;
+  --chip-fg:#000000;
+  --border:4px; --shadow:8px 8px 0 0 var(--ink); --shadow-sm:4px 4px 0 0 var(--ink);
+  --shadow-lg:12px 12px 0 0 var(--ink);
+}
+
+*,*::before,*::after{box-sizing:border-box;}
+html,body{margin:0; padding:0;}
+html,body{height:100%;}
+body{
+  background:var(--paper); color:var(--ink);
+  font-family:'Space Grotesk', system-ui, sans-serif;
+  font-size:15px; line-height:1.4;
+  -webkit-font-smoothing:antialiased;
+  overflow:hidden;
+}
+.mono{font-family:'JetBrains Mono', ui-monospace, monospace;}
+::selection{background:var(--acc-yellow); color:#0A0908;}
+:focus-visible{outline:3px solid var(--acc-yellow); outline-offset:3px;}
+
+/* ===== app shell ===== */
+.app{
+  display:grid;
+  grid-template-rows:auto auto 1fr;
+  height:100vh;
+  width:100vw;
+}
+
+/* topbar */
+.topbar{
+  background:var(--paper);
+  border-bottom:var(--border) solid var(--line);
+  padding:14px 24px;
+  display:flex; align-items:center; justify-content:space-between; gap:18px;
+}
+.brand{display:flex; align-items:center; gap:12px;}
+.logo{
+  --logo-size:34px;
+  position:relative; width:var(--logo-size); height:var(--logo-size);
+  display:inline-block;
+}
+.logo .plate{position:absolute; inset:3px -3px -3px 3px; background:var(--ink);}
+.logo .face{
+  position:absolute; inset:0;
+  background:var(--acc-yellow); border:2px solid var(--ink);
+  display:grid; place-items:center;
+  font-family:'JetBrains Mono', monospace;
+  font-weight:800; font-size:calc(var(--logo-size) * 0.6);
+  color:var(--ink); line-height:1;
+}
+.logo .face::after{
+  content:""; position:absolute; right:3px; bottom:3px;
+  width:5px; height:5px; background:var(--acc-red); border:1.5px solid var(--ink);
+}
+.brand-name{
+  font-family:'JetBrains Mono', monospace; font-weight:800;
+  letter-spacing:0.04em; font-size:16px; text-transform:uppercase;
+}
+.brand-name .dot{
+  display:inline-block; width:6px; height:6px;
+  background:var(--acc-red); border:1.5px solid var(--ink);
+  margin-left:5px; transform:translateY(-2px);
+}
+.crumb{
+  font-family:'JetBrains Mono', monospace; font-size:11px;
+  text-transform:uppercase; letter-spacing:0.08em;
+  color:var(--muted); padding-left:18px; margin-left:14px;
+  border-left:2px solid var(--line);
+}
+.crumb b{color:var(--ink);}
+.topbar-right{display:flex; align-items:center; gap:14px;}
+.mode-switch{
+  display:inline-flex;
+  border:var(--border) solid var(--line);
+  background:var(--paper);
+  box-shadow:var(--shadow-sm);
+}
+.mode-switch button{
+  appearance:none; background:transparent; border:0;
+  border-right:2px solid var(--line);
+  padding:8px 12px;
+  font-family:'JetBrains Mono', monospace; font-size:11px; font-weight:700;
+  text-transform:uppercase; letter-spacing:0.06em;
+  color:var(--ink); cursor:pointer;
+}
+.mode-switch button:last-child{border-right:0;}
+.mode-switch button[aria-pressed="true"]{background:var(--ink); color:var(--paper);}
+
+/* ===== toolbar ===== */
+.toolbar{
+  background:var(--paper-2);
+  border-bottom:var(--border) solid var(--line);
+  padding:12px 24px;
+  display:flex; align-items:center; justify-content:space-between; gap:14px;
+  flex-wrap:wrap;
+}
+.toolbar-left, .toolbar-right{display:flex; align-items:center; gap:10px; flex-wrap:wrap;}
+.search{
+  display:flex; align-items:center; gap:8px;
+  padding:8px 12px;
+  background:var(--paper);
+  border:var(--border) solid var(--line);
+  box-shadow:var(--shadow-sm);
+  min-width:240px;
+}
+.search input{
+  appearance:none; border:0; outline:none; background:transparent;
+  font-family:'JetBrains Mono', monospace; font-size:13px; color:var(--ink);
+  width:100%;
+}
+.search .icon{
+  font-family:'JetBrains Mono', monospace; font-size:12px; color:var(--muted);
+  font-weight:700;
+}
+.filter-chip{
+  font-family:'JetBrains Mono', monospace; font-size:11px;
+  font-weight:700; text-transform:uppercase; letter-spacing:0.06em;
+  padding:6px 10px;
+  background:var(--paper);
+  border:2px solid var(--line);
+  cursor:pointer; user-select:none;
+  display:inline-flex; align-items:center; gap:6px;
+}
+.filter-chip .dot{
+  width:8px; height:8px; border:2px solid var(--line); display:inline-block;
+}
+.filter-chip[aria-pressed="true"]{background:var(--ink); color:var(--paper);}
+.filter-chip[aria-pressed="true"] .dot{border-color:var(--paper);}
+
+.btn{
+  appearance:none; display:inline-flex; align-items:center; justify-content:center;
+  gap:8px; padding:10px 14px;
+  font-family:'JetBrains Mono', monospace; font-weight:700; font-size:12px;
+  letter-spacing:0.06em; text-transform:uppercase;
+  background:var(--paper); color:var(--ink);
+  border:var(--border) solid var(--line);
+  box-shadow:var(--shadow-sm);
+  cursor:pointer;
+  transition:transform .05s linear, box-shadow .05s linear;
+  text-decoration:none;
+}
+.btn:hover{transform:translate(-1px,-1px); box-shadow:5px 5px 0 0 var(--ink);}
+.btn:active{transform:translate(2px,2px); box-shadow:0 0 0 0 var(--ink);}
+.btn.primary{background:var(--acc-yellow); color:var(--chip-fg);}
+.btn.danger{background:var(--acc-red); color:#FFF1F1;}
+.btn.ghost{background:transparent; box-shadow:none; border-color:transparent;}
+.btn.ghost:hover{background:var(--paper); box-shadow:var(--shadow-sm); border-color:var(--line); transform:none;}
+.btn.icon{padding:8px 10px;}
+[data-mode="contrast"] .btn.danger{color:#FFFFFF;}
+
+/* ===== board ===== */
+.board-wrap{
+  overflow-x:auto; overflow-y:hidden;
+  padding:24px;
+  background:
+    radial-gradient(var(--paper-3) 1.5px, transparent 1.5px) 0 0/22px 22px,
+    var(--paper);
+}
+.board{
+  display:flex; align-items:stretch; gap:20px;
+  min-height:100%;
+  padding-bottom:8px;
+  width:max-content;
+}
+
+/* ===== lane ===== */
+.lane{
+  width:300px;
+  min-width:300px;
+  background:var(--paper-2);
+  border:var(--border) solid var(--line);
+  box-shadow:var(--shadow);
+  display:flex; flex-direction:column;
+  max-height:calc(100vh - 200px);
+  position:relative;
+}
+.lane.dragging{opacity:0.5;}
+.lane.drop-target-lane{
+  outline:4px dashed var(--acc-violet);
+  outline-offset:-4px;
+}
+.lane-header{
+  padding:14px 14px 12px;
+  border-bottom:2px solid var(--line);
+  background:var(--paper);
+  cursor:grab;
+  display:flex; align-items:center; gap:8px;
+  user-select:none;
+}
+.lane-header:active{cursor:grabbing;}
+.lane-swatch{
+  width:14px; height:14px; flex-shrink:0;
+  border:2px solid var(--line);
+}
+.lane-title{
+  flex:1;
+  font-family:'JetBrains Mono', monospace;
+  font-size:13px; font-weight:800;
+  text-transform:uppercase; letter-spacing:0.06em;
+  background:transparent; border:0; outline:none;
+  color:var(--ink); padding:2px 4px;
+  min-width:0;
+}
+.lane-title:focus{
+  background:var(--acc-yellow); color:var(--chip-fg);
+}
+.lane-count{
+  font-family:'JetBrains Mono', monospace;
+  font-size:11px; font-weight:700;
+  background:var(--ink); color:var(--paper);
+  padding:2px 7px;
+  min-width:24px; text-align:center;
+}
+.lane-menu{
+  appearance:none; background:transparent; border:0; padding:4px 6px;
+  cursor:pointer; color:var(--muted);
+  font-family:'JetBrains Mono', monospace; font-weight:800;
+  font-size:14px; line-height:1;
+}
+.lane-menu:hover{color:var(--ink);}
+
+.lane-body{
+  flex:1; overflow-y:auto; overflow-x:hidden;
+  padding:12px;
+  display:flex; flex-direction:column; gap:10px;
+}
+.lane-body::-webkit-scrollbar{width:8px;}
+.lane-body::-webkit-scrollbar-track{background:var(--paper-2);}
+.lane-body::-webkit-scrollbar-thumb{background:var(--ink); border:2px solid var(--paper-2);}
+
+.lane-footer{
+  border-top:2px solid var(--line);
+  background:var(--paper);
+}
+.add-card-btn{
+  width:100%;
+  appearance:none; border:0; background:transparent;
+  padding:12px 14px; text-align:left;
+  font-family:'JetBrains Mono', monospace; font-size:12px;
+  font-weight:700; text-transform:uppercase; letter-spacing:0.06em;
+  color:var(--muted); cursor:pointer;
+}
+.add-card-btn:hover{background:var(--acc-yellow); color:var(--chip-fg);}
+
+/* drop slot inside lane */
+.drop-slot{
+  height:0;
+  border-top:0 dashed var(--acc-violet);
+  transition:height .12s ease, border-top-width .12s ease;
+  margin:-5px 0;
+}
+.drop-slot.active{
+  height:80px;
+  border-top:0;
+  background:repeating-linear-gradient(
+    -45deg,
+    transparent 0 6px,
+    rgba(122,79,214,0.18) 6px 10px
+  );
+  outline:3px dashed var(--acc-violet);
+  outline-offset:-3px;
+}
+
+/* ===== card ===== */
+.card{
+  background:var(--paper);
+  border:var(--border) solid var(--line);
+  box-shadow:var(--shadow-sm);
+  padding:12px 12px 10px;
+  display:flex; flex-direction:column; gap:8px;
+  cursor:grab;
+  user-select:none;
+  position:relative;
+}
+.card:hover{transform:translate(-1px,-1px); box-shadow:5px 5px 0 0 var(--ink);}
+.card:active{cursor:grabbing;}
+.card.dragging{opacity:0.4;}
+.card.is-ghost{opacity:0.35; transform:none;}
+
+.card-strip{
+  position:absolute; top:-3px; left:-3px; bottom:-3px;
+  width:6px;
+  background:var(--acc-blue);
+  border:0;
+}
+.card-top{
+  display:flex; align-items:center; justify-content:space-between; gap:8px;
+}
+.card-id{
+  font-family:'JetBrains Mono', monospace; font-size:10px;
+  font-weight:700; letter-spacing:0.08em;
+  color:var(--muted);
+}
+.card-title{
+  font-size:14px; line-height:1.35; font-weight:500;
+  color:var(--ink);
+  word-break:break-word;
+}
+.card-meta{
+  display:flex; align-items:center; gap:6px; flex-wrap:wrap;
+  margin-top:2px;
+}
+.badge{
+  display:inline-flex; align-items:center; gap:5px;
+  font-family:'JetBrains Mono', monospace;
+  font-size:10px; font-weight:700;
+  letter-spacing:0.06em; text-transform:uppercase;
+  padding:3px 6px;
+  background:var(--paper); color:var(--ink);
+  border:2px solid var(--line); line-height:1.1;
+}
+.badge.p0{background:var(--acc-red); color:#FFF1F1;}
+.badge.p1{background:var(--acc-yellow); color:var(--chip-fg);}
+.badge.p2{background:var(--paper); color:var(--ink);}
+.badge.p3{background:var(--paper-2); color:var(--ink-soft);}
+[data-mode="contrast"] .badge.p0{color:#FFFFFF;}
+
+.tag{
+  display:inline-flex; align-items:center;
+  font-family:'JetBrains Mono', monospace;
+  font-size:10px; font-weight:700;
+  letter-spacing:0.06em; text-transform:uppercase;
+  padding:3px 6px; line-height:1.1;
+  background:var(--paper-2); color:var(--ink-soft);
+  border:2px solid var(--line);
+}
+.tag.tag-bug{background:var(--acc-red); color:#FFF1F1;}
+.tag.tag-mcp{background:var(--acc-violet); color:#FFF;}
+.tag.tag-api{background:var(--acc-blue); color:#F0F4FF;}
+.tag.tag-cli{background:var(--ink); color:var(--paper);}
+.tag.tag-docs{background:var(--paper); color:var(--ink);}
+.tag.tag-ux{background:var(--acc-green); color:#F0FFF4;}
+
+.agent-mark{
+  display:inline-flex; align-items:center; gap:4px;
+  font-family:'JetBrains Mono', monospace;
+  font-size:10px; font-weight:700;
+  letter-spacing:0.06em; text-transform:uppercase;
+  color:var(--muted);
+}
+.agent-mark::before{
+  content:""; width:6px; height:6px;
+  background:var(--acc-violet); border:1.5px solid var(--line);
+}
+
+/* card editing inline */
+.new-card-form{
+  background:var(--paper);
+  border:var(--border) solid var(--line);
+  box-shadow:var(--shadow-sm);
+  padding:10px;
+  display:flex; flex-direction:column; gap:8px;
+}
+.new-card-form textarea{
+  appearance:none; resize:none; min-height:60px;
+  border:2px solid var(--line); background:var(--paper-2);
+  font-family:'Space Grotesk', sans-serif; font-size:14px;
+  color:var(--ink); padding:8px; outline:none;
+}
+.new-card-form textarea:focus{background:var(--paper); box-shadow:var(--shadow-sm);}
+.new-card-form .row{display:flex; align-items:center; gap:8px;}
+.mini-select{
+  appearance:none; border:2px solid var(--line); background:var(--paper);
+  font-family:'JetBrains Mono', monospace; font-size:11px; font-weight:700;
+  text-transform:uppercase; letter-spacing:0.04em;
+  padding:5px 8px; color:var(--ink); cursor:pointer;
+}
+
+/* "add lane" button at end of board */
+.add-lane{
+  width:260px; min-width:260px;
+  background:transparent;
+  border:var(--border) dashed var(--line);
+  display:grid; place-items:center;
+  cursor:pointer; appearance:none;
+  font-family:'JetBrains Mono', monospace; font-weight:700;
+  font-size:13px; text-transform:uppercase; letter-spacing:0.06em;
+  color:var(--ink); padding:18px;
+  align-self:flex-start;
+  height:fit-content;
+  margin-top:0;
+}
+.add-lane:hover{background:var(--paper-2); box-shadow:var(--shadow-sm);}
+.add-lane .plus{
+  display:block;
+  font-size:32px; font-weight:800; line-height:1; margin-bottom:6px;
+}
+
+/* ===== popover (lane menu) ===== */
+.popover{
+  position:absolute;
+  top:46px; right:10px;
+  background:var(--paper);
+  border:var(--border) solid var(--line);
+  box-shadow:var(--shadow);
+  z-index:60;
+  min-width:220px;
+  display:flex; flex-direction:column;
+}
+.popover button{
+  appearance:none; background:transparent; border:0;
+  text-align:left; padding:10px 14px;
+  font-family:'JetBrains Mono', monospace; font-size:12px;
+  font-weight:700; text-transform:uppercase; letter-spacing:0.06em;
+  color:var(--ink); cursor:pointer;
+  border-bottom:2px solid var(--line);
+}
+.popover button:last-child{border-bottom:0;}
+.popover button:hover{background:var(--paper-2);}
+.popover .danger{color:var(--acc-red);}
+.popover .swatches{
+  display:grid; grid-template-columns:repeat(6, 1fr); gap:6px;
+  padding:10px 14px;
+  border-bottom:2px solid var(--line);
+}
+.popover .swatches button{
+  padding:0; height:24px; border:2px solid var(--line);
+}
+
+/* ===== keyboard hint ===== */
+.kbd{
+  display:inline-flex; align-items:center; justify-content:center;
+  padding:1px 6px; min-width:18px;
+  font-family:'JetBrains Mono', monospace; font-size:10px; font-weight:700;
+  background:var(--paper); color:var(--ink);
+  border:1.5px solid var(--line);
+  margin:0 2px;
+}
+
+/* ===== drag preview floating ghost ===== */
+.drag-ghost{
+  position:fixed; pointer-events:none;
+  z-index:1000;
+  transform:rotate(-3deg);
+  box-shadow:var(--shadow-lg);
+  width:280px;
+}
+
+/* ===== empty state in lane body ===== */
+.lane-empty{
+  border:2px dashed var(--line);
+  padding:16px;
+  text-align:center;
+  font-family:'JetBrains Mono', monospace; font-size:11px;
+  color:var(--muted);
+  text-transform:uppercase; letter-spacing:0.06em;
+}
+
+/* footer status bar */
+.statusbar{
+  position:fixed; bottom:0; left:0; right:0;
+  background:var(--ink); color:var(--paper);
+  font-family:'JetBrains Mono', monospace; font-size:11px;
+  text-transform:uppercase; letter-spacing:0.08em;
+  padding:6px 24px;
+  display:flex; align-items:center; justify-content:space-between; gap:14px;
+  z-index:40;
+}
+.statusbar .dotg{
+  display:inline-block; width:8px; height:8px;
+  background:var(--acc-green); border:1.5px solid var(--paper);
+  margin-right:6px; vertical-align:middle;
+}
+.statusbar .right{display:flex; gap:18px;}
+
+/* scrollbar (board horiz) */
+.board-wrap::-webkit-scrollbar{height:12px;}
+.board-wrap::-webkit-scrollbar-track{background:var(--paper-2); border-top:2px solid var(--line);}
+.board-wrap::-webkit-scrollbar-thumb{background:var(--ink); border:2px solid var(--paper-2);}
+
+@media (max-width: 640px){
+  .toolbar{padding:10px 14px;}
+  .topbar{padding:12px 14px;}
+  .board-wrap{padding:14px;}
+  .lane{width:280px; min-width:280px;}
+}
+</style>
+</head>
+<body>
+
+<div class="app">
+
+  <!-- ===== TOP BAR ===== -->
+  <header class="topbar">
+    <div class="brand">
+      <span class="logo" aria-hidden="true"><span class="plate"></span><span class="face">Z</span></span>
+      <span class="brand-name">Zdzira<span class="dot"></span></span>
+      <span class="crumb"><b>local</b> &nbsp;/&nbsp; board &nbsp;/&nbsp; <b>main</b></span>
+    </div>
+    <div class="topbar-right">
+      <button class="btn ghost" id="resetBtn" title="Reset to defaults">Reset</button>
+      <div class="mode-switch" role="tablist" aria-label="Color mode">
+        <button data-set="light" aria-pressed="true">Light</button>
+        <button data-set="dark" aria-pressed="false">Dark</button>
+        <button data-set="contrast" aria-pressed="false">Contrast</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- ===== TOOLBAR ===== -->
+  <div class="toolbar">
+    <div class="toolbar-left">
+      <label class="search">
+        <span class="icon">/</span>
+        <input id="searchInput" type="text" placeholder="filter issues…" />
+      </label>
+      <button class="filter-chip" data-filter="p" data-val="P0"><span class="dot" style="background:var(--acc-red)"></span>P0</button>
+      <button class="filter-chip" data-filter="p" data-val="P1"><span class="dot" style="background:var(--acc-yellow)"></span>P1</button>
+      <button class="filter-chip" data-filter="tag" data-val="mcp"><span class="dot" style="background:var(--acc-violet)"></span>mcp</button>
+      <button class="filter-chip" data-filter="tag" data-val="bug"><span class="dot" style="background:var(--acc-red)"></span>bug</button>
+      <button class="filter-chip" data-filter="agent" data-val="1"><span class="dot" style="background:var(--acc-violet)"></span>agent</button>
+    </div>
+    <div class="toolbar-right">
+      <span class="mono" style="font-size:11px; color:var(--muted); text-transform:uppercase; letter-spacing:0.06em;">
+        Drag <span class="kbd">⇄</span> to reorder &middot; double-click title to rename
+      </span>
+      <button class="btn primary" id="addLaneBtn">+ Lane</button>
+      <button class="btn" id="addCardGlobalBtn">+ Issue</button>
+    </div>
+  </div>
+
+  <!-- ===== BOARD ===== -->
+  <div class="board-wrap" id="boardWrap">
+    <div class="board" id="board"></div>
+  </div>
+
+</div>
+
+<!-- ===== STATUS BAR ===== -->
+<div class="statusbar">
+  <div>
+    <span class="dotg"></span>
+    <span>API :7777</span>
+    <span style="margin-left:14px;"><span class="dotg"></span>MCP ready</span>
+  </div>
+  <div class="right">
+    <span><span id="totalCount">0</span> issues</span>
+    <span><span id="laneCount">0</span> lanes</span>
+    <span class="mono">db: .zdzira/db.sqlite</span>
+  </div>
+</div>
+
+<script>
+// =========================================================================
+// state
+// =========================================================================
+const STORE_KEY = 'zdzira-board-v1';
+const MODE_KEY  = 'zdzira-mode';
+
+const DEFAULT_LANE_COLORS = [
+  '#2A6FDB', // blue
+  '#F5D547', // yellow
+  '#7A4FD6', // violet
+  '#E63946', // red
+  '#2A9D5A', // green
+  '#6B655A', // muted
+  '#0A0908', // ink
+  '#F4F1E8', // paper
+];
+
+const DEFAULT_STATE = {
+  lanes: [
+    { id: 'l-backlog',  title: 'Backlog',     color: '#6B655A' },
+    { id: 'l-open',     title: 'Open',        color: '#2A6FDB' },
+    { id: 'l-progress', title: 'In progress', color: '#F5D547' },
+    { id: 'l-review',   title: 'Review',      color: '#7A4FD6' },
+    { id: 'l-done',     title: 'Done',        color: '#2A9D5A' },
+  ],
+  issues: [
+    { id:'ZDR-0142', laneId:'l-progress', title:'Fix sqlite write contention under parallel agent writes', priority:'P0', tags:['bug','api'], agent:true },
+    { id:'ZDR-0141', laneId:'l-open',     title:'MCP: expose issue.search with full-text fallback',         priority:'P1', tags:['mcp'], agent:false },
+    { id:'ZDR-0140', laneId:'l-review',   title:'Add DELETE /issues/:id with cascade on links',             priority:'P1', tags:['api'], agent:true },
+    { id:'ZDR-0139', laneId:'l-backlog',  title:'CLI: zdzira open should accept partial IDs',               priority:'P2', tags:['cli'], agent:false },
+    { id:'ZDR-0138', laneId:'l-done',     title:'Decide on labels vs. tags vs. milestones — pick one',      priority:'P2', tags:['ux','docs'], agent:false },
+    { id:'ZDR-0137', laneId:'l-done',     title:'Write the README, but the version that\'s actually useful', priority:'P3', tags:['docs'], agent:false },
+    { id:'ZDR-0136', laneId:'l-open',     title:'Soft-delete issues, surface in archive view',              priority:'P2', tags:['api'], agent:false },
+    { id:'ZDR-0135', laneId:'l-progress', title:'MCP tool: issue.link for parent/child + blocks',           priority:'P1', tags:['mcp'], agent:true },
+    { id:'ZDR-0134', laneId:'l-backlog',  title:'Local web UI: keyboard-only navigation across cards',      priority:'P2', tags:['ux'], agent:false },
+    { id:'ZDR-0133', laneId:'l-backlog',  title:'Migration story for v0.1 → v0.2 sqlite schema',            priority:'P1', tags:['api','docs'], agent:false },
+    { id:'ZDR-0132', laneId:'l-open',     title:'Rate-limit panic when agent floods with patches',          priority:'P0', tags:['bug','mcp'], agent:true },
+  ],
+};
+
+// =========================================================================
+// persistence
+// =========================================================================
+function loadState(){
+  try{
+    const raw = localStorage.getItem(STORE_KEY);
+    if (raw){
+      const s = JSON.parse(raw);
+      if (s && Array.isArray(s.lanes) && Array.isArray(s.issues)) return s;
+    }
+  } catch(e){}
+  return JSON.parse(JSON.stringify(DEFAULT_STATE));
+}
+function saveState(){
+  try{ localStorage.setItem(STORE_KEY, JSON.stringify(state)); } catch(e){}
+}
+
+let state = loadState();
+let filters = { q:'', p:new Set(), tag:new Set(), agent:false };
+let nextId = computeNextId();
+
+function computeNextId(){
+  let max = 0;
+  for (const i of state.issues){
+    const m = /ZDR-(\d+)/.exec(i.id);
+    if (m) max = Math.max(max, parseInt(m[1],10));
+  }
+  return max + 1;
+}
+function newIssueId(){ const n = nextId++; return 'ZDR-' + String(n).padStart(4,'0'); }
+function uid(prefix){ return prefix + '-' + Math.random().toString(36).slice(2,8); }
+
+// =========================================================================
+// render
+// =========================================================================
+const boardEl = document.getElementById('board');
+const totalEl = document.getElementById('totalCount');
+const laneEl  = document.getElementById('laneCount');
+
+function matchesFilters(issue){
+  if (filters.q){
+    const q = filters.q.toLowerCase();
+    const hay = (issue.id + ' ' + issue.title + ' ' + issue.tags.join(' ')).toLowerCase();
+    if (!hay.includes(q)) return false;
+  }
+  if (filters.p.size && !filters.p.has(issue.priority)) return false;
+  if (filters.tag.size){
+    const has = issue.tags.some(t => filters.tag.has(t));
+    if (!has) return false;
+  }
+  if (filters.agent && !issue.agent) return false;
+  return true;
+}
+
+function render(){
+  boardEl.innerHTML = '';
+
+  state.lanes.forEach((lane, laneIdx) => {
+    const laneIssues = state.issues.filter(i => i.laneId === lane.id);
+    const visibleIssues = laneIssues.filter(matchesFilters);
+
+    const laneEl = document.createElement('div');
+    laneEl.className = 'lane';
+    laneEl.dataset.laneId = lane.id;
+    laneEl.draggable = false;
+
+    // header
+    const header = document.createElement('div');
+    header.className = 'lane-header';
+    header.draggable = true;
+    header.dataset.dragKind = 'lane';
+    header.dataset.laneId = lane.id;
+    header.innerHTML = `
+      <span class="lane-swatch" style="background:${lane.color}"></span>
+      <input class="lane-title" value="${escapeHtml(lane.title)}" maxlength="40" />
+      <span class="lane-count">${visibleIssues.length}</span>
+      <button class="lane-menu" aria-label="Lane menu">⋯</button>
+    `;
+    laneEl.appendChild(header);
+
+    // body
+    const body = document.createElement('div');
+    body.className = 'lane-body';
+    body.dataset.laneId = lane.id;
+
+    if (visibleIssues.length === 0){
+      const empty = document.createElement('div');
+      empty.className = 'lane-empty';
+      empty.textContent = laneIssues.length === 0 ? 'No issues' : 'No matches';
+      body.appendChild(empty);
+    } else {
+      visibleIssues.forEach((issue) => {
+        body.appendChild(renderCard(issue, lane));
+      });
+    }
+    laneEl.appendChild(body);
+
+    // footer
+    const footer = document.createElement('div');
+    footer.className = 'lane-footer';
+    const addBtn = document.createElement('button');
+    addBtn.className = 'add-card-btn';
+    addBtn.textContent = '+ Add issue';
+    addBtn.addEventListener('click', () => beginAddCard(lane.id, body, footer));
+    footer.appendChild(addBtn);
+    laneEl.appendChild(footer);
+
+    boardEl.appendChild(laneEl);
+  });
+
+  // add-lane tile
+  const addLane = document.createElement('button');
+  addLane.className = 'add-lane';
+  addLane.innerHTML = '<span class="plus">+</span> Add lane';
+  addLane.addEventListener('click', addLane_click);
+  boardEl.appendChild(addLane);
+
+  // counts
+  totalEl.textContent = state.issues.length;
+  laneEl && (laneEl.textContent = state.lanes.length);
+  document.getElementById('laneCount').textContent = state.lanes.length;
+
+  saveState();
+  wireRenderedHandlers();
+}
+
+function renderCard(issue, lane){
+  const card = document.createElement('div');
+  card.className = 'card';
+  card.draggable = true;
+  card.dataset.dragKind = 'card';
+  card.dataset.cardId = issue.id;
+  card.dataset.laneId = lane.id;
+
+  const strip = document.createElement('div');
+  strip.className = 'card-strip';
+  strip.style.background = lane.color;
+  card.appendChild(strip);
+
+  const top = document.createElement('div');
+  top.className = 'card-top';
+  top.innerHTML = `
+    <span class="card-id mono">${issue.id}</span>
+    <span class="badge p${issue.priority[1]}">${issue.priority}</span>
+  `;
+  card.appendChild(top);
+
+  const title = document.createElement('div');
+  title.className = 'card-title';
+  title.textContent = issue.title;
+  card.appendChild(title);
+
+  const meta = document.createElement('div');
+  meta.className = 'card-meta';
+  issue.tags.forEach(t => {
+    const tag = document.createElement('span');
+    tag.className = 'tag tag-' + t;
+    tag.textContent = t;
+    meta.appendChild(tag);
+  });
+  if (issue.agent){
+    const a = document.createElement('span');
+    a.className = 'agent-mark';
+    a.textContent = 'agent';
+    meta.appendChild(a);
+  }
+  card.appendChild(meta);
+
+  // delete-on-shift-click for quick test
+  card.addEventListener('click', (e) => {
+    if (e.shiftKey){
+      if (confirm(`Delete ${issue.id}?`)){
+        state.issues = state.issues.filter(i => i.id !== issue.id);
+        render();
+      }
+    }
+  });
+
+  return card;
+}
+
+function escapeHtml(s){
+  return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+// =========================================================================
+// inline new-card form
+// =========================================================================
+function beginAddCard(laneId, bodyEl, footerEl){
+  // remove other open forms
+  document.querySelectorAll('.new-card-form').forEach(n => n.remove());
+  document.querySelectorAll('.add-card-btn').forEach(b => b.style.display = '');
+
+  const form = document.createElement('div');
+  form.className = 'new-card-form';
+  form.innerHTML = `
+    <textarea placeholder="Title — what needs doing?"></textarea>
+    <div class="row">
+      <select class="mini-select" data-k="priority">
+        <option value="P2" selected>P2 Later</option>
+        <option value="P0">P0 Now</option>
+        <option value="P1">P1 Soon</option>
+        <option value="P3">P3 Someday</option>
+      </select>
+      <select class="mini-select" data-k="tag">
+        <option value="">no tag</option>
+        <option value="bug">bug</option>
+        <option value="api">api</option>
+        <option value="mcp">mcp</option>
+        <option value="cli">cli</option>
+        <option value="docs">docs</option>
+        <option value="ux">ux</option>
+      </select>
+      <label class="mono" style="font-size:11px; display:inline-flex; align-items:center; gap:6px; text-transform:uppercase; letter-spacing:0.04em;">
+        <input type="checkbox" data-k="agent" style="accent-color:var(--acc-violet);" /> agent
+      </label>
+      <span style="flex:1;"></span>
+      <button class="btn primary sm" data-act="save" style="padding:6px 10px; font-size:11px;">Add</button>
+      <button class="btn ghost sm"  data-act="cancel" style="padding:6px 10px; font-size:11px;">Esc</button>
+    </div>
+  `;
+  // hide the add-card-btn while editing
+  const addBtn = footerEl.querySelector('.add-card-btn');
+  if (addBtn) addBtn.style.display = 'none';
+  bodyEl.appendChild(form);
+  const ta = form.querySelector('textarea');
+  ta.focus();
+
+  function commit(){
+    const title = ta.value.trim();
+    if (!title){ cancel(); return; }
+    const priority = form.querySelector('[data-k="priority"]').value;
+    const tagSel   = form.querySelector('[data-k="tag"]').value;
+    const agent    = form.querySelector('[data-k="agent"]').checked;
+    state.issues.push({
+      id: newIssueId(),
+      laneId,
+      title,
+      priority,
+      tags: tagSel ? [tagSel] : [],
+      agent,
+    });
+    render();
+  }
+  function cancel(){
+    form.remove();
+    if (addBtn) addBtn.style.display = '';
+  }
+
+  form.querySelector('[data-act="save"]').addEventListener('click', commit);
+  form.querySelector('[data-act="cancel"]').addEventListener('click', cancel);
+  ta.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' && (e.metaKey || e.ctrlKey || !e.shiftKey)){ e.preventDefault(); commit(); }
+    if (e.key === 'Escape'){ e.preventDefault(); cancel(); }
+  });
+}
+
+// =========================================================================
+// rendered handlers (delegated where possible, attached where not)
+// =========================================================================
+function wireRenderedHandlers(){
+  // lane title edit
+  document.querySelectorAll('.lane-title').forEach(input => {
+    const laneId = input.closest('.lane').dataset.laneId;
+    input.addEventListener('change', () => {
+      const lane = state.lanes.find(l => l.id === laneId);
+      if (lane){ lane.title = input.value.trim() || 'Untitled'; saveState(); }
+    });
+    input.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter'){ e.preventDefault(); input.blur(); }
+    });
+    // prevent drag while editing title
+    input.addEventListener('mousedown', e => e.stopPropagation());
+  });
+
+  // lane menu
+  document.querySelectorAll('.lane-menu').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const laneEl = btn.closest('.lane');
+      const laneId = laneEl.dataset.laneId;
+      openLaneMenu(laneEl, laneId);
+    });
+  });
+}
+
+function openLaneMenu(laneEl, laneId){
+  closeAllPopovers();
+  const lane = state.lanes.find(l => l.id === laneId);
+  if (!lane) return;
+  const pop = document.createElement('div');
+  pop.className = 'popover';
+  pop.innerHTML = `
+    <div class="swatches" role="group" aria-label="Lane color">
+      ${DEFAULT_LANE_COLORS.map(c => `<button data-c="${c}" style="background:${c}" aria-label="${c}"></button>`).join('')}
+    </div>
+    <button data-act="rename">Rename lane</button>
+    <button data-act="clear">Clear issues</button>
+    <button data-act="move-left">← Move lane left</button>
+    <button data-act="move-right">→ Move lane right</button>
+    <button data-act="delete" class="danger">Delete lane</button>
+  `;
+  laneEl.appendChild(pop);
+
+  pop.querySelectorAll('.swatches button').forEach(b => {
+    b.addEventListener('click', () => {
+      lane.color = b.dataset.c;
+      render();
+    });
+  });
+  pop.querySelector('[data-act="rename"]').addEventListener('click', () => {
+    closeAllPopovers();
+    const input = laneEl.querySelector('.lane-title');
+    input.focus(); input.select();
+  });
+  pop.querySelector('[data-act="clear"]').addEventListener('click', () => {
+    if (confirm('Remove all issues in "' + lane.title + '"?')){
+      state.issues = state.issues.filter(i => i.laneId !== lane.id);
+      render();
+    }
+  });
+  pop.querySelector('[data-act="move-left"]').addEventListener('click', () => {
+    const i = state.lanes.findIndex(l => l.id === lane.id);
+    if (i > 0){ [state.lanes[i-1], state.lanes[i]] = [state.lanes[i], state.lanes[i-1]]; render(); }
+  });
+  pop.querySelector('[data-act="move-right"]').addEventListener('click', () => {
+    const i = state.lanes.findIndex(l => l.id === lane.id);
+    if (i < state.lanes.length - 1){ [state.lanes[i+1], state.lanes[i]] = [state.lanes[i], state.lanes[i+1]]; render(); }
+  });
+  pop.querySelector('[data-act="delete"]').addEventListener('click', () => {
+    const count = state.issues.filter(i => i.laneId === lane.id).length;
+    const msg = count > 0
+      ? `Delete "${lane.title}" and its ${count} issue${count===1?'':'s'}?`
+      : `Delete "${lane.title}"?`;
+    if (confirm(msg)){
+      state.lanes = state.lanes.filter(l => l.id !== lane.id);
+      state.issues = state.issues.filter(i => i.laneId !== lane.id);
+      render();
+    }
+  });
+}
+
+function closeAllPopovers(){
+  document.querySelectorAll('.popover').forEach(p => p.remove());
+}
+document.addEventListener('click', (e) => {
+  if (!e.target.closest('.popover') && !e.target.closest('.lane-menu')){
+    closeAllPopovers();
+  }
+});
+
+// =========================================================================
+// add lane
+// =========================================================================
+function addLane_click(){
+  const colors = DEFAULT_LANE_COLORS;
+  const c = colors[state.lanes.length % colors.length];
+  state.lanes.push({ id: uid('l'), title: 'New lane', color: c });
+  render();
+  // focus the new lane's title for instant rename
+  requestAnimationFrame(() => {
+    const lanes = document.querySelectorAll('.lane');
+    const last = lanes[lanes.length - 1];
+    if (last){
+      const t = last.querySelector('.lane-title');
+      if (t){ t.focus(); t.select(); }
+      last.scrollIntoView ? null : null;
+    }
+    const wrap = document.getElementById('boardWrap');
+    wrap.scrollTo({ left: wrap.scrollWidth, behavior: 'smooth' });
+  });
+}
+document.getElementById('addLaneBtn').addEventListener('click', addLane_click);
+
+// =========================================================================
+// add issue (global) → puts into first lane
+// =========================================================================
+document.getElementById('addCardGlobalBtn').addEventListener('click', () => {
+  if (state.lanes.length === 0){ addLane_click(); return; }
+  const firstLane = state.lanes[0];
+  const laneEl = document.querySelector(`.lane[data-lane-id="${firstLane.id}"]`);
+  if (!laneEl) return;
+  const body = laneEl.querySelector('.lane-body');
+  const footer = laneEl.querySelector('.lane-footer');
+  beginAddCard(firstLane.id, body, footer);
+});
+
+// =========================================================================
+// reset
+// =========================================================================
+document.getElementById('resetBtn').addEventListener('click', () => {
+  if (confirm('Reset board to defaults? This clears your local board.')){
+    state = JSON.parse(JSON.stringify(DEFAULT_STATE));
+    nextId = computeNextId();
+    filters = { q:'', p:new Set(), tag:new Set(), agent:false };
+    document.getElementById('searchInput').value = '';
+    document.querySelectorAll('.filter-chip').forEach(c => c.setAttribute('aria-pressed','false'));
+    render();
+  }
+});
+
+// =========================================================================
+// filters
+// =========================================================================
+document.getElementById('searchInput').addEventListener('input', (e) => {
+  filters.q = e.target.value;
+  render();
+});
+document.querySelectorAll('.filter-chip').forEach(chip => {
+  chip.addEventListener('click', () => {
+    const k = chip.dataset.filter;
+    const v = chip.dataset.val;
+    const pressed = chip.getAttribute('aria-pressed') === 'true';
+    if (k === 'agent'){
+      filters.agent = !filters.agent;
+      chip.setAttribute('aria-pressed', filters.agent ? 'true' : 'false');
+    } else {
+      const set = filters[k];
+      if (pressed){ set.delete(v); chip.setAttribute('aria-pressed','false'); }
+      else        { set.add(v);    chip.setAttribute('aria-pressed','true');  }
+    }
+    render();
+  });
+});
+
+// =========================================================================
+// DRAG & DROP
+//   - card: drag any card into any lane, with insertion slot
+//   - lane: drag a lane header to reorder lanes
+// =========================================================================
+let drag = null;  // { kind:'card'|'lane', id, fromLaneId? }
+let lastDropSlot = null;
+
+document.addEventListener('dragstart', (e) => {
+  const cardEl = e.target.closest && e.target.closest('[data-drag-kind="card"]');
+  const laneHdr = e.target.closest && e.target.closest('[data-drag-kind="lane"]');
+
+  if (cardEl){
+    drag = { kind:'card', id: cardEl.dataset.cardId, fromLaneId: cardEl.dataset.laneId };
+    cardEl.classList.add('dragging');
+    e.dataTransfer.effectAllowed = 'move';
+    try { e.dataTransfer.setData('text/plain', drag.id); } catch(_){}
+    return;
+  }
+  if (laneHdr){
+    drag = { kind:'lane', id: laneHdr.dataset.laneId };
+    laneHdr.closest('.lane').classList.add('dragging');
+    e.dataTransfer.effectAllowed = 'move';
+    try { e.dataTransfer.setData('text/plain', 'lane:' + drag.id); } catch(_){}
+    return;
+  }
+});
+
+document.addEventListener('dragend', () => {
+  document.querySelectorAll('.dragging').forEach(n => n.classList.remove('dragging'));
+  document.querySelectorAll('.drop-slot').forEach(n => n.remove());
+  document.querySelectorAll('.drop-target-lane').forEach(n => n.classList.remove('drop-target-lane'));
+  drag = null;
+  lastDropSlot = null;
+});
+
+document.addEventListener('dragover', (e) => {
+  if (!drag) return;
+
+  if (drag.kind === 'card'){
+    const laneBody = e.target.closest && e.target.closest('.lane-body');
+    if (!laneBody) return;
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+
+    // figure out the card we are above (insertion before it)
+    const cards = [...laneBody.querySelectorAll('.card:not(.dragging)')];
+    let before = null;
+    for (const c of cards){
+      const r = c.getBoundingClientRect();
+      if (e.clientY < r.top + r.height / 2){ before = c; break; }
+    }
+
+    // remove old slots
+    laneBody.querySelectorAll('.drop-slot').forEach(s => s.remove());
+    const slot = document.createElement('div');
+    slot.className = 'drop-slot active';
+    if (before) laneBody.insertBefore(slot, before);
+    else        laneBody.appendChild(slot);
+
+    // remove slots in other lanes
+    document.querySelectorAll('.lane-body').forEach(b => {
+      if (b !== laneBody) b.querySelectorAll('.drop-slot').forEach(s => s.remove());
+    });
+    return;
+  }
+
+  if (drag.kind === 'lane'){
+    const laneEl = e.target.closest && e.target.closest('.lane');
+    if (!laneEl) return;
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+    document.querySelectorAll('.drop-target-lane').forEach(n => n.classList.remove('drop-target-lane'));
+    if (laneEl.dataset.laneId !== drag.id) laneEl.classList.add('drop-target-lane');
+    return;
+  }
+});
+
+document.addEventListener('drop', (e) => {
+  if (!drag) return;
+
+  if (drag.kind === 'card'){
+    const laneBody = e.target.closest && e.target.closest('.lane-body');
+    if (!laneBody) return;
+    e.preventDefault();
+
+    const toLaneId = laneBody.dataset.laneId;
+    const issue = state.issues.find(i => i.id === drag.id);
+    if (!issue) return;
+
+    // figure out target index inside the lane (in *original* list)
+    const cardsInDom = [...laneBody.querySelectorAll('.card:not(.dragging)')];
+    let beforeCardId = null;
+    for (const c of cardsInDom){
+      const r = c.getBoundingClientRect();
+      if (e.clientY < r.top + r.height / 2){ beforeCardId = c.dataset.cardId; break; }
+    }
+
+    // remove from current position
+    state.issues = state.issues.filter(i => i.id !== issue.id);
+    issue.laneId = toLaneId;
+
+    // insert at correct spot
+    if (beforeCardId){
+      const idx = state.issues.findIndex(i => i.id === beforeCardId);
+      state.issues.splice(idx, 0, issue);
+    } else {
+      // append to end of lane: insert after the last issue of that lane
+      let lastIdx = -1;
+      state.issues.forEach((i, idx) => { if (i.laneId === toLaneId) lastIdx = idx; });
+      if (lastIdx === -1) state.issues.push(issue);
+      else state.issues.splice(lastIdx + 1, 0, issue);
+    }
+    render();
+    return;
+  }
+
+  if (drag.kind === 'lane'){
+    const laneEl = e.target.closest && e.target.closest('.lane');
+    if (!laneEl) return;
+    e.preventDefault();
+    const targetId = laneEl.dataset.laneId;
+    if (targetId === drag.id) return;
+
+    const fromIdx = state.lanes.findIndex(l => l.id === drag.id);
+    const toIdx   = state.lanes.findIndex(l => l.id === targetId);
+    if (fromIdx < 0 || toIdx < 0) return;
+
+    // figure out left/right placement based on cursor x within target
+    const r = laneEl.getBoundingClientRect();
+    const insertAfter = (e.clientX > r.left + r.width / 2);
+
+    const [moved] = state.lanes.splice(fromIdx, 1);
+    let newIdx = state.lanes.findIndex(l => l.id === targetId);
+    if (insertAfter) newIdx += 1;
+    state.lanes.splice(newIdx, 0, moved);
+    render();
+    return;
+  }
+});
+
+// =========================================================================
+// mode switcher
+// =========================================================================
+const root = document.documentElement;
+const buttons = document.querySelectorAll('.mode-switch button');
+function setMode(m){
+  root.setAttribute('data-mode', m);
+  buttons.forEach(b => b.setAttribute('aria-pressed', b.dataset.set === m ? 'true' : 'false'));
+  try { localStorage.setItem(MODE_KEY, m); } catch(e){}
+}
+buttons.forEach(b => b.addEventListener('click', () => setMode(b.dataset.set)));
+try {
+  const saved = localStorage.getItem(MODE_KEY);
+  if (saved) setMode(saved);
+} catch(e){}
+
+// =========================================================================
+// boot
+// =========================================================================
+render();
+</script>
+</body>
+</html>

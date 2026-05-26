@@ -1,0 +1,1363 @@
+<!doctype html>
+<html lang="en" data-mode="light">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Zdzira — Design System</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=JetBrains+Mono:wght@400;500;700;800&display=swap" />
+<style>
+/* ---------- tokens : LIGHT (default) ---------- */
+:root,
+[data-mode="light"] {
+  --paper:        #F4F1E8;
+  --paper-2:      #EAE5D2;
+  --ink:          #0A0908;
+  --ink-soft:     #2A2724;
+  --muted:        #6B655A;
+  --line:         #0A0908;
+
+  --acc-yellow:   #F5D547;
+  --acc-red:      #E63946;
+  --acc-green:    #2A9D5A;
+  --acc-blue:     #2A6FDB;
+  --acc-violet:   #7A4FD6;
+
+  --chip-fg:      #0A0908;
+  --shadow-rgb:   10,9,8;
+
+  --border:       3px;
+  --shadow:       6px 6px 0 0 var(--ink);
+  --shadow-sm:    3px 3px 0 0 var(--ink);
+  --shadow-lg:    10px 10px 0 0 var(--ink);
+
+  --r:            0px;
+  --gap:          20px;
+
+  color-scheme: light;
+}
+
+/* ---------- tokens : DARK ---------- */
+[data-mode="dark"] {
+  --paper:        #13110E;
+  --paper-2:      #1E1B16;
+  --ink:          #EFEAD8;
+  --ink-soft:     #C9C2AC;
+  --muted:        #7A7567;
+  --line:         #EFEAD8;
+
+  --acc-yellow:   #F5D547;
+  --acc-red:      #FF5A66;
+  --acc-green:    #4ED38A;
+  --acc-blue:     #6FA0F5;
+  --acc-violet:   #B796F7;
+
+  --chip-fg:      #0A0908;
+  --shadow-rgb:   239,234,216;
+
+  --shadow:       6px 6px 0 0 var(--ink);
+  --shadow-sm:    3px 3px 0 0 var(--ink);
+  --shadow-lg:    10px 10px 0 0 var(--ink);
+
+  color-scheme: dark;
+}
+
+/* ---------- tokens : CONTRAST (AAA) ---------- */
+[data-mode="contrast"] {
+  --paper:        #FFFFFF;
+  --paper-2:      #FFFFFF;
+  --ink:          #000000;
+  --ink-soft:     #000000;
+  --muted:        #000000;
+  --line:         #000000;
+
+  --acc-yellow:   #FFD60A;
+  --acc-red:      #FF0000;
+  --acc-green:    #008000;
+  --acc-blue:     #0000FF;
+  --acc-violet:   #000000;
+
+  --chip-fg:      #000000;
+  --shadow-rgb:   0,0,0;
+
+  --border:       4px;
+  --shadow:       8px 8px 0 0 var(--ink);
+  --shadow-sm:    4px 4px 0 0 var(--ink);
+  --shadow-lg:    12px 12px 0 0 var(--ink);
+}
+
+/* ---------- reset ---------- */
+*, *::before, *::after { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+body {
+  background: var(--paper);
+  color: var(--ink);
+  font-family: 'Space Grotesk', system-ui, sans-serif;
+  font-size: 16px;
+  line-height: 1.45;
+  -webkit-font-smoothing: antialiased;
+}
+.mono { font-family: 'JetBrains Mono', ui-monospace, monospace; }
+::selection { background: var(--acc-yellow); color: #0A0908; }
+
+/* ---------- layout ---------- */
+.page {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 56px 40px 120px;
+}
+.section { margin-bottom: 96px; }
+.section > header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 24px;
+  border-bottom: var(--border) solid var(--line);
+  padding-bottom: 14px;
+  margin-bottom: 32px;
+}
+.section h2 {
+  margin: 0;
+  font-size: 38px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+.section .eyebrow {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--ink);
+  background: var(--acc-yellow);
+  color: var(--chip-fg);
+  padding: 6px 10px;
+  border: var(--border) solid var(--line);
+  box-shadow: var(--shadow-sm);
+}
+.lede {
+  font-size: 18px;
+  max-width: 60ch;
+  color: var(--ink-soft);
+}
+.grid {
+  display: grid;
+  gap: var(--gap);
+}
+.cols-2 { grid-template-columns: repeat(2, minmax(0,1fr)); }
+.cols-3 { grid-template-columns: repeat(3, minmax(0,1fr)); }
+.cols-4 { grid-template-columns: repeat(4, minmax(0,1fr)); }
+@media (max-width: 900px){
+  .cols-2,.cols-3,.cols-4 { grid-template-columns: 1fr; }
+}
+
+/* ---------- top bar ---------- */
+.topbar {
+  position: sticky; top: 0; z-index: 50;
+  background: var(--paper);
+  border-bottom: var(--border) solid var(--line);
+}
+.topbar-inner {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 16px 40px;
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 24px;
+}
+.topbar .brand { display:flex; align-items:center; gap: 14px; }
+.topbar .brand-name {
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  font-size: 18px;
+  text-transform: uppercase;
+}
+.tag {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  padding: 4px 8px;
+  border: 2px solid var(--line);
+  background: var(--paper-2);
+}
+
+/* ---------- mode switcher ---------- */
+.mode-switch {
+  display: inline-flex;
+  border: var(--border) solid var(--line);
+  background: var(--paper);
+  box-shadow: var(--shadow-sm);
+}
+.mode-switch button {
+  appearance: none;
+  background: transparent;
+  border: 0;
+  border-right: 2px solid var(--line);
+  padding: 8px 14px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--ink);
+  cursor: pointer;
+}
+.mode-switch button:last-child { border-right: 0; }
+.mode-switch button[aria-pressed="true"] {
+  background: var(--ink);
+  color: var(--paper);
+}
+.mode-switch button:focus-visible {
+  outline: 3px solid var(--acc-yellow);
+  outline-offset: 2px;
+}
+
+/* ---------- hero ---------- */
+.hero {
+  display: grid;
+  grid-template-columns: 1.1fr 1fr;
+  gap: 32px;
+  margin: 32px 0 96px;
+  align-items: stretch;
+}
+@media (max-width: 900px){ .hero { grid-template-columns: 1fr; } }
+.hero-card {
+  border: var(--border) solid var(--line);
+  background: var(--paper);
+  padding: 40px;
+  box-shadow: var(--shadow-lg);
+  position: relative;
+}
+.hero-card.alt {
+  background: var(--acc-yellow);
+  color: var(--chip-fg);
+}
+.hero h1 {
+  margin: 0 0 18px;
+  font-size: clamp(48px, 7vw, 88px);
+  line-height: 0.92;
+  letter-spacing: -0.04em;
+  font-weight: 700;
+}
+.hero h1 .slash {
+  display: inline-block;
+  background: var(--acc-yellow);
+  color: var(--chip-fg);
+  padding: 0 12px;
+  margin: 0 4px;
+  transform: skewX(-8deg);
+  border: 3px solid var(--line);
+}
+.hero p { font-size: 18px; max-width: 52ch; color: var(--ink-soft); }
+.hero .meta {
+  display: flex; flex-wrap: wrap; gap: 10px;
+  margin-top: 28px;
+}
+.meta-chip {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  padding: 6px 10px;
+  background: var(--paper);
+  color: var(--ink);
+  border: 2px solid var(--line);
+}
+.hero-card.alt .meta-chip { background: #FFF8DC; }
+
+/* ---------- LOGO ---------- */
+.logo-wrap {
+  display: flex; align-items: center; gap: 16px;
+}
+.logo {
+  --logo-size: 44px;
+  position: relative;
+  width: var(--logo-size);
+  height: var(--logo-size);
+  flex-shrink: 0;
+  display: inline-block;
+}
+.logo .plate {
+  position: absolute; inset: 4px -4px -4px 4px;
+  background: var(--ink);
+}
+.logo .face {
+  position: absolute; inset: 0 0 0 0;
+  background: var(--acc-yellow);
+  border: 3px solid var(--ink);
+  display: grid;
+  place-items: center;
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 800;
+  font-size: calc(var(--logo-size) * 0.6);
+  color: var(--ink);
+  line-height: 1;
+}
+.logo .face::after {
+  content: "";
+  position: absolute;
+  right: 4px; bottom: 4px;
+  width: 7px; height: 7px;
+  background: var(--acc-red);
+  border: 2px solid var(--ink);
+}
+.logo.big { --logo-size: 96px; }
+.logo.huge { --logo-size: 180px; }
+
+.wordmark {
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  font-size: 22px;
+  line-height: 1;
+}
+.wordmark .dot {
+  display: inline-block;
+  width: 0.5em; height: 0.5em;
+  background: var(--acc-red);
+  border: 2px solid var(--ink);
+  margin-left: 0.15em;
+  transform: translateY(0.05em);
+}
+
+/* ---------- logo gallery ---------- */
+.logo-tile {
+  border: var(--border) solid var(--line);
+  background: var(--paper);
+  padding: 36px;
+  box-shadow: var(--shadow);
+  display: grid;
+  place-items: center;
+  min-height: 220px;
+  position: relative;
+}
+.logo-tile .caption {
+  position: absolute;
+  left: -2px; bottom: -2px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 6px 10px;
+  background: var(--ink);
+  color: var(--paper);
+  border: 2px solid var(--line);
+}
+.logo-tile.inverse { background: var(--ink); }
+.logo-tile.inverse .face { background: var(--paper); color: var(--ink); border-color: var(--ink); }
+.logo-tile.inverse .plate { background: var(--acc-yellow); }
+.logo-tile.inverse .wordmark { color: var(--paper); }
+.logo-tile.inverse .wordmark .dot { background: var(--acc-yellow); border-color: var(--paper); }
+.logo-tile.fill { background: var(--acc-yellow); }
+.logo-tile.fill .face { background: var(--paper); }
+.logo-tile.fill .plate { background: var(--ink); }
+
+/* ---------- color swatches ---------- */
+.swatch {
+  border: var(--border) solid var(--line);
+  background: var(--paper);
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+  display: flex; flex-direction: column;
+}
+.swatch .chip {
+  height: 110px;
+  border-bottom: var(--border) solid var(--line);
+}
+.swatch .meta-row {
+  padding: 12px 14px;
+  display: flex; align-items: baseline; justify-content: space-between;
+  gap: 10px;
+}
+.swatch .name {
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+.swatch .val {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+/* ---------- type specimens ---------- */
+.type-row {
+  border: var(--border) solid var(--line);
+  padding: 24px;
+  background: var(--paper);
+  box-shadow: var(--shadow-sm);
+  display: grid;
+  grid-template-columns: 140px 1fr;
+  gap: 24px;
+  align-items: center;
+}
+.type-row .label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.type-h1 { font-size: 64px; font-weight: 700; letter-spacing: -0.03em; line-height: 1; }
+.type-h2 { font-size: 40px; font-weight: 700; letter-spacing: -0.02em; line-height: 1.05; }
+.type-h3 { font-size: 24px; font-weight: 700; letter-spacing: -0.01em; }
+.type-body { font-size: 16px; }
+.type-small { font-size: 13px; color: var(--ink-soft); }
+.type-mono { font-family: 'JetBrains Mono', monospace; font-size: 14px; }
+
+/* ---------- buttons ---------- */
+.btn {
+  appearance: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 18px;
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 700;
+  font-size: 13px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  background: var(--paper);
+  color: var(--ink);
+  border: var(--border) solid var(--line);
+  box-shadow: var(--shadow-sm);
+  cursor: pointer;
+  transition: transform .05s linear, box-shadow .05s linear;
+  text-decoration: none;
+}
+.btn:hover { transform: translate(-1px,-1px); box-shadow: 5px 5px 0 0 var(--ink); }
+.btn:active { transform: translate(2px,2px); box-shadow: 0 0 0 0 var(--ink); }
+.btn:focus-visible { outline: 3px solid var(--acc-yellow); outline-offset: 3px; }
+
+.btn.primary  { background: var(--acc-yellow); color: var(--chip-fg); }
+.btn.danger   { background: var(--acc-red);    color: #FFF1F1; }
+.btn.success  { background: var(--acc-green);  color: #F0FFF4; }
+.btn.ghost    { background: transparent; box-shadow: none; }
+.btn.ghost:hover { background: var(--paper-2); }
+.btn.sm { padding: 8px 12px; font-size: 11px; }
+.btn.lg { padding: 16px 22px; font-size: 14px; }
+[data-mode="contrast"] .btn.danger { color: #FFFFFF; }
+[data-mode="contrast"] .btn.success { color: #FFFFFF; }
+
+/* ---------- card ---------- */
+.card {
+  border: var(--border) solid var(--line);
+  background: var(--paper);
+  box-shadow: var(--shadow);
+  padding: 22px;
+}
+.card.flat { box-shadow: var(--shadow-sm); padding: 18px; }
+.card .card-title {
+  font-weight: 700; font-size: 18px; margin: 0 0 8px;
+}
+.card .card-sub {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase;
+  color: var(--muted);
+}
+
+/* ---------- badges / chips ---------- */
+.badge {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 4px 8px;
+  background: var(--paper);
+  color: var(--ink);
+  border: 2px solid var(--line);
+  line-height: 1.2;
+}
+.badge .dot {
+  width: 8px; height: 8px;
+  border: 2px solid var(--line);
+  display: inline-block;
+}
+.badge.open     .dot { background: var(--acc-blue); }
+.badge.progress .dot { background: var(--acc-yellow); }
+.badge.review   .dot { background: var(--acc-violet); }
+.badge.done     .dot { background: var(--acc-green); }
+.badge.blocked  .dot { background: var(--acc-red); }
+
+.badge.p0 { background: var(--acc-red); color: #FFF1F1; }
+.badge.p1 { background: var(--acc-yellow); color: var(--chip-fg); }
+.badge.p2 { background: var(--paper); color: var(--ink); }
+.badge.p3 { background: var(--paper-2); color: var(--ink-soft); }
+[data-mode="contrast"] .badge.p0 { color: #FFFFFF; }
+
+/* ---------- inputs ---------- */
+.field { display: flex; flex-direction: column; gap: 6px; }
+.field > label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px; font-weight: 700;
+  letter-spacing: 0.08em; text-transform: uppercase;
+  color: var(--ink-soft);
+}
+.input,
+.textarea,
+.select {
+  appearance: none;
+  width: 100%;
+  padding: 12px 14px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 14px;
+  color: var(--ink);
+  background: var(--paper);
+  border: var(--border) solid var(--line);
+  box-shadow: inset 0 0 0 0 var(--ink);
+  outline: none;
+}
+.input:focus, .textarea:focus, .select:focus {
+  background: var(--paper-2);
+  box-shadow: var(--shadow-sm);
+}
+.textarea { min-height: 96px; resize: vertical; }
+.select {
+  background-image: linear-gradient(45deg, transparent 50%, var(--ink) 50%),
+                    linear-gradient(135deg, var(--ink) 50%, transparent 50%);
+  background-position: calc(100% - 18px) 50%, calc(100% - 12px) 50%;
+  background-size: 6px 6px, 6px 6px;
+  background-repeat: no-repeat;
+  padding-right: 36px;
+}
+
+.check {
+  display: inline-flex; align-items: center; gap: 10px;
+  font-family: 'JetBrains Mono', monospace; font-size: 12px;
+  font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase;
+  cursor: pointer; user-select: none;
+}
+.check input { display: none; }
+.check .box {
+  width: 22px; height: 22px;
+  border: var(--border) solid var(--line);
+  background: var(--paper);
+  display: grid; place-items: center;
+  box-shadow: var(--shadow-sm);
+}
+.check input:checked + .box {
+  background: var(--acc-yellow);
+}
+.check input:checked + .box::after {
+  content: "";
+  display: block;
+  width: 12px; height: 6px;
+  border-left: 3px solid var(--ink);
+  border-bottom: 3px solid var(--ink);
+  transform: rotate(-45deg) translate(1px,-2px);
+}
+
+/* ---------- issue row / table ---------- */
+.issue-list {
+  border: var(--border) solid var(--line);
+  background: var(--paper);
+  box-shadow: var(--shadow);
+}
+.issue {
+  display: grid;
+  grid-template-columns: 96px 1fr 110px 140px 80px;
+  align-items: center;
+  gap: 16px;
+  padding: 14px 18px;
+  border-bottom: 2px solid var(--line);
+}
+.issue:last-child { border-bottom: 0; }
+.issue:hover { background: var(--paper-2); }
+.issue .id {
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 700;
+  font-size: 12px;
+  letter-spacing: 0.06em;
+  color: var(--muted);
+}
+.issue .title { font-weight: 500; }
+.issue .meta-cell {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  text-align: right;
+}
+.issue.header {
+  background: var(--ink);
+  color: var(--paper);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-weight: 700;
+}
+.issue.header .id,
+.issue.header .meta-cell { color: var(--paper); }
+@media (max-width: 900px){
+  .issue { grid-template-columns: 1fr; }
+  .issue .meta-cell { text-align: left; }
+}
+
+/* ---------- code block ---------- */
+.code {
+  border: var(--border) solid var(--line);
+  background: var(--ink);
+  color: var(--paper);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 13px;
+  line-height: 1.55;
+  padding: 18px 20px;
+  overflow: auto;
+  box-shadow: var(--shadow-sm);
+}
+.code .k { color: var(--acc-yellow); }
+.code .s { color: var(--acc-green); }
+.code .c { color: var(--muted); }
+.code .m { color: var(--acc-yellow); font-weight: 700; }
+[data-mode="contrast"] .code { background: var(--ink); color: var(--paper); }
+[data-mode="contrast"] .code .k { color: var(--acc-yellow); }
+[data-mode="contrast"] .code .s { color: #FFFFFF; }
+
+/* ---------- API endpoints ---------- */
+.endpoint {
+  border: var(--border) solid var(--line);
+  background: var(--paper);
+  box-shadow: var(--shadow-sm);
+  display: grid;
+  grid-template-columns: 76px 1fr;
+  align-items: stretch;
+  font-family: 'JetBrains Mono', monospace;
+}
+.endpoint .method {
+  display: grid; place-items: center;
+  font-weight: 800;
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  border-right: var(--border) solid var(--line);
+  padding: 12px 8px;
+}
+.endpoint .method.get    { background: var(--acc-blue);   color: #F0F4FF; }
+.endpoint .method.post   { background: var(--acc-green);  color: #F0FFF4; }
+.endpoint .method.patch  { background: var(--acc-yellow); color: var(--chip-fg); }
+.endpoint .method.del    { background: var(--acc-red);    color: #FFF1F1; }
+.endpoint .path { padding: 12px 16px; font-size: 13px; }
+.endpoint .path .arg { color: var(--acc-violet); }
+.endpoint .desc {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 12px;
+  color: var(--muted);
+  display: block;
+  margin-top: 4px;
+}
+
+/* ---------- spacing scale ---------- */
+.scale-row { display: flex; align-items: center; gap: 16px; padding: 8px 0; }
+.scale-bar { background: var(--ink); height: 18px; }
+.scale-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  width: 90px;
+  color: var(--muted);
+}
+
+/* ---------- shadow examples ---------- */
+.shadow-tile {
+  height: 120px;
+  background: var(--paper);
+  border: var(--border) solid var(--line);
+  display: grid;
+  place-items: center;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.s-1 { box-shadow: var(--shadow-sm); }
+.s-2 { box-shadow: var(--shadow); }
+.s-3 { box-shadow: var(--shadow-lg); }
+
+/* ---------- composition / app preview ---------- */
+.app-frame {
+  border: var(--border) solid var(--line);
+  background: var(--paper);
+  box-shadow: var(--shadow-lg);
+  display: grid;
+  grid-template-columns: 240px 1fr;
+  min-height: 520px;
+  overflow: hidden;
+}
+.app-side {
+  border-right: var(--border) solid var(--line);
+  background: var(--paper-2);
+  padding: 22px 18px;
+  display: flex; flex-direction: column; gap: 22px;
+}
+.app-side .nav-item {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 8px 10px;
+  border: 2px solid transparent;
+  cursor: pointer;
+}
+.app-side .nav-item.active {
+  background: var(--ink);
+  color: var(--paper);
+}
+.app-side .nav-section {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  color: var(--muted);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin-bottom: 6px;
+}
+.app-main {
+  padding: 24px 28px;
+  display: flex; flex-direction: column; gap: 22px;
+}
+.app-toolbar {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 12px; flex-wrap: wrap;
+}
+.app-h1 {
+  font-size: 30px; font-weight: 700; letter-spacing: -0.02em; margin: 0;
+}
+.app-filters { display: flex; gap: 8px; flex-wrap: wrap; }
+
+/* ---------- footer ---------- */
+.footer {
+  border-top: var(--border) solid var(--line);
+  margin-top: 80px;
+  padding-top: 24px;
+  display: flex; justify-content: space-between; align-items: center;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+}
+
+/* ---------- token row ---------- */
+.token {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 12px;
+  padding: 12px 14px;
+  border-bottom: 2px solid var(--line);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+}
+.token:last-child { border-bottom: 0; }
+.token .k { font-weight: 700; }
+.token .v { color: var(--muted); }
+.token-table {
+  border: var(--border) solid var(--line);
+  background: var(--paper);
+  box-shadow: var(--shadow-sm);
+}
+
+/* ---------- focus ring (global) ---------- */
+:focus-visible { outline: 3px solid var(--acc-yellow); outline-offset: 3px; }
+
+/* ---------- print-ish bg pattern decorations ---------- */
+.dots {
+  background-image: radial-gradient(var(--ink) 1px, transparent 1px);
+  background-size: 10px 10px;
+  background-position: 0 0;
+}
+.stripes {
+  background-image: repeating-linear-gradient(
+    -45deg,
+    transparent 0 8px,
+    var(--ink) 8px 10px
+  );
+}
+</style>
+</head>
+<body>
+
+<!-- ===================== TOP BAR ===================== -->
+<header class="topbar">
+  <div class="topbar-inner">
+    <div class="brand">
+      <span class="logo" aria-hidden="true">
+        <span class="plate"></span>
+        <span class="face">Z</span>
+      </span>
+      <span class="brand-name">Zdzira<span class="dot" style="display:inline-block;width:6px;height:6px;background:var(--acc-red);border:2px solid var(--ink);margin-left:6px;transform:translateY(-2px)"></span></span>
+      <span class="tag mono">v0.1 / Design System</span>
+    </div>
+    <div class="mode-switch" role="tablist" aria-label="Color mode">
+      <button data-set="light"    aria-pressed="true">Light</button>
+      <button data-set="dark"     aria-pressed="false">Dark</button>
+      <button data-set="contrast" aria-pressed="false">Contrast</button>
+    </div>
+  </div>
+</header>
+
+<main class="page">
+
+  <!-- ===================== HERO ===================== -->
+  <section class="hero">
+    <div class="hero-card">
+      <h1>Track issues.<br />Ship code.<br />No <span class="slash">noise.</span></h1>
+      <p class="lede">Zdzira is a local-only issue tracker built for solo developers and agentic AI workflows. No accounts, no cloud, no telemetry &mdash; a single SQLite file, a REST API, and an MCP server your coding agent already knows how to drive.</p>
+      <div class="meta">
+        <span class="meta-chip">LOCAL-FIRST</span>
+        <span class="meta-chip">NO-AUTH</span>
+        <span class="meta-chip">REST</span>
+        <span class="meta-chip">MCP-NATIVE</span>
+        <span class="meta-chip">SQLITE</span>
+      </div>
+    </div>
+    <div class="hero-card alt">
+      <div class="logo huge" aria-hidden="true" style="margin-bottom:20px;">
+        <span class="plate"></span>
+        <span class="face">Z</span>
+      </div>
+      <div class="wordmark" style="font-size:36px;">ZDZIRA<span class="dot"></span></div>
+      <p style="font-family:'JetBrains Mono',monospace; font-size:12px; text-transform:uppercase; letter-spacing:0.08em; margin-top:18px;">Issue&nbsp;Tracker / Local&nbsp;Only / MCP&nbsp;Ready</p>
+    </div>
+  </section>
+
+  <!-- ===================== LOGO ===================== -->
+  <section class="section" id="logo">
+    <header>
+      <h2>01 &mdash; Logo</h2>
+      <span class="eyebrow">Brand</span>
+    </header>
+    <p class="lede" style="margin-bottom:28px;">A chunky <code class="mono">Z</code> mounted on a hard offset plate. The red square is the "issue dot" &mdash; it always sits on the bottom-right and is the only place red appears in the brand.</p>
+
+    <div class="grid cols-3">
+      <div class="logo-tile">
+        <div class="logo-wrap">
+          <span class="logo big"><span class="plate"></span><span class="face">Z</span></span>
+          <span class="wordmark" style="font-size:32px;">ZDZIRA<span class="dot"></span></span>
+        </div>
+        <span class="caption">PRIMARY</span>
+      </div>
+      <div class="logo-tile inverse">
+        <div class="logo-wrap">
+          <span class="logo big"><span class="plate"></span><span class="face">Z</span></span>
+          <span class="wordmark" style="font-size:32px;">ZDZIRA<span class="dot"></span></span>
+        </div>
+        <span class="caption">INVERSE</span>
+      </div>
+      <div class="logo-tile fill">
+        <div class="logo-wrap">
+          <span class="logo big"><span class="plate"></span><span class="face">Z</span></span>
+          <span class="wordmark" style="font-size:32px;">ZDZIRA<span class="dot"></span></span>
+        </div>
+        <span class="caption">SIGNAL</span>
+      </div>
+
+      <div class="logo-tile">
+        <span class="logo huge"><span class="plate"></span><span class="face">Z</span></span>
+        <span class="caption">MARK / 180&times;180</span>
+      </div>
+      <div class="logo-tile">
+        <span class="logo big"><span class="plate"></span><span class="face">Z</span></span>
+        <span class="caption">MARK / 96&times;96</span>
+      </div>
+      <div class="logo-tile">
+        <span class="logo"><span class="plate"></span><span class="face">Z</span></span>
+        <span class="caption">FAVICON / 44&times;44</span>
+      </div>
+    </div>
+
+    <div class="grid cols-2" style="margin-top:24px;">
+      <div class="card">
+        <div class="card-sub">Construction</div>
+        <h3 class="card-title">Three layers, no curves.</h3>
+        <ul class="mono" style="font-size:13px; line-height:1.8; padding-left:18px;">
+          <li>FACE&nbsp; &mdash;&nbsp; yellow square, 3px ink border</li>
+          <li>PLATE&nbsp;&mdash;&nbsp; ink square offset +4 / +4</li>
+          <li>DOT&nbsp;&nbsp;&nbsp;&mdash;&nbsp; red 7px, bottom-right, 2px border</li>
+        </ul>
+      </div>
+      <div class="card">
+        <div class="card-sub">Don't</div>
+        <h3 class="card-title">Hard rules.</h3>
+        <ul class="mono" style="font-size:13px; line-height:1.8; padding-left:18px;">
+          <li>No gradients, no glow, no rounded corners</li>
+          <li>Never re-color the Z &mdash; only the FACE swaps</li>
+          <li>Never remove the offset plate</li>
+          <li>Minimum size: 24&times;24 px</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== COLOR ===================== -->
+  <section class="section" id="color">
+    <header>
+      <h2>02 &mdash; Color</h2>
+      <span class="eyebrow">Tokens</span>
+    </header>
+    <p class="lede" style="margin-bottom:28px;">Three modes, one palette. Accents stay the same across <strong>Light</strong> and <strong>Dark</strong>; <strong>Contrast</strong> mode flattens everything to pure black / white with a single yellow signal for AAA compliance.</p>
+
+    <div class="grid cols-4">
+      <div class="swatch">
+        <div class="chip" style="background:var(--paper)"></div>
+        <div class="meta-row"><span class="name">Paper</span><span class="val">--paper</span></div>
+      </div>
+      <div class="swatch">
+        <div class="chip" style="background:var(--paper-2)"></div>
+        <div class="meta-row"><span class="name">Paper 2</span><span class="val">--paper-2</span></div>
+      </div>
+      <div class="swatch">
+        <div class="chip" style="background:var(--ink)"></div>
+        <div class="meta-row"><span class="name">Ink</span><span class="val">--ink</span></div>
+      </div>
+      <div class="swatch">
+        <div class="chip" style="background:var(--muted)"></div>
+        <div class="meta-row"><span class="name">Muted</span><span class="val">--muted</span></div>
+      </div>
+
+      <div class="swatch">
+        <div class="chip" style="background:var(--acc-yellow)"></div>
+        <div class="meta-row"><span class="name">Signal</span><span class="val">--acc-yellow</span></div>
+      </div>
+      <div class="swatch">
+        <div class="chip" style="background:var(--acc-red)"></div>
+        <div class="meta-row"><span class="name">Alert</span><span class="val">--acc-red</span></div>
+      </div>
+      <div class="swatch">
+        <div class="chip" style="background:var(--acc-green)"></div>
+        <div class="meta-row"><span class="name">OK</span><span class="val">--acc-green</span></div>
+      </div>
+      <div class="swatch">
+        <div class="chip" style="background:var(--acc-blue)"></div>
+        <div class="meta-row"><span class="name">Info</span><span class="val">--acc-blue</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== TYPE ===================== -->
+  <section class="section" id="type">
+    <header>
+      <h2>03 &mdash; Type</h2>
+      <span class="eyebrow">Space Grotesk + JetBrains Mono</span>
+    </header>
+    <p class="lede" style="margin-bottom:28px;">Two families. Display and body in Space Grotesk; UI chrome, labels, IDs, code in JetBrains Mono. Every label, badge, and meta cell is mono &mdash; it's how Zdzira <em>sounds</em>.</p>
+
+    <div class="grid" style="gap:18px;">
+      <div class="type-row"><div class="label">Display / H1</div><div class="type-h1">Zdzira/01</div></div>
+      <div class="type-row"><div class="label">Display / H2</div><div class="type-h2">Issue triage, locally</div></div>
+      <div class="type-row"><div class="label">Heading / H3</div><div class="type-h3">Resolve the rate-limit panic</div></div>
+      <div class="type-row"><div class="label">Body</div><div class="type-body">A local-only tracker keeps your scratch issues, todos, and agent-spawned tasks in one place &mdash; without dragging a cloud login into every prototype.</div></div>
+      <div class="type-row"><div class="label">Small</div><div class="type-small">Updated 4 minutes ago by <span class="mono">agent-claude</span></div></div>
+      <div class="type-row"><div class="label">Mono / UI</div><div class="type-mono">ZDR-0142 &middot; OPEN &middot; PRIORITY P1 &middot; ASSIGNED @local</div></div>
+    </div>
+  </section>
+
+  <!-- ===================== SPACING / SHADOW ===================== -->
+  <section class="section" id="spacing">
+    <header>
+      <h2>04 &mdash; Spacing &amp; Shadow</h2>
+      <span class="eyebrow">Geometry</span>
+    </header>
+
+    <div class="grid cols-2">
+      <div class="card flat">
+        <div class="card-sub">Scale</div>
+        <h3 class="card-title">4 / 8 / 12 / 16 / 20 / 24 / 32 / 48</h3>
+        <div style="margin-top:14px;">
+          <div class="scale-row"><div class="scale-label">--s-1 &nbsp; 4</div><div class="scale-bar" style="width:4px"></div></div>
+          <div class="scale-row"><div class="scale-label">--s-2 &nbsp; 8</div><div class="scale-bar" style="width:8px"></div></div>
+          <div class="scale-row"><div class="scale-label">--s-3 &nbsp; 12</div><div class="scale-bar" style="width:12px"></div></div>
+          <div class="scale-row"><div class="scale-label">--s-4 &nbsp; 16</div><div class="scale-bar" style="width:16px"></div></div>
+          <div class="scale-row"><div class="scale-label">--s-5 &nbsp; 20</div><div class="scale-bar" style="width:20px"></div></div>
+          <div class="scale-row"><div class="scale-label">--s-6 &nbsp; 24</div><div class="scale-bar" style="width:24px"></div></div>
+          <div class="scale-row"><div class="scale-label">--s-8 &nbsp; 32</div><div class="scale-bar" style="width:32px"></div></div>
+          <div class="scale-row"><div class="scale-label">--s-12 &nbsp;48</div><div class="scale-bar" style="width:48px"></div></div>
+        </div>
+      </div>
+
+      <div class="card flat">
+        <div class="card-sub">Borders &amp; shadow</div>
+        <h3 class="card-title">Hard offsets only. No blur.</h3>
+        <div class="grid cols-3" style="gap:18px; margin-top:14px;">
+          <div class="shadow-tile s-1">SM 3 3 0</div>
+          <div class="shadow-tile s-2">MD 6 6 0</div>
+          <div class="shadow-tile s-3">LG 10 10 0</div>
+        </div>
+        <div class="token-table" style="margin-top:18px;">
+          <div class="token"><span class="k">--border</span><span class="v">3px solid ink</span><span>(4px contrast)</span></div>
+          <div class="token"><span class="k">--shadow-sm</span><span class="v">3 3 0 ink</span><span></span></div>
+          <div class="token"><span class="k">--shadow</span><span class="v">6 6 0 ink</span><span></span></div>
+          <div class="token"><span class="k">--shadow-lg</span><span class="v">10 10 0 ink</span><span></span></div>
+          <div class="token"><span class="k">--r</span><span class="v">0px</span><span>(never rounded)</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== COMPONENTS ===================== -->
+  <section class="section" id="components">
+    <header>
+      <h2>05 &mdash; Components</h2>
+      <span class="eyebrow">Library</span>
+    </header>
+
+    <div class="grid cols-2">
+      <!-- Buttons -->
+      <div class="card">
+        <div class="card-sub">Buttons</div>
+        <h3 class="card-title">Hard-press buttons</h3>
+        <div style="display:flex; flex-wrap:wrap; gap:12px; margin-top:12px;">
+          <button class="btn primary">New issue</button>
+          <button class="btn">Cancel</button>
+          <button class="btn danger">Delete</button>
+          <button class="btn success">Resolve</button>
+          <button class="btn ghost">More&nbsp;&rarr;</button>
+        </div>
+        <div style="display:flex; flex-wrap:wrap; gap:12px; margin-top:14px;">
+          <button class="btn sm">SM</button>
+          <button class="btn">MD</button>
+          <button class="btn lg">LG</button>
+        </div>
+        <p class="mono" style="font-size:11px; color:var(--muted); margin-top:14px; text-transform:uppercase; letter-spacing:0.08em;">Hover: lift &minus;1 / &minus;1 &nbsp;&middot;&nbsp; Active: press +2 / +2, shadow collapses</p>
+      </div>
+
+      <!-- Badges -->
+      <div class="card">
+        <div class="card-sub">Status badges</div>
+        <h3 class="card-title">Workflow states</h3>
+        <div style="display:flex; flex-wrap:wrap; gap:10px; margin-top:12px;">
+          <span class="badge open"><span class="dot"></span>Open</span>
+          <span class="badge progress"><span class="dot"></span>In&nbsp;progress</span>
+          <span class="badge review"><span class="dot"></span>Review</span>
+          <span class="badge blocked"><span class="dot"></span>Blocked</span>
+          <span class="badge done"><span class="dot"></span>Done</span>
+        </div>
+        <div class="card-sub" style="margin-top:22px;">Priority</div>
+        <div style="display:flex; flex-wrap:wrap; gap:10px; margin-top:8px;">
+          <span class="badge p0">P0&nbsp;Now</span>
+          <span class="badge p1">P1&nbsp;Soon</span>
+          <span class="badge p2">P2&nbsp;Later</span>
+          <span class="badge p3">P3&nbsp;Someday</span>
+        </div>
+      </div>
+
+      <!-- Inputs -->
+      <div class="card">
+        <div class="card-sub">Forms</div>
+        <h3 class="card-title">Inputs &amp; controls</h3>
+        <div class="grid" style="gap:14px; margin-top:14px;">
+          <div class="field">
+            <label for="t">Title</label>
+            <input id="t" class="input" value="Fix sqlite write contention" />
+          </div>
+          <div class="grid cols-2" style="gap:14px;">
+            <div class="field">
+              <label>Status</label>
+              <select class="select">
+                <option>Open</option><option>In&nbsp;progress</option><option>Review</option><option>Done</option>
+              </select>
+            </div>
+            <div class="field">
+              <label>Priority</label>
+              <select class="select">
+                <option>P0&nbsp;Now</option><option>P1&nbsp;Soon</option><option>P2&nbsp;Later</option><option>P3&nbsp;Someday</option>
+              </select>
+            </div>
+          </div>
+          <div class="field">
+            <label>Description</label>
+            <textarea class="textarea">When two agents write at the same time, the second one hangs for ~3s.</textarea>
+          </div>
+          <label class="check">
+            <input type="checkbox" checked />
+            <span class="box"></span>
+            <span>Notify MCP clients on change</span>
+          </label>
+        </div>
+      </div>
+
+      <!-- Cards -->
+      <div class="card">
+        <div class="card-sub">Cards &amp; surfaces</div>
+        <h3 class="card-title">Three elevations</h3>
+        <div class="grid cols-3" style="gap:14px; margin-top:14px;">
+          <div class="card flat" style="padding:14px;">
+            <div class="card-sub">FLAT</div>
+            <div style="font-weight:700; margin-top:6px;">Inline tile</div>
+          </div>
+          <div class="card" style="padding:14px;">
+            <div class="card-sub">DEFAULT</div>
+            <div style="font-weight:700; margin-top:6px;">Standard card</div>
+          </div>
+          <div class="card" style="padding:14px; box-shadow: var(--shadow-lg)">
+            <div class="card-sub">FLOATING</div>
+            <div style="font-weight:700; margin-top:6px;">Hero / modal</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== ISSUE LIST ===================== -->
+  <section class="section" id="issues">
+    <header>
+      <h2>06 &mdash; Issue list</h2>
+      <span class="eyebrow">Pattern</span>
+    </header>
+    <p class="lede" style="margin-bottom:24px;">The core surface. ID, title, status, priority, updated. Click-targets are entire rows; hover fills the row with paper-2. No avatars &mdash; there are no users.</p>
+
+    <div class="issue-list">
+      <div class="issue header">
+        <div class="id">ID</div>
+        <div>Title</div>
+        <div class="meta-cell">Status</div>
+        <div class="meta-cell">Priority</div>
+        <div class="meta-cell">Updated</div>
+      </div>
+      <div class="issue">
+        <div class="id">ZDR-0142</div>
+        <div class="title">Fix sqlite write contention under parallel agent writes</div>
+        <div class="meta-cell"><span class="badge progress"><span class="dot"></span>In&nbsp;progress</span></div>
+        <div class="meta-cell"><span class="badge p0">P0&nbsp;Now</span></div>
+        <div class="meta-cell">4m</div>
+      </div>
+      <div class="issue">
+        <div class="id">ZDR-0141</div>
+        <div class="title">MCP: expose <span class="mono">issue.search</span> with full-text fallback</div>
+        <div class="meta-cell"><span class="badge open"><span class="dot"></span>Open</span></div>
+        <div class="meta-cell"><span class="badge p1">P1&nbsp;Soon</span></div>
+        <div class="meta-cell">1h</div>
+      </div>
+      <div class="issue">
+        <div class="id">ZDR-0140</div>
+        <div class="title">Add <span class="mono">DELETE&nbsp;/issues/:id</span> with cascade on links</div>
+        <div class="meta-cell"><span class="badge review"><span class="dot"></span>Review</span></div>
+        <div class="meta-cell"><span class="badge p1">P1&nbsp;Soon</span></div>
+        <div class="meta-cell">3h</div>
+      </div>
+      <div class="issue">
+        <div class="id">ZDR-0139</div>
+        <div class="title">CLI: <span class="mono">zdzira open</span> should accept partial IDs</div>
+        <div class="meta-cell"><span class="badge blocked"><span class="dot"></span>Blocked</span></div>
+        <div class="meta-cell"><span class="badge p2">P2&nbsp;Later</span></div>
+        <div class="meta-cell">yest.</div>
+      </div>
+      <div class="issue">
+        <div class="id">ZDR-0138</div>
+        <div class="title">Decide on labels vs. tags vs. milestones (pick one)</div>
+        <div class="meta-cell"><span class="badge done"><span class="dot"></span>Done</span></div>
+        <div class="meta-cell"><span class="badge p2">P2&nbsp;Later</span></div>
+        <div class="meta-cell">2d</div>
+      </div>
+      <div class="issue">
+        <div class="id">ZDR-0137</div>
+        <div class="title">Write the README, but the version that's actually useful</div>
+        <div class="meta-cell"><span class="badge done"><span class="dot"></span>Done</span></div>
+        <div class="meta-cell"><span class="badge p3">P3&nbsp;Someday</span></div>
+        <div class="meta-cell">3d</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== API ===================== -->
+  <section class="section" id="api">
+    <header>
+      <h2>07 &mdash; REST &amp; MCP</h2>
+      <span class="eyebrow">Surface</span>
+    </header>
+    <p class="lede" style="margin-bottom:24px;">Every REST endpoint has a matching MCP tool. Agents can either call <code class="mono">POST&nbsp;/issues</code> directly, or invoke the tool <code class="mono">zdzira.issue.create</code> &mdash; same args, same response, same SQLite file.</p>
+
+    <div class="grid cols-2">
+      <div>
+        <h3 class="card-title" style="margin-bottom:14px;">REST endpoints</h3>
+        <div class="grid" style="gap:14px;">
+          <div class="endpoint">
+            <div class="method get">GET</div>
+            <div class="path">/issues<br /><span class="desc">List &middot; filter by status, priority, q=</span></div>
+          </div>
+          <div class="endpoint">
+            <div class="method get">GET</div>
+            <div class="path">/issues/<span class="arg">:id</span><br /><span class="desc">Single issue with links &amp; activity</span></div>
+          </div>
+          <div class="endpoint">
+            <div class="method post">POST</div>
+            <div class="path">/issues<br /><span class="desc">Create &middot; title required, body optional</span></div>
+          </div>
+          <div class="endpoint">
+            <div class="method patch">PATCH</div>
+            <div class="path">/issues/<span class="arg">:id</span><br /><span class="desc">Partial update &middot; status, priority, title&hellip;</span></div>
+          </div>
+          <div class="endpoint">
+            <div class="method del">DEL</div>
+            <div class="path">/issues/<span class="arg">:id</span><br /><span class="desc">Soft-delete by default, <span class="mono">?hard=1</span> to purge</span></div>
+          </div>
+          <div class="endpoint">
+            <div class="method post">POST</div>
+            <div class="path">/issues/<span class="arg">:id</span>/comments<br /><span class="desc">Append a comment &middot; supports markdown</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <h3 class="card-title" style="margin-bottom:14px;">MCP tool call</h3>
+<pre class="code">
+<span class="c">// .mcp.json</span>
+{
+  <span class="k">"mcpServers"</span>: {
+    <span class="k">"zdzira"</span>: {
+      <span class="k">"command"</span>: <span class="s">"zdzira"</span>,
+      <span class="k">"args"</span>: [<span class="s">"mcp"</span>],
+      <span class="k">"env"</span>: { <span class="k">"ZDZIRA_DB"</span>: <span class="s">"./.zdzira/db.sqlite"</span> }
+    }
+  }
+}
+
+<span class="c">// agent invocation</span>
+<span class="m">tool</span>: zdzira.issue.create
+<span class="m">args</span>: {
+  <span class="k">"title"</span>: <span class="s">"Fix sqlite write contention"</span>,
+  <span class="k">"priority"</span>: <span class="s">"P0"</span>,
+  <span class="k">"body"</span>:  <span class="s">"Parallel agents block &gt;3s"</span>
+}
+
+<span class="c">// response</span>
+{
+  <span class="k">"id"</span>:       <span class="s">"ZDR-0142"</span>,
+  <span class="k">"status"</span>:   <span class="s">"open"</span>,
+  <span class="k">"priority"</span>: <span class="s">"P0"</span>,
+  <span class="k">"created"</span>:  <span class="s">"2026-05-26T14:02:11Z"</span>
+}
+</pre>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:24px;">
+      <div class="card-sub">MCP tools</div>
+      <h3 class="card-title">Eight tools, mapped 1:1 to REST</h3>
+      <div class="grid cols-2" style="gap:10px; margin-top:14px;">
+        <div class="endpoint"><div class="method get">RUN</div><div class="path">zdzira.issue.list</div></div>
+        <div class="endpoint"><div class="method get">RUN</div><div class="path">zdzira.issue.get</div></div>
+        <div class="endpoint"><div class="method post">RUN</div><div class="path">zdzira.issue.create</div></div>
+        <div class="endpoint"><div class="method patch">RUN</div><div class="path">zdzira.issue.update</div></div>
+        <div class="endpoint"><div class="method del">RUN</div><div class="path">zdzira.issue.delete</div></div>
+        <div class="endpoint"><div class="method post">RUN</div><div class="path">zdzira.issue.comment</div></div>
+        <div class="endpoint"><div class="method get">RUN</div><div class="path">zdzira.issue.search</div></div>
+        <div class="endpoint"><div class="method patch">RUN</div><div class="path">zdzira.issue.link</div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== APP PREVIEW ===================== -->
+  <section class="section" id="composition">
+    <header>
+      <h2>08 &mdash; In situ</h2>
+      <span class="eyebrow">Composition</span>
+    </header>
+    <p class="lede" style="margin-bottom:24px;">All of the above, glued together. This is what the local web UI looks like at <code class="mono">http://localhost:7777</code>.</p>
+
+    <div class="app-frame">
+      <aside class="app-side">
+        <div class="brand" style="display:flex; align-items:center; gap:10px;">
+          <span class="logo" aria-hidden="true"><span class="plate"></span><span class="face">Z</span></span>
+          <span class="wordmark" style="font-size:16px;">ZDZIRA<span class="dot"></span></span>
+        </div>
+        <div>
+          <div class="nav-section">Views</div>
+          <div class="nav-item active">All issues</div>
+          <div class="nav-item">Open</div>
+          <div class="nav-item">In progress</div>
+          <div class="nav-item">Blocked</div>
+          <div class="nav-item">Done</div>
+        </div>
+        <div>
+          <div class="nav-section">Local</div>
+          <div class="nav-item">Database</div>
+          <div class="nav-item">MCP server</div>
+          <div class="nav-item">API logs</div>
+        </div>
+        <div style="margin-top:auto;">
+          <div class="badge open" style="margin-bottom:6px;"><span class="dot"></span>API&nbsp;:7777</div>
+          <div class="badge open"><span class="dot"></span>MCP&nbsp;ready</div>
+        </div>
+      </aside>
+      <section class="app-main">
+        <div class="app-toolbar">
+          <h1 class="app-h1">All issues<span style="color:var(--muted); font-family:'JetBrains Mono',monospace; font-size:16px; margin-left:10px;">14</span></h1>
+          <div style="display:flex; gap:10px;">
+            <input class="input" placeholder="search&hellip;" style="width:220px;" />
+            <button class="btn primary">+ New issue</button>
+          </div>
+        </div>
+        <div class="app-filters">
+          <span class="badge open"><span class="dot"></span>Open&nbsp;6</span>
+          <span class="badge progress"><span class="dot"></span>In&nbsp;progress&nbsp;3</span>
+          <span class="badge review"><span class="dot"></span>Review&nbsp;1</span>
+          <span class="badge blocked"><span class="dot"></span>Blocked&nbsp;1</span>
+          <span class="badge done"><span class="dot"></span>Done&nbsp;3</span>
+        </div>
+        <div class="issue-list" style="box-shadow: var(--shadow-sm);">
+          <div class="issue">
+            <div class="id">ZDR-0142</div>
+            <div class="title">Fix sqlite write contention</div>
+            <div class="meta-cell"><span class="badge progress"><span class="dot"></span>WIP</span></div>
+            <div class="meta-cell"><span class="badge p0">P0</span></div>
+            <div class="meta-cell">4m</div>
+          </div>
+          <div class="issue">
+            <div class="id">ZDR-0141</div>
+            <div class="title">MCP: expose <span class="mono">issue.search</span></div>
+            <div class="meta-cell"><span class="badge open"><span class="dot"></span>Open</span></div>
+            <div class="meta-cell"><span class="badge p1">P1</span></div>
+            <div class="meta-cell">1h</div>
+          </div>
+          <div class="issue">
+            <div class="id">ZDR-0140</div>
+            <div class="title">Add DELETE with cascade on links</div>
+            <div class="meta-cell"><span class="badge review"><span class="dot"></span>Review</span></div>
+            <div class="meta-cell"><span class="badge p1">P1</span></div>
+            <div class="meta-cell">3h</div>
+          </div>
+          <div class="issue">
+            <div class="id">ZDR-0139</div>
+            <div class="title">CLI accepts partial IDs</div>
+            <div class="meta-cell"><span class="badge blocked"><span class="dot"></span>Blocked</span></div>
+            <div class="meta-cell"><span class="badge p2">P2</span></div>
+            <div class="meta-cell">yest.</div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </section>
+
+  <footer class="footer">
+    <span>ZDZIRA &middot; v0.1 design system</span>
+    <span>Made local. No accounts. No cloud.</span>
+  </footer>
+</main>
+
+<script>
+  // mode switcher
+  const root = document.documentElement;
+  const buttons = document.querySelectorAll('.mode-switch button');
+  function setMode(m){
+    root.setAttribute('data-mode', m);
+    buttons.forEach(b => b.setAttribute('aria-pressed', b.dataset.set === m ? 'true' : 'false'));
+    try { localStorage.setItem('zdzira-mode', m); } catch(e){}
+  }
+  buttons.forEach(b => b.addEventListener('click', () => setMode(b.dataset.set)));
+  try {
+    const saved = localStorage.getItem('zdzira-mode');
+    if (saved) setMode(saved);
+  } catch(e){}
+</script>
+
+</body>
+</html>
