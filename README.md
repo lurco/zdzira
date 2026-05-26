@@ -32,7 +32,7 @@ The MCP server runs at `http://localhost:8080/mcp` over SSE. Add it to your Clau
 ```
 
 Available tools: `list_projects`, `get_project`, `create_project`, `list_epics`, `get_epic`, `create_epic`,
-`list_issues`, `get_issue`, `create_issue`, `move_issue`, `add_comment`, `list_comments`, `link_issues`, `list_links`.
+`list_issues`, `get_issue`, `create_issue`, `move_issue`, `delete_issue`, `add_comment`, `list_comments`, `link_issues`, `list_links`.
 
 Issues are referenced as `PROJ-42`, epics as `PROJ-E1`.
 
