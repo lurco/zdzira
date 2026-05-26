@@ -60,6 +60,30 @@ func TestProjectDelete_CascadesToChildren(t *testing.T) {
 	assert.Empty(t, swimlanes, "swimlanes should be soft-deleted")
 }
 
+func TestProjectList_ReturnsAll(t *testing.T) {
+	svcs := newTestServices(t)
+
+	_, err := svcs.Projects.Create(ctx, service.CreateProjectInput{Name: "Alpha", Shortcut: "ALP"})
+	require.NoError(t, err)
+	_, err = svcs.Projects.Create(ctx, service.CreateProjectInput{Name: "Beta", Shortcut: "BET"})
+	require.NoError(t, err)
+
+	projects, err := svcs.Projects.List(ctx)
+	require.NoError(t, err)
+	assert.Len(t, projects, 2)
+}
+
+func TestProjectGet_BySlug(t *testing.T) {
+	svcs := newTestServices(t)
+
+	p, err := svcs.Projects.Create(ctx, service.CreateProjectInput{Name: "My Project", Shortcut: "MP"})
+	require.NoError(t, err)
+
+	got, err := svcs.Projects.Get(ctx, p.Slug)
+	require.NoError(t, err)
+	assert.Equal(t, p.ID, got.ID)
+}
+
 func TestProjectCreate_SeedsSwimlanes(t *testing.T) {
 	svcs := newTestServices(t)
 

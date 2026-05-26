@@ -14,6 +14,43 @@ func newProjectWithIssues(t *testing.T, svcs *service.Services) {
 	require.NoError(t, err)
 }
 
+func TestIssueList_ReturnsIssuesForProject(t *testing.T) {
+	svcs := newTestServices(t)
+	newProjectWithIssues(t, svcs)
+
+	for i := 0; i < 3; i++ {
+		_, err := svcs.Issues.Create(ctx, service.CreateIssueInput{
+			ProjectSlug: "tracker",
+			Name:        "issue",
+			Type:        "TASK",
+			Priority:    "LOW",
+		})
+		require.NoError(t, err)
+	}
+
+	issues, err := svcs.Issues.List(ctx, "tracker")
+	require.NoError(t, err)
+	assert.Len(t, issues, 3)
+}
+
+func TestIssueDelete_RemovesIssue(t *testing.T) {
+	svcs := newTestServices(t)
+	newProjectWithIssues(t, svcs)
+
+	_, err := svcs.Issues.Create(ctx, service.CreateIssueInput{
+		ProjectSlug: "tracker",
+		Name:        "to delete",
+		Type:        "TASK",
+		Priority:    "LOW",
+	})
+	require.NoError(t, err)
+
+	require.NoError(t, svcs.Issues.Delete(ctx, "tracker", "TRK-1"))
+
+	_, err = svcs.Issues.Get(ctx, "tracker", "TRK-1")
+	assert.Error(t, err, "deleted issue should not be found")
+}
+
 func TestIssueCreate_SequentialNumbers(t *testing.T) {
 	svcs := newTestServices(t)
 	newProjectWithIssues(t, svcs)
