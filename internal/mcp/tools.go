@@ -265,6 +265,30 @@ func registerIssueTools(s *server.MCPServer, svcs *service.Services) {
 	)
 }
 
+func registerDeleteIssueTools(s *server.MCPServer, svcs *service.Services) {
+	s.AddTool(
+		mcp.NewTool("delete_issue",
+			mcp.WithDescription("Delete an issue by its ref. The deletion is soft — data is retained but the issue is no longer accessible."),
+			mcp.WithString("project", mcp.Required(), mcp.Description("Project slug")),
+			mcp.WithString("issue_ref", mcp.Required(), mcp.Description("Issue reference, e.g. PROJ-42")),
+		),
+		func(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+			slug, err := req.RequireString("project")
+			if err != nil {
+				return mcp.NewToolResultError(err.Error()), nil
+			}
+			ref, err := req.RequireString("issue_ref")
+			if err != nil {
+				return mcp.NewToolResultError(err.Error()), nil
+			}
+			if err := svcs.Issues.Delete(ctx, slug, ref); err != nil {
+				return mcp.NewToolResultError(err.Error()), nil
+			}
+			return mcp.NewToolResultText("deleted"), nil
+		},
+	)
+}
+
 func registerCommentTools(s *server.MCPServer, svcs *service.Services) {
 	s.AddTool(
 		mcp.NewTool("add_comment",

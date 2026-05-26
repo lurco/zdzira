@@ -7,7 +7,9 @@ import (
 	"github.com/mark3labs/mcp-go/server"
 )
 
-func NewSSEHandler(svcs *service.Services, baseURL string) http.Handler {
+type Server = server.MCPServer
+
+func NewServer(svcs *service.Services) *Server {
 	s := server.NewMCPServer("zdzira", "1.0.0",
 		server.WithToolCapabilities(true),
 	)
@@ -15,8 +17,13 @@ func NewSSEHandler(svcs *service.Services, baseURL string) http.Handler {
 	registerProjectTools(s, svcs)
 	registerEpicTools(s, svcs)
 	registerIssueTools(s, svcs)
+	registerDeleteIssueTools(s, svcs)
 	registerCommentTools(s, svcs)
 	registerLinkTools(s, svcs)
 
-	return server.NewSSEServer(s, server.WithBaseURL(baseURL))
+	return s
+}
+
+func NewSSEHandler(svcs *service.Services, baseURL string) http.Handler {
+	return server.NewSSEServer(NewServer(svcs), server.WithBaseURL(baseURL))
 }
