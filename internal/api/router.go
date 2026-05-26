@@ -19,6 +19,7 @@ func NewRouter(svcs *service.Services) http.Handler {
 	issues := &issueHandler{svcs.Issues}
 	comments := &commentHandler{svcs.Comments}
 	links := &linkHandler{svcs.Links}
+	audit := &auditHandler{svcs.Audit}
 
 	r.Route("/projects", func(r chi.Router) {
 		r.Get("/", projects.list)
@@ -26,6 +27,7 @@ func NewRouter(svcs *service.Services) http.Handler {
 		r.Route("/{slug}", func(r chi.Router) {
 			r.Get("/", projects.get)
 			r.Delete("/", projects.delete)
+			r.Get("/audit", audit.listForProject)
 
 			r.Route("/epics", func(r chi.Router) {
 				r.Get("/", epics.list)

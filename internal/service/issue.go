@@ -11,6 +11,7 @@ import (
 
 type IssueService struct {
 	stores *store.Stores
+	audit  *AuditService
 }
 
 type CreateIssueInput struct {
@@ -67,6 +68,7 @@ func (s *IssueService) Create(ctx context.Context, in CreateIssueInput) (*model.
 	if err := s.stores.Issues.Create(ctx, issue); err != nil {
 		return nil, err
 	}
+	s.audit.record(ctx, p.ID, "issue", fmt.Sprintf("%s-%d", p.Shortcut, issue.Number), "created")
 	return issue, nil
 }
 
@@ -107,7 +109,11 @@ func (s *IssueService) Move(ctx context.Context, in MoveIssueInput) (*model.Issu
 	}
 
 	issue.SwimlaneID = sl.ID
-	return issue, s.stores.Issues.Update(ctx, issue)
+	if err := s.stores.Issues.Update(ctx, issue); err != nil {
+		return nil, err
+	}
+	s.audit.record(ctx, p.ID, "issue", fmt.Sprintf("%s-%d", p.Shortcut, issue.Number), "moved")
+	return issue, nil
 }
 
 type UpdateIssueInput struct {
@@ -120,6 +126,10 @@ type UpdateIssueInput struct {
 }
 
 func (s *IssueService) Update(ctx context.Context, in UpdateIssueInput) (*model.Issue, error) {
+	p, err := s.stores.Projects.GetBySlug(ctx, in.ProjectSlug)
+	if err != nil {
+		return nil, fmt.Errorf("project %q not found", in.ProjectSlug)
+	}
 	issue, err := s.Get(ctx, in.ProjectSlug, in.IssueRef)
 	if err != nil {
 		return nil, err
@@ -128,15 +138,27 @@ func (s *IssueService) Update(ctx context.Context, in UpdateIssueInput) (*model.
 	issue.Description = in.Description
 	issue.Type = in.Type
 	issue.Priority = in.Priority
-	return issue, s.stores.Issues.Update(ctx, issue)
+	if err := s.stores.Issues.Update(ctx, issue); err != nil {
+		return nil, err
+	}
+	s.audit.record(ctx, p.ID, "issue", fmt.Sprintf("%s-%d", p.Shortcut, issue.Number), "updated")
+	return issue, nil
 }
 
 func (s *IssueService) Delete(ctx context.Context, projectSlug, ref string) error {
+	p, err := s.stores.Projects.GetBySlug(ctx, projectSlug)
+	if err != nil {
+		return fmt.Errorf("project %q not found", projectSlug)
+	}
 	issue, err := s.Get(ctx, projectSlug, ref)
 	if err != nil {
 		return err
 	}
-	return s.stores.Issues.Delete(ctx, issue.ID)
+	if err := s.stores.Issues.Delete(ctx, issue.ID); err != nil {
+		return err
+	}
+	s.audit.record(ctx, p.ID, "issue", fmt.Sprintf("%s-%d", p.Shortcut, issue.Number), "deleted")
+	return nil
 }
 
 func (s *IssueService) resolveSwimlane(ctx context.Context, projectID uint, id *uint) (uint, error) {

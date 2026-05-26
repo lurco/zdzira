@@ -68,6 +68,15 @@ classDiagram
         +deleted_at: timestamp, nullable
     }
 
+    class AuditEntry {
+        +id: integer, PK, autoincrement
+        +project_id: integer, FK, non-nullable
+        +entity_type: string, non-nullable
+        +ref: string, non-nullable
+        +action: string, non-nullable
+        +created_at: timestamp, non-nullable
+    }
+
     class IssueType {
         <<enumeration>>
         TASK
@@ -100,6 +109,7 @@ classDiagram
     Issue o-- Comment : on
     Epic o-- Comment : on
     Project o-- Comment : on
+    Project *-- AuditEntry : logs
 ```
 
 ## Constraints
@@ -108,4 +118,6 @@ classDiagram
 - `Link`: `issue_a` = source, `issue_b` = target for directed types (`BLOCKS`, `IS_PART_OF`)
 - `Issue.position`: creation order within swimlane, not manually reorderable
 - `Swimlane`: seeded with `Backlog → In Progress → Done` on project creation
-- Soft delete (`deleted_at`) on all entities except `Link`; project deletion cascades to all owned entities
+- Soft delete (`deleted_at`) on all entities except `Link` and `AuditEntry`; project deletion cascades to all owned entities
+- `AuditEntry`: append-only, no `updated_at` or `deleted_at`; `entity_type` ∈ {"issue", "epic"}, `action` ∈ {"created", "updated", "moved", "deleted"}
+- `AuditEntry` is REST-only — not exposed via MCP (see ADR 0004)

@@ -14,6 +14,7 @@ type Stores struct {
 	Swimlanes SwimlaneStore
 	Comments  CommentStore
 	Links     LinkStore
+	Audit     AuditStore
 }
 
 func New(db *gorm.DB) *Stores {
@@ -24,6 +25,7 @@ func New(db *gorm.DB) *Stores {
 		Swimlanes: &gormSwimlaneStore{db},
 		Comments:  &gormCommentStore{db},
 		Links:     &gormLinkStore{db},
+		Audit:     &gormAuditStore{db},
 	}
 }
 
@@ -76,4 +78,9 @@ type LinkStore interface {
 	Create(ctx context.Context, l *model.Link) error
 	ListByIssue(ctx context.Context, issueID uint) ([]model.Link, error)
 	Delete(ctx context.Context, id uint) error
+}
+
+type AuditStore interface {
+	Record(ctx context.Context, entry *model.AuditEntry) error
+	ListByProject(ctx context.Context, projectID uint) ([]model.AuditEntry, error)
 }

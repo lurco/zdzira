@@ -9,6 +9,7 @@ import (
 
 type EpicService struct {
 	stores *store.Stores
+	audit  *AuditService
 }
 
 type CreateEpicInput struct {
@@ -37,6 +38,7 @@ func (s *EpicService) Create(ctx context.Context, in CreateEpicInput) (*model.Ep
 	if err := s.stores.Epics.Create(ctx, e); err != nil {
 		return nil, err
 	}
+	s.audit.record(ctx, p.ID, "epic", fmt.Sprintf("%s-E%d", p.Shortcut, e.Number), "created")
 	return e, nil
 }
 
@@ -61,9 +63,17 @@ func (s *EpicService) List(ctx context.Context, projectSlug string) ([]model.Epi
 }
 
 func (s *EpicService) Delete(ctx context.Context, projectSlug, ref string) error {
+	p, err := s.stores.Projects.GetBySlug(ctx, projectSlug)
+	if err != nil {
+		return fmt.Errorf("project %q not found", projectSlug)
+	}
 	e, err := s.Get(ctx, projectSlug, ref)
 	if err != nil {
 		return err
 	}
-	return s.stores.Epics.Delete(ctx, e.ID)
+	if err := s.stores.Epics.Delete(ctx, e.ID); err != nil {
+		return err
+	}
+	s.audit.record(ctx, p.ID, "epic", fmt.Sprintf("%s-E%d", p.Shortcut, e.Number), "deleted")
+	return nil
 }

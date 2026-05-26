@@ -2,6 +2,7 @@ package model
 
 import (
 	"errors"
+	"time"
 
 	"gorm.io/gorm"
 )
@@ -71,6 +72,16 @@ type Comment struct {
 	ProjectID *uint  `gorm:"index"`
 	Timestamps
 	SoftDelete
+}
+
+// AuditEntry is append-only — no UpdatedAt, no DeletedAt.
+type AuditEntry struct {
+	ID         uint      `gorm:"primarykey"               json:"id"`
+	ProjectID  uint      `gorm:"not null;index"           json:"project_id"`
+	EntityType string    `gorm:"not null"                 json:"entity_type"`
+	Ref        string    `gorm:"not null"                 json:"ref"`
+	Action     string    `gorm:"not null"                 json:"action"`
+	CreatedAt  time.Time `gorm:"not null;autoCreateTime"  json:"created_at"`
 }
 
 func (c *Comment) BeforeCreate(tx *gorm.DB) error { return c.validateParent() }

@@ -31,5 +31,6 @@ func migrate(db *gorm.DB) error {
 		&model.Issue{},
 		&model.Link{},
 		&model.Comment{},
+		&model.AuditEntry{},
 	)
 }
