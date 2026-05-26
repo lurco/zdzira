@@ -1,0 +1,29 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# Only run Go checks if a module exists
+if [ ! -f go.mod ]; then
+  exit 0
+fi
+
+GO_FILES=$(git diff --cached --name-only --diff-filter=ACM | grep '\.go$' || true)
+if [ -z "$GO_FILES" ]; then
+  exit 0
+fi
+
+echo "→ fmt"
+UNFORMATTED=$(gofmt -l $GO_FILES)
+if [ -n "$UNFORMATTED" ]; then
+  echo "gofmt required:"
+  echo "$UNFORMATTED" | sed 's/^/  /'
+  echo "Run: gofmt -w $UNFORMATTED"
+  exit 1
+fi
+
+echo "→ vet"
+go vet ./...
+
+if command -v golangci-lint &>/dev/null; then
+  echo "→ lint"
+  golangci-lint run --fix=false ./...
+fi

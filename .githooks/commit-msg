@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+MSG_FILE="$1"
+MSG=$(cat "$MSG_FILE")
+
+# Strip comments and leading/trailing whitespace
+SUBJECT=$(echo "$MSG" | grep -v '^#' | sed '/^$/d' | head -1)
+
+PATTERN='^(build|chore|ci|docs|feat|fix|perf|refactor|revert|style|test)(\([a-z0-9/._-]+\))?(!)?: .{1,72}$'
+
+if ! echo "$SUBJECT" | grep -qP "$PATTERN"; then
+  echo "✗ commit-msg: does not follow Conventional Commits"
+  echo ""
+  echo "  Expected: <type>(<scope>): <description>"
+  echo "  Types:    build|chore|ci|docs|feat|fix|perf|refactor|revert|style|test"
+  echo "  Example:  feat(issue): add move_issue MCP tool"
+  echo ""
+  echo "  Got: $SUBJECT"
+  exit 1
+fi
