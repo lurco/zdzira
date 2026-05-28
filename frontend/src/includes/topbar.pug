@@ -6,10 +6,8 @@ header.topbar
     span.brand-name
       | Zdzira
       span.dot
-    span.crumb
-      span.crumb__bold local
-      |  &nbsp;/&nbsp; board &nbsp;/&nbsp;
-      span.crumb__bold main
+  select.project-switcher#projectSwitcher(aria-label='Current project')
+    option(value='', disabled, selected) Loading…
   .topbar-right
     .mode-switch(role='tablist', aria-label='Color mode')
       button.mode-switch__btn(data-set='light', aria-pressed='true') Light

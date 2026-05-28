@@ -1,4 +1,5 @@
 import '../styles/main.sass'
+import './topbar'
 
 // ── config ────────────────────────────────────────────────────────────────────
 const params  = new URLSearchParams(location.search)

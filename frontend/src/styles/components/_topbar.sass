@@ -51,18 +51,24 @@
     margin-left: 5px
     transform: translateY(-2px)
 
-.crumb
+.project-switcher
+  appearance: none
+  background: var(--paper)
+  border: var(--border) solid var(--line)
+  box-shadow: var(--shadow-sm)
   +mono
-  font-size: 11px
+  font-size: 12px
+  font-weight: 700
   text-transform: uppercase
-  letter-spacing: 0.08em
-  color: var(--muted)
-  padding-left: 18px
-  margin-left: 14px
-  border-left: 2px solid var(--line)
+  letter-spacing: 0.06em
+  color: var(--ink)
+  padding: 8px 14px
+  cursor: pointer
+  min-width: 160px
 
-  &__bold
-    color: var(--ink)
+  &:focus-visible
+    outline: 3px solid var(--acc-yellow)
+    outline-offset: 2px
 
 .topbar-right
   +flex-center

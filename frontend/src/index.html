@@ -7,13 +7,17 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=JetBrains+Mono:wght@400;500;700;800&display=swap" />
-    <script type="module" src="js/main.js"></script>
+    <script type="module" src="js/index.js"></script>
   </head>
   <body>
-    <div class="app">
+    <div class="app app--two-row">
       <pug src="includes/topbar.pug" />
-      <main class="project-list" hx-get="/projects" hx-trigger="load" hx-swap="innerHTML">
-        <p class="loading">Loading projects&hellip;</p>
+      <main class="project-list">
+        <p class="project-list__heading">Projects</p>
+        <div class="project-list__grid" id="projectGrid">
+          <p class="project-list__empty">Loading&hellip;</p>
+        </div>
+        <button class="project-new" id="newProjectBtn">+ New project</button>
       </main>
     </div>
   </body>
