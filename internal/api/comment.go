@@ -47,4 +47,22 @@ func registerCommentRoutes(api huma.API, svcs *service.Services) {
 		}
 		return &struct{ Body *model.Comment }{c}, nil
 	})
+
+	huma.Register(api, huma.Operation{
+		OperationID:   "delete-comment",
+		Method:        http.MethodDelete,
+		Path:          "/projects/{slug}/issues/{issueRef}/comments/{id}",
+		Summary:       "Delete a comment",
+		DefaultStatus: http.StatusNoContent,
+		Tags:          []string{"Comments"},
+	}, func(ctx context.Context, input *struct {
+		Slug     string `path:"slug"     doc:"Project slug"                  example:"my-project"`
+		IssueRef string `path:"issueRef" doc:"Issue reference, e.g. PROJ-42"  example:"PROJ-42"`
+		ID       uint   `path:"id"       doc:"Comment ID"`
+	}) (*struct{}, error) {
+		if err := svcs.Comments.Delete(ctx, input.ID); err != nil {
+			return nil, huma.Error404NotFound(err.Error())
+		}
+		return nil, nil
+	})
 }

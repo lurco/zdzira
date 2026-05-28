@@ -1,6 +1,7 @@
 package api_test
 
 import (
+	"fmt"
 	"net/http"
 	"testing"
 	"zdzira/internal/model"
@@ -31,6 +32,32 @@ func TestCommentAddToIssue_Returns201(t *testing.T) {
 	decode(t, resp, &c)
 	assert.Equal(t, "looks good", c.Contents)
 	assert.NotNil(t, c.IssueID)
+}
+
+func TestCommentDelete_Returns204(t *testing.T) {
+	srv := newTestServer(t)
+	defer srv.Close()
+
+	resp := do(t, srv, http.MethodPost, "/projects", map[string]string{"name": "Cmt Proj", "shortcut": "CMT"})
+	require.Equal(t, http.StatusCreated, resp.StatusCode)
+	resp.Body.Close()
+
+	resp = do(t, srv, http.MethodPost, "/projects/cmt-proj/issues", map[string]any{
+		"name": "issue", "type": "TASK", "priority": "LOW",
+	})
+	require.Equal(t, http.StatusCreated, resp.StatusCode)
+	resp.Body.Close()
+
+	var c model.Comment
+	resp = do(t, srv, http.MethodPost, "/projects/cmt-proj/issues/CMT-1/comments",
+		map[string]string{"contents": "delete me"})
+	require.Equal(t, http.StatusCreated, resp.StatusCode)
+	decode(t, resp, &c)
+
+	resp = do(t, srv, http.MethodDelete,
+		fmt.Sprintf("/projects/cmt-proj/issues/CMT-1/comments/%d", c.ID), nil)
+	assert.Equal(t, http.StatusNoContent, resp.StatusCode)
+	resp.Body.Close()
 }
 
 func TestCommentListForIssue_Returns200(t *testing.T) {
