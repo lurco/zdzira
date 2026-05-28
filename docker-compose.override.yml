@@ -1,0 +1,14 @@
+# Applied automatically by `docker compose up` — dev only.
+# Serves pre-built dist/ from a volume mount so frontend changes
+# take effect after `npm run build` without rebuilding the image.
+# For true HMR run `npm run dev` separately on port 5173.
+#
+# Production: docker compose -f docker-compose.yml up --build
+
+services:
+  nginx:
+    build: !reset null
+    image: nginx:alpine
+    volumes:
+      - ./dist:/usr/share/nginx/html:ro
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
