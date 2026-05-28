@@ -54,6 +54,23 @@ func (s *SwimlaneService) Create(ctx context.Context, in CreateSwimlaneInput) (*
 	return sl, nil
 }
 
+func (s *SwimlaneService) Delete(ctx context.Context, projectSlug string, id uint) error {
+	p, err := s.stores.Projects.GetBySlug(ctx, projectSlug)
+	if err != nil {
+		return fmt.Errorf("project %q not found", projectSlug)
+	}
+	swimlanes, err := s.stores.Swimlanes.ListByProject(ctx, p.ID)
+	if err != nil {
+		return err
+	}
+	for _, sl := range swimlanes {
+		if sl.ID == id {
+			return s.stores.Swimlanes.Delete(ctx, id)
+		}
+	}
+	return fmt.Errorf("swimlane %d not found in project", id)
+}
+
 func (s *SwimlaneService) Rename(ctx context.Context, in RenameSwimlaneInput) (*model.Swimlane, error) {
 	p, err := s.stores.Projects.GetBySlug(ctx, in.ProjectSlug)
 	if err != nil {

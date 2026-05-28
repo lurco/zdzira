@@ -64,4 +64,21 @@ func registerSwimlaneRoutes(api huma.API, svcs *service.Services) {
 		}
 		return &struct{ Body *model.Swimlane }{sl}, nil
 	})
+
+	huma.Register(api, huma.Operation{
+		OperationID:   "delete-swimlane",
+		Method:        http.MethodDelete,
+		Path:          "/projects/{slug}/swimlanes/{id}",
+		Summary:       "Delete a swimlane",
+		DefaultStatus: http.StatusNoContent,
+		Tags:          []string{"Swimlanes"},
+	}, func(ctx context.Context, input *struct {
+		Slug string `path:"slug" doc:"Project slug" example:"my-project"`
+		ID   uint   `path:"id"   doc:"Swimlane ID"`
+	}) (*struct{}, error) {
+		if err := svcs.Swimlanes.Delete(ctx, input.Slug, input.ID); err != nil {
+			return nil, huma.Error422UnprocessableEntity(err.Error())
+		}
+		return nil, nil
+	})
 }

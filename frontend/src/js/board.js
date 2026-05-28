@@ -439,7 +439,7 @@ document.addEventListener('drop', async e => {
     if (!issue) return
     try {
       await api(`/projects/${PROJECT}/issues/${issue.ref}/move`, {
-        method: 'PUT',
+        method: 'POST',
         body: { swimlane_id: toLaneId },
       })
       issue.swimlane_id = toLaneId
