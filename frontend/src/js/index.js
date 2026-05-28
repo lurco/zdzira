@@ -31,4 +31,30 @@ async function loadProjects() {
   }
 }
 
-document.addEventListener('DOMContentLoaded', loadProjects)
+async function createProject() {
+  const name = prompt('Project name:')
+  if (!name) return
+  const shortcut = prompt('Issue prefix (e.g. PROJ):')
+  if (!shortcut) return
+  try {
+    const res = await fetch('/api/v1/projects', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, shortcut }),
+    })
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}))
+      throw new Error(err.detail || `${res.status} ${res.statusText}`)
+    }
+    const p = await res.json()
+    location.href = `/board.html?project=${esc(p.slug)}`
+  } catch (e) {
+    alert('Failed to create project: ' + e.message)
+  }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  loadProjects()
+  const btn = document.getElementById('newProjectBtn')
+  if (btn) btn.addEventListener('click', createProject)
+})
