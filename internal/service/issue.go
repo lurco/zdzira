@@ -27,7 +27,8 @@ type CreateIssueInput struct {
 type MoveIssueInput struct {
 	ProjectSlug  string `json:"-"`
 	IssueRef     string `json:"-"`
-	SwimlaneName string `json:"swimlane" doc:"Target swimlane name" example:"In Progress"`
+	SwimlaneName string `json:"swimlane,omitempty"    doc:"Target swimlane name" example:"In Progress"`
+	SwimlaneID   *uint  `json:"swimlane_id,omitempty" doc:"Target swimlane ID"`
 }
 
 func (s *IssueService) Create(ctx context.Context, in CreateIssueInput) (*model.Issue, error) {
@@ -98,14 +99,26 @@ func (s *IssueService) Move(ctx context.Context, in MoveIssueInput) (*model.Issu
 		return nil, err
 	}
 
+	var sl *model.Swimlane
+	if in.SwimlaneID != nil {
+		sl, err = s.stores.Swimlanes.GetByID(ctx, *in.SwimlaneID)
+		if err != nil {
+			return nil, fmt.Errorf("swimlane %d not found", *in.SwimlaneID)
+		}
+	} else {
+		p, err := s.stores.Projects.GetBySlug(ctx, in.ProjectSlug)
+		if err != nil {
+			return nil, err
+		}
+		sl, err = s.stores.Swimlanes.GetByName(ctx, p.ID, in.SwimlaneName)
+		if err != nil {
+			return nil, fmt.Errorf("swimlane %q not found in project", in.SwimlaneName)
+		}
+	}
+
 	p, err := s.stores.Projects.GetBySlug(ctx, in.ProjectSlug)
 	if err != nil {
 		return nil, err
-	}
-
-	sl, err := s.stores.Swimlanes.GetByName(ctx, p.ID, in.SwimlaneName)
-	if err != nil {
-		return nil, fmt.Errorf("swimlane %q not found in project", in.SwimlaneName)
 	}
 
 	issue.SwimlaneID = sl.ID

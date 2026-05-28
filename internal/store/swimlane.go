@@ -30,6 +30,12 @@ func (s *gormSwimlaneStore) GetByName(ctx context.Context, projectID uint, name 
 	return &sl, err
 }
 
+func (s *gormSwimlaneStore) GetByID(ctx context.Context, id uint) (*model.Swimlane, error) {
+	var sl model.Swimlane
+	err := s.db.WithContext(ctx).First(&sl, id).Error
+	return &sl, err
+}
+
 func (s *gormSwimlaneStore) Update(ctx context.Context, sl *model.Swimlane) error {
 	return s.db.WithContext(ctx).Save(sl).Error
 }

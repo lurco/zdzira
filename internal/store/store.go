@@ -68,6 +68,7 @@ type SwimlaneStore interface {
 	Create(ctx context.Context, s *model.Swimlane) error
 	ListByProject(ctx context.Context, projectID uint) ([]model.Swimlane, error)
 	GetByName(ctx context.Context, projectID uint, name string) (*model.Swimlane, error)
+	GetByID(ctx context.Context, id uint) (*model.Swimlane, error)
 	Update(ctx context.Context, s *model.Swimlane) error
 	Delete(ctx context.Context, id uint) error
 	DeleteByProject(ctx context.Context, projectID uint) error

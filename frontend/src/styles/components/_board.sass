@@ -1,3 +1,5 @@
+@use '../abstracts/mixins' as *
+
 .board-wrap
   overflow-x: auto
   overflow-y: hidden
@@ -11,3 +13,156 @@
   min-height: 100%
   padding-bottom: 8px
   width: max-content
+
+.add-lane
+  width: 260px
+  min-width: 260px
+  background: transparent
+  border: var(--border) dashed var(--line)
+  display: grid
+  place-items: center
+  cursor: pointer
+  appearance: none
+  +mono
+  font-weight: 700
+  font-size: 13px
+  text-transform: uppercase
+  letter-spacing: 0.06em
+  color: var(--ink)
+  padding: 18px
+  align-self: flex-start
+  height: fit-content
+
+  &:hover
+    background: var(--paper-2)
+    box-shadow: var(--shadow-sm)
+
+  .plus
+    display: block
+    font-size: 32px
+    font-weight: 800
+    line-height: 1
+    margin-bottom: 6px
+
+.new-card-form
+  background: var(--paper)
+  border: var(--border) solid var(--line)
+  box-shadow: var(--shadow-sm)
+  padding: 10px
+  display: flex
+  flex-direction: column
+  gap: 8px
+
+  textarea
+    appearance: none
+    resize: none
+    min-height: 60px
+    border: 2px solid var(--line)
+    background: var(--paper-2)
+    font-family: 'Space Grotesk', sans-serif
+    font-size: 14px
+    color: var(--ink)
+    padding: 8px
+    outline: none
+
+    &:focus
+      background: var(--paper)
+      box-shadow: var(--shadow-sm)
+
+  .row
+    display: flex
+    align-items: center
+    gap: 8px
+
+.mini-select
+  appearance: none
+  border: 2px solid var(--line)
+  background: var(--paper)
+  +mono
+  font-size: 11px
+  font-weight: 700
+  text-transform: uppercase
+  letter-spacing: 0.04em
+  padding: 5px 8px
+  color: var(--ink)
+  cursor: pointer
+
+.popover
+  position: absolute
+  top: 46px
+  right: 10px
+  background: var(--paper)
+  border: var(--border) solid var(--line)
+  box-shadow: var(--shadow)
+  z-index: 60
+  min-width: 220px
+  display: flex
+  flex-direction: column
+
+  button
+    appearance: none
+    background: transparent
+    border: 0
+    text-align: left
+    padding: 10px 14px
+    +mono
+    font-size: 12px
+    font-weight: 700
+    text-transform: uppercase
+    letter-spacing: 0.06em
+    color: var(--ink)
+    cursor: pointer
+    border-bottom: 2px solid var(--line)
+
+    &:last-child
+      border-bottom: 0
+
+    &:hover
+      background: var(--paper-2)
+
+  .danger
+    color: var(--acc-red)
+
+  .swatches
+    display: grid
+    grid-template-columns: repeat(6, 1fr)
+    gap: 6px
+    padding: 10px 14px
+    border-bottom: 2px solid var(--line)
+
+    button
+      padding: 0
+      height: 24px
+      border: 2px solid var(--line)
+
+.kbd
+  display: inline-flex
+  align-items: center
+  justify-content: center
+  padding: 1px 6px
+  min-width: 18px
+  +mono
+  font-size: 10px
+  font-weight: 700
+  background: var(--paper)
+  color: var(--ink)
+  border: 1.5px solid var(--line)
+  margin: 0 2px
+
+.drag-ghost
+  position: fixed
+  pointer-events: none
+  z-index: 1000
+  transform: rotate(-3deg)
+  box-shadow: var(--shadow-lg)
+  width: 280px
+
+.lane-empty
+  border: 2px dashed var(--line)
+  padding: 16px
+  text-align: center
+  +mono
+  font-size: 11px
+  color: var(--muted)
+  text-transform: uppercase
+  letter-spacing: 0.06em
