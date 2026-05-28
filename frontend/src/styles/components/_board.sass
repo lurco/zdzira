@@ -53,7 +53,7 @@
   flex-direction: column
   gap: 8px
 
-  textarea
+  &__textarea
     appearance: none
     resize: none
     min-height: 60px
@@ -69,7 +69,7 @@
       background: var(--paper)
       box-shadow: var(--shadow-sm)
 
-  .row
+  .new-card-form__row
     display: flex
     align-items: center
     gap: 8px
@@ -99,7 +99,7 @@
   display: flex
   flex-direction: column
 
-  button
+  &__btn
     appearance: none
     background: transparent
     border: 0
@@ -120,20 +120,20 @@
     &:hover
       background: var(--paper-2)
 
-  .danger
+  &__danger
     color: var(--acc-red)
 
-  .swatches
+  &__swatches
     display: grid
     grid-template-columns: repeat(6, 1fr)
     gap: 6px
     padding: 10px 14px
     border-bottom: 2px solid var(--line)
 
-    button
-      padding: 0
-      height: 24px
-      border: 2px solid var(--line)
+  &__swatch
+    padding: 0
+    height: 24px
+    border: 2px solid var(--line)
 
 .kbd
   display: inline-flex

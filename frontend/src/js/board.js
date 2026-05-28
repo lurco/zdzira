@@ -171,8 +171,8 @@ function beginAddCard(laneId, bodyEl, footerEl) {
   const form = document.createElement('div')
   form.className = 'new-card-form'
   form.innerHTML = `
-    <textarea placeholder="What needs doing?"></textarea>
-    <div class="row">
+    <textarea class="new-card-form__textarea" placeholder="What needs doing?"></textarea>
+    <div class="new-card-form__row">
       <select class="mini-select" data-k="type">
         <option value="TASK" selected>Task</option>
         <option value="BUG">Bug</option>
@@ -193,7 +193,7 @@ function beginAddCard(laneId, bodyEl, footerEl) {
   const addBtn = footerEl.querySelector('.add-card-btn')
   if (addBtn) addBtn.style.display = 'none'
   bodyEl.appendChild(form)
-  const ta = form.querySelector('textarea')
+  const ta = form.querySelector('.new-card-form__textarea')
   ta.focus()
 
   async function commit() {
@@ -268,16 +268,16 @@ function openLaneMenu(laneEl, laneId) {
   const pop = document.createElement('div')
   pop.className = 'popover'
   pop.innerHTML = `
-    <div class="swatches">
-      ${LANE_COLORS.map(c => `<button data-c="${c}" style="background:${c}" aria-label="${c}"></button>`).join('')}
+    <div class="popover__swatches">
+      ${LANE_COLORS.map(c => `<button class="popover__swatch" data-c="${c}" style="background:${c}" aria-label="${c}"></button>`).join('')}
     </div>
-    <button data-act="move-left">← Move left</button>
-    <button data-act="move-right">→ Move right</button>
-    <button data-act="delete" class="danger">Delete lane</button>
+    <button class="popover__btn" data-act="move-left">← Move left</button>
+    <button class="popover__btn" data-act="move-right">→ Move right</button>
+    <button class="popover__btn popover__danger" data-act="delete">Delete lane</button>
   `
   laneEl.appendChild(pop)
 
-  pop.querySelectorAll('.swatches button').forEach(b => {
+  pop.querySelectorAll('.popover__swatch').forEach(b => {
     b.addEventListener('click', async () => {
       lane.color = b.dataset.c
       render()
