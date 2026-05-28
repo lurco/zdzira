@@ -51,9 +51,17 @@ type IssueStore interface {
 	GetByRef(ctx context.Context, projectID uint, number uint) (*model.Issue, error)
 	ListByProject(ctx context.Context, projectID uint) ([]model.Issue, error)
 	ListBySwimlane(ctx context.Context, swimlaneID uint) ([]model.Issue, error)
+	ListFiltered(ctx context.Context, projectID uint, f IssueStoreFilter) ([]model.Issue, error)
 	Update(ctx context.Context, i *model.Issue) error
 	Delete(ctx context.Context, id uint) error
 	DeleteByProject(ctx context.Context, projectID uint) error
+}
+
+type IssueStoreFilter struct {
+	Type       *model.IssueType
+	Priority   *model.Priority
+	SwimlaneID *uint
+	EpicID     *uint
 }
 
 type SwimlaneStore interface {

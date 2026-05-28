@@ -2,6 +2,7 @@ package service_test
 
 import (
 	"testing"
+	"zdzira/internal/model"
 	"zdzira/internal/service"
 
 	"github.com/stretchr/testify/assert"
@@ -56,6 +57,45 @@ func TestIssueUpdate_NonexistentIssue(t *testing.T) {
 	})
 	assert.Error(t, err)
 }
+
+func TestIssueFilter_ByType(t *testing.T) {
+	svcs := newTestServices(t)
+	newProjectWithIssues(t, svcs)
+
+	for _, typ := range []string{"TASK", "TASK", "BUG"} {
+		_, err := svcs.Issues.Create(ctx, service.CreateIssueInput{
+			ProjectSlug: "tracker", Name: "issue", Type: model.IssueType(typ), Priority: "LOW",
+		})
+		require.NoError(t, err)
+	}
+
+	bugs, err := svcs.Issues.Filter(ctx, service.IssueFilterInput{
+		ProjectSlug: "tracker", Type: issueTypePtr("BUG"),
+	})
+	require.NoError(t, err)
+	assert.Len(t, bugs, 1)
+}
+
+func TestIssueFilter_ByPriority(t *testing.T) {
+	svcs := newTestServices(t)
+	newProjectWithIssues(t, svcs)
+
+	for _, pri := range []string{"LOW", "HIGH", "HIGH"} {
+		_, err := svcs.Issues.Create(ctx, service.CreateIssueInput{
+			ProjectSlug: "tracker", Name: "issue", Type: "TASK", Priority: model.Priority(pri),
+		})
+		require.NoError(t, err)
+	}
+
+	highs, err := svcs.Issues.Filter(ctx, service.IssueFilterInput{
+		ProjectSlug: "tracker", Priority: priorityPtr("HIGH"),
+	})
+	require.NoError(t, err)
+	assert.Len(t, highs, 2)
+}
+
+func issueTypePtr(s string) *model.IssueType { v := model.IssueType(s); return &v }
+func priorityPtr(s string) *model.Priority   { v := model.Priority(s); return &v }
 
 func TestIssueList_ReturnsIssuesForProject(t *testing.T) {
 	svcs := newTestServices(t)
