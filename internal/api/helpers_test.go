@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"log/slog"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -18,7 +19,7 @@ func newTestServer(t *testing.T) *httptest.Server {
 	t.Helper()
 	db, err := store.Open(":memory:")
 	require.NoError(t, err)
-	return httptest.NewServer(api.NewRouter(service.New(store.New(db))))
+	return httptest.NewServer(api.NewRouter(service.New(store.New(db)), slog.Default()))
 }
 
 func do(t *testing.T, srv *httptest.Server, method, path string, body any) *http.Response {

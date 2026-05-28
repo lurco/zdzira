@@ -1,52 +1,81 @@
 package api
 
 import (
-	"encoding/json"
+	"context"
 	"net/http"
+	"zdzira/internal/model"
 	"zdzira/internal/service"
 
-	"github.com/go-chi/chi/v5"
+	"github.com/danielgtaylor/huma/v2"
 )
 
-type epicHandler struct{ svc *service.EpicService }
+func registerEpicRoutes(api huma.API, svcs *service.Services) {
+	huma.Register(api, huma.Operation{
+		OperationID: "list-epics",
+		Method:      http.MethodGet,
+		Path:        "/projects/{slug}/epics",
+		Summary:     "List all epics in a project",
+		Tags:        []string{"Epics"},
+	}, func(ctx context.Context, input *struct {
+		Slug string `path:"slug" doc:"Project slug" example:"my-project"`
+	}) (*struct{ Body []model.Epic }, error) {
+		epics, err := svcs.Epics.List(ctx, input.Slug)
+		if err != nil {
+			return nil, huma.Error404NotFound(err.Error())
+		}
+		return &struct{ Body []model.Epic }{epics}, nil
+	})
 
-func (h *epicHandler) list(w http.ResponseWriter, r *http.Request) {
-	epics, err := h.svc.List(r.Context(), chi.URLParam(r, "slug"))
-	if err != nil {
-		writeError(w, http.StatusInternalServerError, err.Error())
-		return
-	}
-	writeJSON(w, http.StatusOK, epics)
-}
+	huma.Register(api, huma.Operation{
+		OperationID:   "create-epic",
+		Method:        http.MethodPost,
+		Path:          "/projects/{slug}/epics",
+		Summary:       "Create an epic",
+		DefaultStatus: http.StatusCreated,
+		Tags:          []string{"Epics"},
+	}, func(ctx context.Context, input *struct {
+		Slug string `path:"slug" doc:"Project slug" example:"my-project"`
+		Body service.CreateEpicInput
+	}) (*struct{ Body *model.Epic }, error) {
+		input.Body.ProjectSlug = input.Slug
+		e, err := svcs.Epics.Create(ctx, input.Body)
+		if err != nil {
+			return nil, huma.Error422UnprocessableEntity(err.Error())
+		}
+		return &struct{ Body *model.Epic }{e}, nil
+	})
 
-func (h *epicHandler) get(w http.ResponseWriter, r *http.Request) {
-	e, err := h.svc.Get(r.Context(), chi.URLParam(r, "slug"), chi.URLParam(r, "epicRef"))
-	if err != nil {
-		writeError(w, http.StatusNotFound, err.Error())
-		return
-	}
-	writeJSON(w, http.StatusOK, e)
-}
+	huma.Register(api, huma.Operation{
+		OperationID: "get-epic",
+		Method:      http.MethodGet,
+		Path:        "/projects/{slug}/epics/{epicRef}",
+		Summary:     "Get an epic by reference",
+		Tags:        []string{"Epics"},
+	}, func(ctx context.Context, input *struct {
+		Slug    string `path:"slug"    doc:"Project slug"                example:"my-project"`
+		EpicRef string `path:"epicRef" doc:"Epic reference, e.g. PROJ-E1" example:"PROJ-E1"`
+	}) (*struct{ Body *model.Epic }, error) {
+		e, err := svcs.Epics.Get(ctx, input.Slug, input.EpicRef)
+		if err != nil {
+			return nil, huma.Error404NotFound(err.Error())
+		}
+		return &struct{ Body *model.Epic }{e}, nil
+	})
 
-func (h *epicHandler) create(w http.ResponseWriter, r *http.Request) {
-	var in service.CreateEpicInput
-	if err := json.NewDecoder(r.Body).Decode(&in); err != nil {
-		writeError(w, http.StatusBadRequest, err.Error())
-		return
-	}
-	in.ProjectSlug = chi.URLParam(r, "slug")
-	e, err := h.svc.Create(r.Context(), in)
-	if err != nil {
-		writeError(w, http.StatusUnprocessableEntity, err.Error())
-		return
-	}
-	writeJSON(w, http.StatusCreated, e)
-}
-
-func (h *epicHandler) delete(w http.ResponseWriter, r *http.Request) {
-	if err := h.svc.Delete(r.Context(), chi.URLParam(r, "slug"), chi.URLParam(r, "epicRef")); err != nil {
-		writeError(w, http.StatusNotFound, err.Error())
-		return
-	}
-	w.WriteHeader(http.StatusNoContent)
+	huma.Register(api, huma.Operation{
+		OperationID:   "delete-epic",
+		Method:        http.MethodDelete,
+		Path:          "/projects/{slug}/epics/{epicRef}",
+		Summary:       "Delete an epic",
+		DefaultStatus: http.StatusNoContent,
+		Tags:          []string{"Epics"},
+	}, func(ctx context.Context, input *struct {
+		Slug    string `path:"slug"    doc:"Project slug"                 example:"my-project"`
+		EpicRef string `path:"epicRef" doc:"Epic reference, e.g. PROJ-E1"  example:"PROJ-E1"`
+	}) (*struct{}, error) {
+		if err := svcs.Epics.Delete(ctx, input.Slug, input.EpicRef); err != nil {
+			return nil, huma.Error404NotFound(err.Error())
+		}
+		return nil, nil
+	})
 }

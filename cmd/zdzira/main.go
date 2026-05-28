@@ -4,7 +4,9 @@ import (
 	"flag"
 	"fmt"
 	"log"
+	"log/slog"
 	"net/http"
+	"os"
 	"zdzira/internal/api"
 	zdziramcp "zdzira/internal/mcp"
 	"zdzira/internal/service"
@@ -18,6 +20,11 @@ func main() {
 	addr := flag.String("addr", ":8080", "Listen address")
 	flag.Parse()
 
+	logger := slog.New(slog.NewJSONHandler(os.Stderr, &slog.HandlerOptions{
+		Level: slog.LevelInfo,
+	}))
+	slog.SetDefault(logger)
+
 	db, err := store.Open(*dbPath)
 	if err != nil {
 		log.Fatalf("open db: %v", err)
@@ -29,10 +36,10 @@ func main() {
 	baseURL := fmt.Sprintf("http://localhost%s", *addr)
 
 	r := chi.NewRouter()
-	r.Mount("/", api.NewRouter(svcs))
+	r.Mount("/", api.NewRouter(svcs, logger))
 	r.Mount("/mcp", zdziramcp.NewSSEHandler(svcs, baseURL))
 
-	log.Printf("zdzira listening on %s (REST + MCP SSE at /mcp)", *addr)
+	logger.Info("starting", "addr", *addr, "db", *dbPath, "docs", baseURL+"/docs")
 	if err := http.ListenAndServe(*addr, r); err != nil {
 		log.Fatalf("server: %v", err)
 	}

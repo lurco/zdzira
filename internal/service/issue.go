@@ -15,19 +15,19 @@ type IssueService struct {
 }
 
 type CreateIssueInput struct {
-	ProjectSlug string
-	Type        model.IssueType
-	Priority    model.Priority
-	Name        string
-	Description *string
-	EpicRef     *string
-	SwimlaneID  *uint
+	ProjectSlug string          `json:"-"`
+	Type        model.IssueType `json:"type"        doc:"Issue type"                              example:"BUG"`
+	Priority    model.Priority  `json:"priority"    doc:"Priority level"                          example:"HIGH"`
+	Name        string          `json:"name"        doc:"Short issue title"                        example:"Fix login timeout"`
+	Description *string         `json:"description,omitempty" doc:"Optional description"`
+	EpicRef     *string         `json:"epic_ref,omitempty"    doc:"Epic reference to attach to, e.g. PROJ-E1" example:"PROJ-E1"`
+	SwimlaneID  *uint           `json:"swimlane_id,omitempty" doc:"Override starting swimlane ID"`
 }
 
 type MoveIssueInput struct {
-	ProjectSlug  string
-	IssueRef     string
-	SwimlaneName string
+	ProjectSlug  string `json:"-"`
+	IssueRef     string `json:"-"`
+	SwimlaneName string `json:"swimlane" doc:"Target swimlane name" example:"In Progress"`
 }
 
 func (s *IssueService) Create(ctx context.Context, in CreateIssueInput) (*model.Issue, error) {
@@ -117,12 +117,12 @@ func (s *IssueService) Move(ctx context.Context, in MoveIssueInput) (*model.Issu
 }
 
 type UpdateIssueInput struct {
-	ProjectSlug string
-	IssueRef    string
-	Name        string
-	Description *string
-	Type        model.IssueType
-	Priority    model.Priority
+	ProjectSlug string          `json:"-"`
+	IssueRef    string          `json:"-"`
+	Name        string          `json:"name"        doc:"Updated issue title"    example:"Fix login timeout (revised)"`
+	Description *string         `json:"description,omitempty" doc:"Updated description"`
+	Type        model.IssueType `json:"type"        doc:"Updated issue type"     example:"BUG"`
+	Priority    model.Priority  `json:"priority"    doc:"Updated priority level" example:"IMMEDIATE"`
 }
 
 func (s *IssueService) Update(ctx context.Context, in UpdateIssueInput) (*model.Issue, error) {

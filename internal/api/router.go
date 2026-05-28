@@ -1,65 +1,34 @@
 package api
 
 import (
+	"log/slog"
 	"net/http"
 	"zdzira/internal/service"
 
+	"github.com/danielgtaylor/huma/v2"
+	"github.com/danielgtaylor/huma/v2/adapters/humachi"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 )
 
-func NewRouter(svcs *service.Services) http.Handler {
+func NewRouter(svcs *service.Services, logger *slog.Logger) http.Handler {
 	r := chi.NewRouter()
-	r.Use(middleware.Logger)
-	r.Use(middleware.Recoverer)
 	r.Use(middleware.RequestID)
+	r.Use(middleware.Recoverer)
+	r.Use(SlogMiddleware(logger))
 
-	projects := &projectHandler{svcs.Projects}
-	epics := &epicHandler{svcs.Epics}
-	issues := &issueHandler{svcs.Issues}
-	comments := &commentHandler{svcs.Comments}
-	links := &linkHandler{svcs.Links}
-	audit := &auditHandler{svcs.Audit}
+	config := huma.DefaultConfig("Zdzira API", "1.0.0")
+	config.Info.Description = "Local issue tracker for AI-assisted software development. " +
+		"REST API for human access; MCP server at /mcp for agent access."
 
-	r.Route("/projects", func(r chi.Router) {
-		r.Get("/", projects.list)
-		r.Post("/", projects.create)
-		r.Route("/{slug}", func(r chi.Router) {
-			r.Get("/", projects.get)
-			r.Delete("/", projects.delete)
-			r.Get("/audit", audit.listForProject)
+	api := humachi.New(r, config)
 
-			r.Route("/epics", func(r chi.Router) {
-				r.Get("/", epics.list)
-				r.Post("/", epics.create)
-				r.Route("/{epicRef}", func(r chi.Router) {
-					r.Get("/", epics.get)
-					r.Delete("/", epics.delete)
-				})
-			})
-
-			r.Route("/issues", func(r chi.Router) {
-				r.Get("/", issues.list)
-				r.Post("/", issues.create)
-				r.Route("/{issueRef}", func(r chi.Router) {
-					r.Get("/", issues.get)
-					r.Put("/", issues.update)
-					r.Delete("/", issues.delete)
-					r.Post("/move", issues.move)
-
-					r.Route("/comments", func(r chi.Router) {
-						r.Get("/", comments.listForIssue)
-						r.Post("/", comments.addToIssue)
-					})
-
-					r.Route("/links", func(r chi.Router) {
-						r.Get("/", links.listForIssue)
-						r.Post("/", links.create)
-					})
-				})
-			})
-		})
-	})
+	registerProjectRoutes(api, svcs)
+	registerEpicRoutes(api, svcs)
+	registerIssueRoutes(api, svcs)
+	registerCommentRoutes(api, svcs)
+	registerLinkRoutes(api, svcs)
+	registerAuditRoutes(api, svcs)
 
 	return r
 }

@@ -1,51 +1,75 @@
 package api
 
 import (
-	"encoding/json"
+	"context"
 	"net/http"
+	"zdzira/internal/model"
 	"zdzira/internal/service"
 
-	"github.com/go-chi/chi/v5"
+	"github.com/danielgtaylor/huma/v2"
 )
 
-type projectHandler struct{ svc *service.ProjectService }
+func registerProjectRoutes(api huma.API, svcs *service.Services) {
+	huma.Register(api, huma.Operation{
+		OperationID: "list-projects",
+		Method:      http.MethodGet,
+		Path:        "/projects",
+		Summary:     "List all projects",
+		Tags:        []string{"Projects"},
+	}, func(ctx context.Context, _ *struct{}) (*struct{ Body []model.Project }, error) {
+		projects, err := svcs.Projects.List(ctx)
+		if err != nil {
+			return nil, huma.Error500InternalServerError(err.Error())
+		}
+		return &struct{ Body []model.Project }{projects}, nil
+	})
 
-func (h *projectHandler) list(w http.ResponseWriter, r *http.Request) {
-	projects, err := h.svc.List(r.Context())
-	if err != nil {
-		writeError(w, http.StatusInternalServerError, err.Error())
-		return
-	}
-	writeJSON(w, http.StatusOK, projects)
-}
+	huma.Register(api, huma.Operation{
+		OperationID:   "create-project",
+		Method:        http.MethodPost,
+		Path:          "/projects",
+		Summary:       "Create a project",
+		DefaultStatus: http.StatusCreated,
+		Tags:          []string{"Projects"},
+	}, func(ctx context.Context, input *struct {
+		Body service.CreateProjectInput
+	}) (*struct{ Body *model.Project }, error) {
+		p, err := svcs.Projects.Create(ctx, input.Body)
+		if err != nil {
+			return nil, huma.Error422UnprocessableEntity(err.Error())
+		}
+		return &struct{ Body *model.Project }{p}, nil
+	})
 
-func (h *projectHandler) get(w http.ResponseWriter, r *http.Request) {
-	p, err := h.svc.Get(r.Context(), chi.URLParam(r, "slug"))
-	if err != nil {
-		writeError(w, http.StatusNotFound, err.Error())
-		return
-	}
-	writeJSON(w, http.StatusOK, p)
-}
+	huma.Register(api, huma.Operation{
+		OperationID: "get-project",
+		Method:      http.MethodGet,
+		Path:        "/projects/{slug}",
+		Summary:     "Get a project by slug",
+		Tags:        []string{"Projects"},
+	}, func(ctx context.Context, input *struct {
+		Slug string `path:"slug" doc:"Project slug" example:"my-project"`
+	}) (*struct{ Body *model.Project }, error) {
+		p, err := svcs.Projects.Get(ctx, input.Slug)
+		if err != nil {
+			return nil, huma.Error404NotFound(err.Error())
+		}
+		return &struct{ Body *model.Project }{p}, nil
+	})
 
-func (h *projectHandler) create(w http.ResponseWriter, r *http.Request) {
-	var in service.CreateProjectInput
-	if err := json.NewDecoder(r.Body).Decode(&in); err != nil {
-		writeError(w, http.StatusBadRequest, err.Error())
-		return
-	}
-	p, err := h.svc.Create(r.Context(), in)
-	if err != nil {
-		writeError(w, http.StatusUnprocessableEntity, err.Error())
-		return
-	}
-	writeJSON(w, http.StatusCreated, p)
-}
-
-func (h *projectHandler) delete(w http.ResponseWriter, r *http.Request) {
-	if err := h.svc.Delete(r.Context(), chi.URLParam(r, "slug")); err != nil {
-		writeError(w, http.StatusNotFound, err.Error())
-		return
-	}
-	w.WriteHeader(http.StatusNoContent)
+	huma.Register(api, huma.Operation{
+		OperationID:   "delete-project",
+		Method:        http.MethodDelete,
+		Path:          "/projects/{slug}",
+		Summary:       "Delete a project and all its contents",
+		DefaultStatus: http.StatusNoContent,
+		Tags:          []string{"Projects"},
+	}, func(ctx context.Context, input *struct {
+		Slug string `path:"slug" doc:"Project slug" example:"my-project"`
+	}) (*struct{}, error) {
+		if err := svcs.Projects.Delete(ctx, input.Slug); err != nil {
+			return nil, huma.Error404NotFound(err.Error())
+		}
+		return nil, nil
+	})
 }

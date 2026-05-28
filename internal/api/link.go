@@ -1,43 +1,56 @@
 package api
 
 import (
-	"encoding/json"
+	"context"
 	"net/http"
 	"zdzira/internal/model"
 	"zdzira/internal/service"
 
-	"github.com/go-chi/chi/v5"
+	"github.com/danielgtaylor/huma/v2"
 )
 
-type linkHandler struct{ svc *service.LinkService }
-
-func (h *linkHandler) listForIssue(w http.ResponseWriter, r *http.Request) {
-	links, err := h.svc.ListForIssue(r.Context(), chi.URLParam(r, "slug"), chi.URLParam(r, "issueRef"))
-	if err != nil {
-		writeError(w, http.StatusInternalServerError, err.Error())
-		return
-	}
-	writeJSON(w, http.StatusOK, links)
-}
-
-func (h *linkHandler) create(w http.ResponseWriter, r *http.Request) {
-	var body struct {
-		TargetRef string         `json:"target_ref"`
-		Type      model.LinkType `json:"type"`
-	}
-	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
-		writeError(w, http.StatusBadRequest, err.Error())
-		return
-	}
-	l, err := h.svc.Create(r.Context(), service.CreateLinkInput{
-		ProjectSlug: chi.URLParam(r, "slug"),
-		SourceRef:   chi.URLParam(r, "issueRef"),
-		TargetRef:   body.TargetRef,
-		Type:        body.Type,
+func registerLinkRoutes(api huma.API, svcs *service.Services) {
+	huma.Register(api, huma.Operation{
+		OperationID: "list-links-for-issue",
+		Method:      http.MethodGet,
+		Path:        "/projects/{slug}/issues/{issueRef}/links",
+		Summary:     "List all links for an issue (as source or target)",
+		Tags:        []string{"Links"},
+	}, func(ctx context.Context, input *struct {
+		Slug     string `path:"slug"     doc:"Project slug"                  example:"my-project"`
+		IssueRef string `path:"issueRef" doc:"Issue reference, e.g. PROJ-42"  example:"PROJ-42"`
+	}) (*struct{ Body []model.Link }, error) {
+		links, err := svcs.Links.ListForIssue(ctx, input.Slug, input.IssueRef)
+		if err != nil {
+			return nil, huma.Error404NotFound(err.Error())
+		}
+		return &struct{ Body []model.Link }{links}, nil
 	})
-	if err != nil {
-		writeError(w, http.StatusUnprocessableEntity, err.Error())
-		return
-	}
-	writeJSON(w, http.StatusCreated, l)
+
+	huma.Register(api, huma.Operation{
+		OperationID:   "create-link",
+		Method:        http.MethodPost,
+		Path:          "/projects/{slug}/issues/{issueRef}/links",
+		Summary:       "Create a directed link from this issue to another",
+		DefaultStatus: http.StatusCreated,
+		Tags:          []string{"Links"},
+	}, func(ctx context.Context, input *struct {
+		Slug     string `path:"slug"     doc:"Project slug"                  example:"my-project"`
+		IssueRef string `path:"issueRef" doc:"Source issue reference"          example:"PROJ-42"`
+		Body     struct {
+			TargetRef string         `json:"target_ref" doc:"Target issue reference"         example:"PROJ-38"`
+			Type      model.LinkType `json:"type"       doc:"Link type"                      example:"BLOCKS"`
+		}
+	}) (*struct{ Body *model.Link }, error) {
+		l, err := svcs.Links.Create(ctx, service.CreateLinkInput{
+			ProjectSlug: input.Slug,
+			SourceRef:   input.IssueRef,
+			TargetRef:   input.Body.TargetRef,
+			Type:        input.Body.Type,
+		})
+		if err != nil {
+			return nil, huma.Error422UnprocessableEntity(err.Error())
+		}
+		return &struct{ Body *model.Link }{l}, nil
+	})
 }

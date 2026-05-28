@@ -13,9 +13,9 @@ type ProjectService struct {
 }
 
 type CreateProjectInput struct {
-	Name        string
-	Shortcut    string
-	Description *string
+	Name        string  `json:"name"                 doc:"Full project name"                          example:"My Project"`
+	Shortcut    string  `json:"shortcut"             doc:"Uppercase issue prefix, e.g. PROJ or API"  example:"PROJ"`
+	Description *string `json:"description,omitempty" doc:"Optional project description"              example:"Tracks backend feature work"`
 }
 
 func (s *ProjectService) Create(ctx context.Context, in CreateProjectInput) (*model.Project, error) {

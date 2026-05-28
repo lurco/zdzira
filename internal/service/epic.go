@@ -13,9 +13,9 @@ type EpicService struct {
 }
 
 type CreateEpicInput struct {
-	ProjectSlug string
-	Name        string
-	Description *string
+	ProjectSlug string  `json:"-"`
+	Name        string  `json:"name"        doc:"Epic name"                  example:"User authentication overhaul"`
+	Description *string `json:"description,omitempty" doc:"Optional epic description"  example:"All issues related to the new OAuth flow"`
 }
 
 func (s *EpicService) Create(ctx context.Context, in CreateEpicInput) (*model.Epic, error) {

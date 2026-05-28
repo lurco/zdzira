@@ -7,10 +7,10 @@ import (
 )
 
 type Timestamps struct {
-	CreatedAt time.Time
-	UpdatedAt time.Time
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
 }
 
 type SoftDelete struct {
-	DeletedAt gorm.DeletedAt `gorm:"index"`
+	DeletedAt gorm.DeletedAt `gorm:"index" json:"-"`
 }
