@@ -52,6 +52,26 @@ func TestEpicDelete_RemovesEpic(t *testing.T) {
 	assert.Error(t, err, "deleted epic should not be found")
 }
 
+func TestEpicUpdate_ChangesFields(t *testing.T) {
+	svcs := newTestServices(t)
+	_, err := svcs.Projects.Create(ctx, service.CreateProjectInput{Name: "Epic Project", Shortcut: "EP"})
+	require.NoError(t, err)
+	_, err = svcs.Epics.Create(ctx, service.CreateEpicInput{ProjectSlug: "epic-project", Name: "original"})
+	require.NoError(t, err)
+
+	updated, err := svcs.Epics.Update(ctx, service.UpdateEpicInput{
+		ProjectSlug: "epic-project",
+		EpicRef:     "EP-E1",
+		Name:        "renamed epic",
+	})
+	require.NoError(t, err)
+	assert.Equal(t, "renamed epic", updated.Name)
+
+	fetched, err := svcs.Epics.Get(ctx, "epic-project", "EP-E1")
+	require.NoError(t, err)
+	assert.Equal(t, "renamed epic", fetched.Name)
+}
+
 func TestEpicGet_ByRef(t *testing.T) {
 	svcs := newTestServices(t)
 	_, err := svcs.Projects.Create(ctx, service.CreateProjectInput{Name: "Epic Project", Shortcut: "EP"})

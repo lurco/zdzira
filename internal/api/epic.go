@@ -63,6 +63,26 @@ func registerEpicRoutes(api huma.API, svcs *service.Services) {
 	})
 
 	huma.Register(api, huma.Operation{
+		OperationID: "update-epic",
+		Method:      http.MethodPut,
+		Path:        "/projects/{slug}/epics/{epicRef}",
+		Summary:     "Update epic fields",
+		Tags:        []string{"Epics"},
+	}, func(ctx context.Context, input *struct {
+		Slug    string `path:"slug"    doc:"Project slug"                 example:"my-project"`
+		EpicRef string `path:"epicRef" doc:"Epic reference, e.g. PROJ-E1"  example:"PROJ-E1"`
+		Body    service.UpdateEpicInput
+	}) (*struct{ Body *model.Epic }, error) {
+		input.Body.ProjectSlug = input.Slug
+		input.Body.EpicRef = input.EpicRef
+		e, err := svcs.Epics.Update(ctx, input.Body)
+		if err != nil {
+			return nil, huma.Error422UnprocessableEntity(err.Error())
+		}
+		return &struct{ Body *model.Epic }{e}, nil
+	})
+
+	huma.Register(api, huma.Operation{
 		OperationID:   "delete-epic",
 		Method:        http.MethodDelete,
 		Path:          "/projects/{slug}/epics/{epicRef}",

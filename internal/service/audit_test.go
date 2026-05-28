@@ -96,6 +96,24 @@ func TestAuditEpicDelete_RecordsDeleted(t *testing.T) {
 	assert.Equal(t, "AUD-E1", entries[0].Ref)
 }
 
+func TestAuditEpicUpdate_RecordsUpdated(t *testing.T) {
+	svcs := newTestServices(t)
+	_, err := svcs.Projects.Create(ctx, service.CreateProjectInput{Name: "Audit Proj", Shortcut: "AUD"})
+	require.NoError(t, err)
+	_, err = svcs.Epics.Create(ctx, service.CreateEpicInput{ProjectSlug: "audit-proj", Name: "epic"})
+	require.NoError(t, err)
+
+	_, err = svcs.Epics.Update(ctx, service.UpdateEpicInput{
+		ProjectSlug: "audit-proj", EpicRef: "AUD-E1", Name: "renamed",
+	})
+	require.NoError(t, err)
+
+	entries, err := svcs.Audit.ListForProject(ctx, "audit-proj")
+	require.NoError(t, err)
+	assert.Equal(t, "updated", entries[0].Action)
+	assert.Equal(t, "AUD-E1", entries[0].Ref)
+}
+
 func TestAuditListForProject_ReturnsEntries(t *testing.T) {
 	svcs := newTestServices(t)
 	_, err := svcs.Projects.Create(ctx, service.CreateProjectInput{Name: "Audit Proj", Shortcut: "AUD"})

@@ -65,6 +65,25 @@ func TestEpicList_Returns200(t *testing.T) {
 	assert.Len(t, epics, 2)
 }
 
+func TestEpicUpdate_Returns200(t *testing.T) {
+	srv := newTestServer(t)
+	defer srv.Close()
+
+	resp := do(t, srv, http.MethodPost, "/projects", map[string]string{"name": "Epic Proj", "shortcut": "EP"})
+	require.Equal(t, http.StatusCreated, resp.StatusCode)
+	resp.Body.Close()
+
+	resp = do(t, srv, http.MethodPost, "/projects/epic-proj/epics", map[string]string{"name": "original"})
+	require.Equal(t, http.StatusCreated, resp.StatusCode)
+	resp.Body.Close()
+
+	var e model.Epic
+	resp = do(t, srv, http.MethodPut, "/projects/epic-proj/epics/EP-E1", map[string]string{"name": "renamed"})
+	require.Equal(t, http.StatusOK, resp.StatusCode)
+	decode(t, resp, &e)
+	assert.Equal(t, "renamed", e.Name)
+}
+
 func TestEpicDelete_Returns204(t *testing.T) {
 	srv := newTestServer(t)
 	defer srv.Close()
