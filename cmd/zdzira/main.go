@@ -33,7 +33,10 @@ func main() {
 	stores := store.New(db)
 	svcs := service.New(stores)
 
-	baseURL := fmt.Sprintf("http://localhost%s", *addr)
+	baseURL := os.Getenv("BASE_URL")
+	if baseURL == "" {
+		baseURL = fmt.Sprintf("http://localhost%s", *addr)
+	}
 
 	r := chi.NewRouter()
 	r.Mount("/", api.NewRouter(svcs, logger))

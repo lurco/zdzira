@@ -1,0 +1,6 @@
+bin/
+*.db
+.git/
+.githooks/
+docs/
+ui/
