@@ -1,0 +1,16 @@
+div.toolbar
+  .toolbar-left
+    label.search
+      span.icon /
+      input#searchInput(type='text', placeholder='filter issues…')
+    button.filter-chip(data-filter='priority', data-val='IMMEDIATE', aria-pressed='false')
+      span.dot(style='background:var(--acc-red)')
+      | Immediate
+    button.filter-chip(data-filter='priority', data-val='HIGH', aria-pressed='false')
+      span.dot(style='background:var(--acc-yellow)')
+      | High
+    button.filter-chip(data-filter='type', data-val='BUG', aria-pressed='false')
+      span.dot(style='background:var(--acc-red)')
+      | Bug
+  .toolbar-right
+    button.btn.primary#addIssueBtn + Issue

@@ -1,0 +1,4 @@
+mixin badge(priority)
+  //- priority: 'IMMEDIATE'|'HIGH'|'MEDIUM'|'LOW'
+  - const cls = {'IMMEDIATE':'p0','HIGH':'p1','MEDIUM':'p2','LOW':'p3'}[priority] || 'p3'
+  span.badge(class=cls)= priority

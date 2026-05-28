@@ -1,0 +1,14 @@
+include badge
+include tag
+
+mixin card(issue)
+  //- issue: { ref, title, priority, type, tags[] }
+  div.card(data-ref=issue.ref)
+    div.card-strip
+    div.card-top
+      span.card-id.mono= issue.ref
+      +badge(issue.priority)
+    div.card-title= issue.title
+    div.card-meta
+      each t in (issue.tags || [])
+        +tag(t)

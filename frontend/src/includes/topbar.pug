@@ -1,0 +1,17 @@
+header.topbar
+  .brand
+    span.logo(aria-hidden='true')
+      span.plate
+      span.face Z
+    span.brand-name
+      | Zdzira
+      span.dot
+    span.crumb
+      b local
+      |  &nbsp;/&nbsp; board &nbsp;/&nbsp;
+      b main
+  .topbar-right
+    .mode-switch(role='tablist', aria-label='Color mode')
+      button(data-set='light', aria-pressed='true') Light
+      button(data-set='dark', aria-pressed='false') Dark
+      button(data-set='contrast', aria-pressed='false') Contrast

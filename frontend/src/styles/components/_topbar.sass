@@ -1,0 +1,96 @@
+@use '../abstracts/mixins' as *
+
+.topbar
+  background: var(--paper)
+  border-bottom: var(--border) solid var(--line)
+  padding: 14px 24px
+  +flex-between
+  gap: 18px
+
+.brand
+  +flex-center
+  gap: 12px
+
+.logo
+  --logo-size: 34px
+  position: relative
+  width: var(--logo-size)
+  height: var(--logo-size)
+
+  .plate
+    display: block
+    width: 100%
+    height: 100%
+    background: var(--acc-yellow)
+    border: var(--border) solid var(--ink)
+    box-shadow: var(--shadow-sm)
+
+  .face
+    position: absolute
+    inset: 0
+    display: flex
+    align-items: center
+    justify-content: center
+    font-size: 18px
+    font-weight: 700
+    color: var(--ink)
+    line-height: 1
+
+.brand-name
+  font-weight: 700
+  font-size: 18px
+  letter-spacing: -0.02em
+  +flex-center
+  gap: 4px
+
+  .dot
+    width: 6px
+    height: 6px
+    background: var(--acc-red)
+    border-radius: 50%
+    margin-left: 5px
+    transform: translateY(-2px)
+
+.crumb
+  +mono
+  font-size: 11px
+  text-transform: uppercase
+  letter-spacing: 0.08em
+  color: var(--muted)
+  padding-left: 18px
+  margin-left: 14px
+  border-left: 2px solid var(--line)
+
+  b
+    color: var(--ink)
+
+.topbar-right
+  +flex-center
+  gap: 14px
+
+.mode-switch
+  display: inline-flex
+  border: var(--border) solid var(--line)
+  background: var(--paper)
+  box-shadow: var(--shadow-sm)
+
+  button
+    appearance: none
+    background: transparent
+    border: 0
+    border-right: 2px solid var(--line)
+    padding: 8px 12px
+    +mono
+    font-size: 11px
+    font-weight: 700
+    text-transform: uppercase
+    letter-spacing: 0.06em
+    color: var(--ink)
+    cursor: pointer
+
+    &:last-child
+      border-right: 0
+
+    &[aria-pressed="true"]
+      background: var(--ink)
+      color: var(--paper)

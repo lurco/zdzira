@@ -1,0 +1,13 @@
+mixin lane(swimlane)
+  //- swimlane: { id, name, color, issues[] }
+  div.lane(data-id=swimlane.id)
+    div.lane-header
+      span.lane-swatch(style='background:' + swimlane.color)
+      span.lane-title(contenteditable='true', spellcheck='false')= swimlane.name
+      span.lane-count= (swimlane.issues || []).length
+      button.lane-menu(aria-label='Lane options') ···
+    div.lane-body
+      each issue in (swimlane.issues || [])
+        +card(issue)
+    div.lane-footer
+      button.add-card-btn(data-lane=swimlane.id) + Issue

@@ -1,0 +1,136 @@
+@use '../abstracts/mixins' as *
+
+.lane
+  width: 300px
+  min-width: 300px
+  background: var(--paper-2)
+  border: var(--border) solid var(--line)
+  box-shadow: var(--shadow)
+  display: flex
+  flex-direction: column
+  max-height: calc(100vh - 200px)
+  position: relative
+
+  &.dragging
+    opacity: 0.5
+
+  &.drop-target-lane
+    outline: 4px dashed var(--acc-violet)
+    outline-offset: -4px
+
+.lane-header
+  padding: 14px 14px 12px
+  border-bottom: 2px solid var(--line)
+  background: var(--paper)
+  cursor: grab
+  display: flex
+  align-items: center
+  gap: 8px
+  user-select: none
+
+  &:active
+    cursor: grabbing
+
+.lane-swatch
+  width: 14px
+  height: 14px
+  flex-shrink: 0
+  border: 2px solid var(--line)
+
+.lane-title
+  flex: 1
+  +mono
+  font-size: 13px
+  font-weight: 800
+  text-transform: uppercase
+  letter-spacing: 0.06em
+  background: transparent
+  border: 0
+  outline: none
+  color: var(--ink)
+  padding: 2px 4px
+  min-width: 0
+
+  &:focus
+    background: var(--acc-yellow)
+    color: var(--chip-fg)
+
+.lane-count
+  +mono
+  font-size: 11px
+  font-weight: 700
+  background: var(--ink)
+  color: var(--paper)
+  padding: 2px 7px
+  min-width: 24px
+  text-align: center
+
+.lane-menu
+  appearance: none
+  background: transparent
+  border: 0
+  padding: 4px 6px
+  cursor: pointer
+  color: var(--muted)
+  +mono
+  font-weight: 800
+  font-size: 14px
+  line-height: 1
+
+  &:hover
+    color: var(--ink)
+
+.lane-body
+  flex: 1
+  overflow-y: auto
+  overflow-x: hidden
+  padding: 12px
+  display: flex
+  flex-direction: column
+  gap: 10px
+
+  &::-webkit-scrollbar
+    width: 8px
+
+  &::-webkit-scrollbar-track
+    background: var(--paper-2)
+
+  &::-webkit-scrollbar-thumb
+    background: var(--ink)
+    border: 2px solid var(--paper-2)
+
+.lane-footer
+  border-top: 2px solid var(--line)
+  background: var(--paper)
+
+.add-card-btn
+  width: 100%
+  appearance: none
+  border: 0
+  background: transparent
+  padding: 12px 14px
+  text-align: left
+  +mono
+  font-size: 12px
+  font-weight: 700
+  text-transform: uppercase
+  letter-spacing: 0.06em
+  color: var(--muted)
+  cursor: pointer
+
+  &:hover
+    background: var(--acc-yellow)
+    color: var(--chip-fg)
+
+.drop-slot
+  height: 0
+  border-top: 0 dashed var(--acc-violet)
+  transition: height .12s ease, border-top-width .12s ease
+  margin: -5px 0
+
+  &.active
+    height: 80px
+    border-top: 0
+    background: repeating-linear-gradient(-45deg, transparent 0 6px, rgba(122,79,214,0.18) 6px 10px)
+    outline: 3px dashed var(--acc-violet)
+    outline-offset: -3px

@@ -1,0 +1,58 @@
+// CSS custom properties — defined on :root, not as SASS variables
+// All theming must use var(--token) in component files
+
+:root,
+[data-mode="light"]
+  --paper: #F4F1E8
+  --paper-2: #EAE5D2
+  --paper-3: #DED7BF
+  --ink: #0A0908
+  --ink-soft: #2A2724
+  --muted: #6B655A
+  --line: #0A0908
+  --acc-yellow: #F5D547
+  --acc-red: #E63946
+  --acc-green: #2A9D5A
+  --acc-blue: #2A6FDB
+  --acc-violet: #7A4FD6
+  --chip-fg: #0A0908
+  --border: 3px
+  --shadow: 6px 6px 0 0 var(--ink)
+  --shadow-sm: 3px 3px 0 0 var(--ink)
+  --shadow-lg: 10px 10px 0 0 var(--ink)
+  color-scheme: light
+
+[data-mode="dark"]
+  --paper: #13110E
+  --paper-2: #1E1B16
+  --paper-3: #2A2620
+  --ink: #EFEAD8
+  --ink-soft: #C9C2AC
+  --muted: #7A7567
+  --line: #EFEAD8
+  --acc-yellow: #F5D547
+  --acc-red: #FF5A66
+  --acc-green: #4ED38A
+  --acc-blue: #6FA0F5
+  --acc-violet: #B796F7
+  --chip-fg: #0A0908
+  color-scheme: dark
+
+[data-mode="contrast"]
+  --paper: #FFFFFF
+  --paper-2: #FFFFFF
+  --paper-3: #FFFFFF
+  --ink: #000000
+  --ink-soft: #000000
+  --muted: #000000
+  --line: #000000
+  --acc-yellow: #FFD60A
+  --acc-red: #FF0000
+  --acc-green: #008000
+  --acc-blue: #0000FF
+  --acc-violet: #000000
+  --chip-fg: #000000
+  --border: 4px
+  --shadow: 8px 8px 0 0 var(--ink)
+  --shadow-sm: 4px 4px 0 0 var(--ink)
+  --shadow-lg: 12px 12px 0 0 var(--ink)

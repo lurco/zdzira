@@ -1,0 +1,55 @@
+@use '../abstracts/mixins' as *
+
+.statusbar
+  position: fixed
+  bottom: 0
+  left: 0
+  right: 0
+  background: var(--ink)
+  color: var(--paper)
+  +mono
+  font-size: 11px
+  text-transform: uppercase
+  letter-spacing: 0.08em
+  padding: 6px 24px
+  +flex-between
+  gap: 14px
+  z-index: 40
+
+  .dotg
+    display: inline-block
+    width: 8px
+    height: 8px
+    background: var(--acc-green)
+    border: 1.5px solid var(--paper)
+    margin-right: 6px
+    vertical-align: middle
+
+  .right
+    display: flex
+    gap: 18px
+
+.board-wrap::-webkit-scrollbar
+  height: 12px
+
+.board-wrap::-webkit-scrollbar-track
+  background: var(--paper-2)
+  border-top: 2px solid var(--line)
+
+.board-wrap::-webkit-scrollbar-thumb
+  background: var(--ink)
+  border: 2px solid var(--paper-2)
+
+@media (max-width: 640px)
+  .toolbar
+    padding: 10px 14px
+
+  .topbar
+    padding: 12px 14px
+
+  .board-wrap
+    padding: 14px
+
+  .lane
+    width: 280px
+    min-width: 280px

@@ -4,3 +4,5 @@ bin/
 .githooks/
 docs/
 ui/
+dist/
+frontend/node_modules/

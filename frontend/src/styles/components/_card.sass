@@ -1,0 +1,153 @@
+@use '../abstracts/mixins' as *
+
+.card
+  background: var(--paper)
+  border: var(--border) solid var(--line)
+  box-shadow: var(--shadow-sm)
+  padding: 12px 12px 10px
+  display: flex
+  flex-direction: column
+  gap: 8px
+  cursor: grab
+  user-select: none
+  position: relative
+
+  &:hover
+    transform: translate(-1px, -1px)
+    box-shadow: 5px 5px 0 0 var(--ink)
+
+  &:active
+    cursor: grabbing
+
+  &.dragging
+    opacity: 0.4
+
+  &.is-ghost
+    opacity: 0.35
+    transform: none
+
+.card-strip
+  position: absolute
+  top: -3px
+  left: -3px
+  bottom: -3px
+  width: 6px
+  background: var(--acc-blue)
+  border: 0
+
+.card-top
+  display: flex
+  align-items: center
+  justify-content: space-between
+  gap: 8px
+
+.card-id
+  +mono
+  font-size: 10px
+  font-weight: 700
+  letter-spacing: 0.08em
+  color: var(--muted)
+
+.card-title
+  font-size: 14px
+  line-height: 1.35
+  font-weight: 500
+  color: var(--ink)
+  word-break: break-word
+
+.card-meta
+  display: flex
+  align-items: center
+  gap: 6px
+  flex-wrap: wrap
+  margin-top: 2px
+
+.badge
+  display: inline-flex
+  align-items: center
+  gap: 5px
+  +mono
+  font-size: 10px
+  font-weight: 700
+  letter-spacing: 0.06em
+  text-transform: uppercase
+  padding: 3px 6px
+  background: var(--paper)
+  color: var(--ink)
+  border: 2px solid var(--line)
+  line-height: 1.1
+
+  &.p0
+    background: var(--acc-red)
+    color: #FFF1F1
+
+  &.p1
+    background: var(--acc-yellow)
+    color: var(--chip-fg)
+
+  &.p2
+    background: var(--paper)
+    color: var(--ink)
+
+  &.p3
+    background: var(--paper-2)
+    color: var(--ink-soft)
+
+[data-mode="contrast"] .badge.p0
+  color: #FFFFFF
+
+.tag
+  display: inline-flex
+  align-items: center
+  +mono
+  font-size: 10px
+  font-weight: 700
+  letter-spacing: 0.06em
+  text-transform: uppercase
+  padding: 3px 6px
+  line-height: 1.1
+  background: var(--paper-2)
+  color: var(--ink-soft)
+  border: 2px solid var(--line)
+
+  &.tag-bug
+    background: var(--acc-red)
+    color: #FFF1F1
+
+  &.tag-mcp
+    background: var(--acc-violet)
+    color: #FFF
+
+  &.tag-api
+    background: var(--acc-blue)
+    color: #F0F4FF
+
+  &.tag-cli
+    background: var(--ink)
+    color: var(--paper)
+
+  &.tag-docs
+    background: var(--paper)
+    color: var(--ink)
+
+  &.tag-ux
+    background: var(--acc-green)
+    color: #F0FFF4
+
+.agent-mark
+  display: inline-flex
+  align-items: center
+  gap: 4px
+  +mono
+  font-size: 10px
+  font-weight: 700
+  letter-spacing: 0.06em
+  text-transform: uppercase
+  color: var(--muted)
+
+  &::before
+    content: ""
+    width: 6px
+    height: 6px
+    background: var(--acc-violet)
+    border: 1.5px solid var(--line)

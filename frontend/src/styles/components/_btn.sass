@@ -1,0 +1,54 @@
+@use '../abstracts/mixins' as *
+
+.btn
+  appearance: none
+  display: inline-flex
+  align-items: center
+  justify-content: center
+  gap: 8px
+  padding: 10px 14px
+  +mono
+  font-weight: 700
+  font-size: 12px
+  letter-spacing: 0.06em
+  text-transform: uppercase
+  background: var(--paper)
+  color: var(--ink)
+  border: var(--border) solid var(--line)
+  box-shadow: var(--shadow-sm)
+  cursor: pointer
+  transition: transform .05s linear, box-shadow .05s linear
+  text-decoration: none
+
+  &:hover
+    transform: translate(-1px, -1px)
+    box-shadow: 5px 5px 0 0 var(--ink)
+
+  &:active
+    transform: translate(2px, 2px)
+    box-shadow: 0 0 0 0 var(--ink)
+
+  &.primary
+    background: var(--acc-yellow)
+    color: var(--chip-fg)
+
+  &.danger
+    background: var(--acc-red)
+    color: #FFF1F1
+
+  &.ghost
+    background: transparent
+    box-shadow: none
+    border-color: transparent
+
+    &:hover
+      background: var(--paper)
+      box-shadow: var(--shadow-sm)
+      border-color: var(--line)
+      transform: none
+
+  &.icon
+    padding: 8px 10px
+
+[data-mode="contrast"] .btn.danger
+  color: #FFFFFF

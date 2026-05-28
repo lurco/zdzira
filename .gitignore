@@ -6,3 +6,7 @@
 bin/
 # Database
 *.db
+
+# Frontend
+dist/
+frontend/node_modules/
