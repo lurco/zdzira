@@ -49,6 +49,107 @@ func isToolError(result map[string]any) bool {
 	return isError
 }
 
+func getResultJSON(t *testing.T, result map[string]any) map[string]any {
+	t.Helper()
+	res := result["result"].(map[string]any)
+	content := res["content"].([]any)
+	raw := content[0].(map[string]any)["text"].(string)
+	var out map[string]any
+	require.NoError(t, json.Unmarshal([]byte(raw), &out))
+	return out
+}
+
+func TestUpdateIssueTool_ChangesFields(t *testing.T) {
+	s, svcs := newTestMCPServer(t)
+	ctx := context.Background()
+
+	_, err := svcs.Projects.Create(ctx, service.CreateProjectInput{Name: "Upd", Shortcut: "UPD"})
+	require.NoError(t, err)
+	_, err = svcs.Issues.Create(ctx, service.CreateIssueInput{
+		ProjectSlug: "upd", Name: "original", Type: "TASK", Priority: "LOW",
+	})
+	require.NoError(t, err)
+
+	result := callTool(t, s, "update_issue", map[string]any{
+		"project":   "upd",
+		"issue_ref": "UPD-1",
+		"name":      "updated",
+		"type":      "BUG",
+		"priority":  "HIGH",
+	})
+	assert.False(t, isToolError(result), fmt.Sprintf("expected success, got: %v", result))
+
+	out := getResultJSON(t, result)
+	assert.Equal(t, "updated", out["name"])
+	assert.Equal(t, "BUG", out["type"])
+	assert.Equal(t, "HIGH", out["priority"])
+}
+
+func TestUpdateIssueTool_NonexistentIssue(t *testing.T) {
+	s, svcs := newTestMCPServer(t)
+	_, err := svcs.Projects.Create(context.Background(), service.CreateProjectInput{Name: "Err", Shortcut: "ERR"})
+	require.NoError(t, err)
+
+	result := callTool(t, s, "update_issue", map[string]any{
+		"project":   "err",
+		"issue_ref": "ERR-99",
+		"name":      "ghost",
+		"type":      "TASK",
+		"priority":  "LOW",
+	})
+	assert.True(t, isToolError(result))
+}
+
+func TestListSwimlanesTool_ReturnsThreeDefault(t *testing.T) {
+	s, svcs := newTestMCPServer(t)
+	_, err := svcs.Projects.Create(context.Background(), service.CreateProjectInput{Name: "Swim", Shortcut: "SWM"})
+	require.NoError(t, err)
+
+	result := callTool(t, s, "list_swimlanes", map[string]any{"project": "swim"})
+	assert.False(t, isToolError(result), fmt.Sprintf("expected success, got: %v", result))
+
+	res := result["result"].(map[string]any)
+	content := res["content"].([]any)
+	raw := content[0].(map[string]any)["text"].(string)
+	var swimlanes []map[string]any
+	require.NoError(t, json.Unmarshal([]byte(raw), &swimlanes))
+	assert.Len(t, swimlanes, 3)
+	assert.Equal(t, "Backlog", swimlanes[0]["name"])
+}
+
+func TestUpdateEpicTool_ChangesName(t *testing.T) {
+	s, svcs := newTestMCPServer(t)
+	ctx := context.Background()
+
+	_, err := svcs.Projects.Create(ctx, service.CreateProjectInput{Name: "Epic Proj", Shortcut: "EP"})
+	require.NoError(t, err)
+	_, err = svcs.Epics.Create(ctx, service.CreateEpicInput{ProjectSlug: "epic-proj", Name: "old name"})
+	require.NoError(t, err)
+
+	result := callTool(t, s, "update_epic", map[string]any{
+		"project":  "epic-proj",
+		"epic_ref": "EP-E1",
+		"name":     "new name",
+	})
+	assert.False(t, isToolError(result), fmt.Sprintf("expected success, got: %v", result))
+
+	out := getResultJSON(t, result)
+	assert.Equal(t, "new name", out["name"])
+}
+
+func TestUpdateEpicTool_NonexistentEpic(t *testing.T) {
+	s, svcs := newTestMCPServer(t)
+	_, err := svcs.Projects.Create(context.Background(), service.CreateProjectInput{Name: "Err", Shortcut: "ERR"})
+	require.NoError(t, err)
+
+	result := callTool(t, s, "update_epic", map[string]any{
+		"project":  "err",
+		"epic_ref": "ERR-E99",
+		"name":     "ghost",
+	})
+	assert.True(t, isToolError(result))
+}
+
 func TestDeleteIssueTool_RemovesIssue(t *testing.T) {
 	s, svcs := newTestMCPServer(t)
 

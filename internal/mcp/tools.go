@@ -265,6 +265,116 @@ func registerIssueTools(s *server.MCPServer, svcs *service.Services) {
 	)
 }
 
+func registerUpdateIssueTools(s *server.MCPServer, svcs *service.Services) {
+	s.AddTool(
+		mcp.NewTool("update_issue",
+			mcp.WithDescription("Update an issue's name, type, priority, or description."),
+			mcp.WithString("project", mcp.Required(), mcp.Description("Project slug")),
+			mcp.WithString("issue_ref", mcp.Required(), mcp.Description("Issue reference, e.g. PROJ-42")),
+			mcp.WithString("name", mcp.Required(), mcp.Description("Updated issue title")),
+			mcp.WithString("type", mcp.Required(), mcp.Description("Issue type: TASK, BUG, or STORY")),
+			mcp.WithString("priority", mcp.Required(), mcp.Description("Priority: LOW, HIGH, or IMMEDIATE")),
+			mcp.WithString("description", mcp.Description("Optional updated description")),
+		),
+		func(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+			slug, err := req.RequireString("project")
+			if err != nil {
+				return mcp.NewToolResultError(err.Error()), nil
+			}
+			ref, err := req.RequireString("issue_ref")
+			if err != nil {
+				return mcp.NewToolResultError(err.Error()), nil
+			}
+			name, err := req.RequireString("name")
+			if err != nil {
+				return mcp.NewToolResultError(err.Error()), nil
+			}
+			issueType, err := req.RequireString("type")
+			if err != nil {
+				return mcp.NewToolResultError(err.Error()), nil
+			}
+			priority, err := req.RequireString("priority")
+			if err != nil {
+				return mcp.NewToolResultError(err.Error()), nil
+			}
+			in := service.UpdateIssueInput{
+				ProjectSlug: slug,
+				IssueRef:    ref,
+				Name:        name,
+				Type:        model.IssueType(issueType),
+				Priority:    model.Priority(priority),
+			}
+			if desc := req.GetString("description", ""); desc != "" {
+				in.Description = &desc
+			}
+			issue, err := svcs.Issues.Update(ctx, in)
+			if err != nil {
+				return mcp.NewToolResultError(err.Error()), nil
+			}
+			return mcp.NewToolResultJSON(issue)
+		},
+	)
+}
+
+func registerSwimlaneTools(s *server.MCPServer, svcs *service.Services) {
+	s.AddTool(
+		mcp.NewTool("list_swimlanes",
+			mcp.WithDescription("List all swimlanes in a project."),
+			mcp.WithString("project", mcp.Required(), mcp.Description("Project slug")),
+		),
+		func(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+			slug, err := req.RequireString("project")
+			if err != nil {
+				return mcp.NewToolResultError(err.Error()), nil
+			}
+			swimlanes, err := svcs.Swimlanes.ListForProject(ctx, slug)
+			if err != nil {
+				return mcp.NewToolResultError(err.Error()), nil
+			}
+			return mcp.NewToolResultJSON(swimlanes)
+		},
+	)
+}
+
+func registerUpdateEpicTools(s *server.MCPServer, svcs *service.Services) {
+	s.AddTool(
+		mcp.NewTool("update_epic",
+			mcp.WithDescription("Update an epic's name or description."),
+			mcp.WithString("project", mcp.Required(), mcp.Description("Project slug")),
+			mcp.WithString("epic_ref", mcp.Required(), mcp.Description("Epic reference, e.g. PROJ-E1")),
+			mcp.WithString("name", mcp.Required(), mcp.Description("Updated epic name")),
+			mcp.WithString("description", mcp.Description("Optional updated description")),
+		),
+		func(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+			slug, err := req.RequireString("project")
+			if err != nil {
+				return mcp.NewToolResultError(err.Error()), nil
+			}
+			ref, err := req.RequireString("epic_ref")
+			if err != nil {
+				return mcp.NewToolResultError(err.Error()), nil
+			}
+			name, err := req.RequireString("name")
+			if err != nil {
+				return mcp.NewToolResultError(err.Error()), nil
+			}
+			in := service.UpdateEpicInput{
+				ProjectSlug: slug,
+				EpicRef:     ref,
+				Name:        name,
+			}
+			if desc := req.GetString("description", ""); desc != "" {
+				in.Description = &desc
+			}
+			e, err := svcs.Epics.Update(ctx, in)
+			if err != nil {
+				return mcp.NewToolResultError(err.Error()), nil
+			}
+			return mcp.NewToolResultJSON(e)
+		},
+	)
+}
+
 func registerDeleteIssueTools(s *server.MCPServer, svcs *service.Services) {
 	s.AddTool(
 		mcp.NewTool("delete_issue",

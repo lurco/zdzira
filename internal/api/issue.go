@@ -14,11 +14,42 @@ func registerIssueRoutes(api huma.API, svcs *service.Services) {
 		OperationID: "list-issues",
 		Method:      http.MethodGet,
 		Path:        "/projects/{slug}/issues",
-		Summary:     "List all issues in a project",
+		Summary:     "List issues in a project, with optional filters",
 		Tags:        []string{"Issues"},
 	}, func(ctx context.Context, input *struct {
-		Slug string `path:"slug" doc:"Project slug" example:"my-project"`
+		Slug       string `path:"slug"        doc:"Project slug"       example:"my-project"`
+		Type       string `query:"type"       doc:"Filter by type"     example:"BUG"`
+		Priority   string `query:"priority"   doc:"Filter by priority" example:"HIGH"`
+		SwimlaneID uint   `query:"swimlane_id" doc:"Filter by swimlane ID"`
+		EpicID     uint   `query:"epic_id"    doc:"Filter by epic ID"`
 	}) (*struct{ Body []model.Issue }, error) {
+		f := service.IssueFilterInput{ProjectSlug: input.Slug}
+		filtered := false
+		if input.Type != "" {
+			t := model.IssueType(input.Type)
+			f.Type = &t
+			filtered = true
+		}
+		if input.Priority != "" {
+			p := model.Priority(input.Priority)
+			f.Priority = &p
+			filtered = true
+		}
+		if input.SwimlaneID != 0 {
+			f.SwimlaneID = &input.SwimlaneID
+			filtered = true
+		}
+		if input.EpicID != 0 {
+			f.EpicID = &input.EpicID
+			filtered = true
+		}
+		if filtered {
+			issues, err := svcs.Issues.Filter(ctx, f)
+			if err != nil {
+				return nil, huma.Error404NotFound(err.Error())
+			}
+			return &struct{ Body []model.Issue }{issues}, nil
+		}
 		issues, err := svcs.Issues.List(ctx, input.Slug)
 		if err != nil {
 			return nil, huma.Error404NotFound(err.Error())

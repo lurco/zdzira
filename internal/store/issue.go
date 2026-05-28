@@ -39,6 +39,25 @@ func (s *gormIssueStore) ListBySwimlane(ctx context.Context, swimlaneID uint) ([
 	return issues, err
 }
 
+func (s *gormIssueStore) ListFiltered(ctx context.Context, projectID uint, f IssueStoreFilter) ([]model.Issue, error) {
+	var issues []model.Issue
+	q := s.db.WithContext(ctx).Where("project_id = ?", projectID)
+	if f.Type != nil {
+		q = q.Where("type = ?", *f.Type)
+	}
+	if f.Priority != nil {
+		q = q.Where("priority = ?", *f.Priority)
+	}
+	if f.SwimlaneID != nil {
+		q = q.Where("swimlane_id = ?", *f.SwimlaneID)
+	}
+	if f.EpicID != nil {
+		q = q.Where("epic_id = ?", *f.EpicID)
+	}
+	err := q.Order("position ASC").Find(&issues).Error
+	return issues, err
+}
+
 func (s *gormIssueStore) Update(ctx context.Context, i *model.Issue) error {
 	return s.db.WithContext(ctx).Save(i).Error
 }

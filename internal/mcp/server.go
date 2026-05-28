@@ -16,8 +16,11 @@ func NewServer(svcs *service.Services) *Server {
 
 	registerProjectTools(s, svcs)
 	registerEpicTools(s, svcs)
+	registerUpdateEpicTools(s, svcs)
 	registerIssueTools(s, svcs)
+	registerUpdateIssueTools(s, svcs)
 	registerDeleteIssueTools(s, svcs)
+	registerSwimlaneTools(s, svcs)
 	registerCommentTools(s, svcs)
 	registerLinkTools(s, svcs)
 

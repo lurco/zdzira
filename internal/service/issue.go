@@ -145,6 +145,27 @@ func (s *IssueService) Update(ctx context.Context, in UpdateIssueInput) (*model.
 	return issue, nil
 }
 
+type IssueFilterInput struct {
+	ProjectSlug string           `json:"-"`
+	Type        *model.IssueType `json:"type,omitempty"        doc:"Filter by issue type"     example:"BUG"`
+	Priority    *model.Priority  `json:"priority,omitempty"    doc:"Filter by priority"       example:"HIGH"`
+	SwimlaneID  *uint            `json:"swimlane_id,omitempty" doc:"Filter by swimlane ID"`
+	EpicID      *uint            `json:"epic_id,omitempty"     doc:"Filter by epic ID"`
+}
+
+func (s *IssueService) Filter(ctx context.Context, in IssueFilterInput) ([]model.Issue, error) {
+	p, err := s.stores.Projects.GetBySlug(ctx, in.ProjectSlug)
+	if err != nil {
+		return nil, fmt.Errorf("project %q not found", in.ProjectSlug)
+	}
+	return s.stores.Issues.ListFiltered(ctx, p.ID, store.IssueStoreFilter{
+		Type:       in.Type,
+		Priority:   in.Priority,
+		SwimlaneID: in.SwimlaneID,
+		EpicID:     in.EpicID,
+	})
+}
+
 func (s *IssueService) Delete(ctx context.Context, projectSlug, ref string) error {
 	p, err := s.stores.Projects.GetBySlug(ctx, projectSlug)
 	if err != nil {
