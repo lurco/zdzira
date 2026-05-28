@@ -1,6 +1,8 @@
 services:
   backend:
-    build: .
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
     restart: unless-stopped
     volumes:
       - db-data:/data
@@ -12,7 +14,7 @@ services:
   nginx:
     build:
       context: .
-      dockerfile: Dockerfile.nginx
+      dockerfile: frontend/Dockerfile
     restart: unless-stopped
     ports:
       - "3400:80"

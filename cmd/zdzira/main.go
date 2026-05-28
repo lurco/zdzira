@@ -7,10 +7,10 @@ import (
 	"log/slog"
 	"net/http"
 	"os"
-	"zdzira/internal/api"
-	zdziramcp "zdzira/internal/mcp"
-	"zdzira/internal/service"
-	"zdzira/internal/store"
+	"zdzira/backend/api"
+	zdziramcp "zdzira/backend/mcp"
+	"zdzira/backend/service"
+	"zdzira/backend/store"
 
 	"github.com/go-chi/chi/v5"
 )
