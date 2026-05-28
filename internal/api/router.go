@@ -26,6 +26,7 @@ func NewRouter(svcs *service.Services, logger *slog.Logger) http.Handler {
 	registerProjectRoutes(api, svcs)
 	registerEpicRoutes(api, svcs)
 	registerIssueRoutes(api, svcs)
+	registerSwimlaneRoutes(api, svcs)
 	registerCommentRoutes(api, svcs)
 	registerLinkRoutes(api, svcs)
 	registerAuditRoutes(api, svcs)
