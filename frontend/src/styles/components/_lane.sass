@@ -26,6 +26,21 @@
   align-items: center
   gap: 8px
 
+.lane-grip
+  +mono
+  flex-shrink: 0
+  font-size: 14px
+  line-height: 1
+  color: var(--muted)
+  cursor: grab
+  user-select: none
+
+  &:hover
+    color: var(--ink)
+
+  &:active
+    cursor: grabbing
+
 .lane-swatch
   width: 14px
   height: 14px

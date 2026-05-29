@@ -2,6 +2,7 @@ script#tmpl-board(type="text/x-handlebars-template")
   | {{#each swimlanes}}
   |   <div class="lane" data-lane-id="{{id}}" data-lane-name="{{name}}">
   |     <div class="lane-header">
+  |       <span class="lane-grip" draggable="true" data-drag-kind="lane" data-lane-id="{{id}}" title="Drag to reorder" aria-label="Reorder lane">⠿</span>
   |       <span class="lane-swatch" style="background:{{laneColor color}}"></span>
   |       <input class="lane-title" name="name" value="{{name}}" maxlength="40"
   |              hx-patch="/api/v1/projects/{{projectSlug}}/swimlanes/{{id}}"
