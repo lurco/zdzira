@@ -90,23 +90,32 @@ document.addEventListener('click', event => {
 
   const addBtn = event.target.closest('.add-card-btn')
   if (addBtn) {
-    openAddIssueForm(Number(addBtn.dataset.laneId))
-    return
-  }
-
-  if (event.target.closest('[data-add-issue-cancel]')) {
-    document.querySelectorAll('.new-card-form').forEach(form => form.remove())
+    const lane = addBtn.closest('.lane')
+    openAddIssueDialog(Number(addBtn.dataset.laneId), lane?.dataset.laneName || '')
     return
   }
 
   if (event.target.closest('#addIssueBtn')) {
-    const firstLane = document.querySelector('.lane-body[data-lane-id]')
-    if (firstLane) openAddIssueForm(Number(firstLane.dataset.laneId))
+    const firstLane = document.querySelector('.lane[data-lane-id]')
+    if (firstLane) {
+      openAddIssueDialog(Number(firstLane.dataset.laneId), firstLane.dataset.laneName)
+    }
     return
   }
 
   if (event.target.closest('[data-open-epics-manager]')) {
     window.openDialog('tmpl-epics-manager', { epics: currentEpics, projectSlug: PROJECT })
+    return
+  }
+
+  const epicEditBtn = event.target.closest('[data-open-epic-edit]')
+  if (epicEditBtn) {
+    window.openDialog('tmpl-epic-edit', {
+      ref: epicEditBtn.getAttribute('data-epic-ref'),
+      name: epicEditBtn.getAttribute('data-epic-name'),
+      description: epicEditBtn.getAttribute('data-epic-description') || '',
+      projectSlug: PROJECT,
+    })
     return
   }
 
@@ -125,22 +134,13 @@ document.body.addEventListener('epicsChanged', () => {
   })
 })
 
-function openAddIssueForm(laneId) {
-  const laneBody = document.querySelector(`.lane-body[data-lane-id="${laneId}"]`)
-  if (!laneBody) return
-  document.querySelectorAll('.new-card-form').forEach(form => form.remove())
-  const html = renderTemplate('tmpl-add-issue-form', {
+function openAddIssueDialog(laneId, laneName) {
+  window.openDialog('tmpl-add-issue-form', {
     laneId,
+    laneName,
     projectSlug: PROJECT,
     epics: currentEpics,
   })
-  const wrapper = document.createElement('div')
-  wrapper.innerHTML = html
-  const form = wrapper.firstElementChild
-  laneBody.appendChild(form)
-  window.htmx.process(form)
-  form.querySelector('textarea[name="name"]')?.focus()
-  form.scrollIntoView({ block: 'end', behavior: 'smooth' })
 }
 
 function closeIssuePanel() {

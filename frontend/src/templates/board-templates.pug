@@ -82,6 +82,12 @@ script#tmpl-epics-manager(type="text/x-handlebars-template")
   |         <li class="epics-manager__row">
   |           <span class="epics-manager__ref mono">{{ref}}</span>
   |           <span class="epics-manager__name">{{name}}</span>
+  |           <button class="btn ghost epics-manager__edit"
+  |                   type="button"
+  |                   data-open-epic-edit
+  |                   data-epic-ref="{{ref}}"
+  |                   data-epic-name="{{name}}"
+  |                   data-epic-description="{{description}}">Edit</button>
   |           <button class="btn ghost epics-manager__delete"
   |                   type="button"
   |                   hx-delete="/api/v1/projects/{{../projectSlug}}/epics/{{ref}}"
@@ -98,6 +104,8 @@ script#tmpl-epics-manager(type="text/x-handlebars-template")
   |         hx-swap="none">
   |     <label class="modal__label">New epic</label>
   |     <input class="modal__input" name="name" placeholder="Epic name" required>
+  |     <label class="modal__label">Description</label>
+  |     <textarea class="modal__input modal__input--multiline" name="description" rows="2" placeholder="Optional description"></textarea>
   |     <div class="modal__actions">
   |       <button class="modal__btn modal__btn--cancel" type="button" data-dialog-close>Close</button>
   |       <button class="modal__btn modal__btn--submit" type="submit">Add epic</button>
@@ -105,36 +113,59 @@ script#tmpl-epics-manager(type="text/x-handlebars-template")
   |   </form>
   | </div>
 
+script#tmpl-epic-edit(type="text/x-handlebars-template")
+  | <form class="modal__form"
+  |       hx-put="/api/v1/projects/{{projectSlug}}/epics/{{ref}}"
+  |       hx-ext="json-enc"
+  |       hx-swap="none">
+  |   <h2 class="modal__title">Edit {{ref}}</h2>
+  |   <label class="modal__label">Name</label>
+  |   <input class="modal__input" name="name" value="{{name}}" required autofocus>
+  |   <label class="modal__label">Description</label>
+  |   <textarea class="modal__input modal__input--multiline" name="description" rows="4">{{description}}</textarea>
+  |   <div class="modal__actions">
+  |     <button class="modal__btn modal__btn--cancel" type="button" data-dialog-close>Cancel</button>
+  |     <button class="modal__btn modal__btn--submit" type="submit">Save</button>
+  |   </div>
+  | </form>
+
 script#tmpl-add-issue-form(type="text/x-handlebars-template")
-  | <form class="new-card-form"
+  | <form class="modal__form"
   |       hx-post="/api/v1/projects/{{projectSlug}}/issues"
   |       hx-ext="json-enc"
   |       hx-swap="none">
+  |   <h2 class="modal__title">New issue in {{laneName}}</h2>
   |   <input type="hidden" name="swimlane_id" value="{{laneId}}">
-  |   <textarea class="new-card-form__textarea" name="name" placeholder="What needs doing?" required autofocus></textarea>
-  |   <textarea class="new-card-form__textarea new-card-form__description" name="description" placeholder="Description (optional)"></textarea>
-  |   <div class="new-card-form__row">
-  |     <select class="mini-select" name="type">
+  |   <label class="modal__label">Title</label>
+  |   <input class="modal__input" name="name" placeholder="What needs doing?" required autofocus>
+  |   <label class="modal__label">Description</label>
+  |   <textarea class="modal__input modal__input--multiline" name="description" rows="3"></textarea>
+  |   <div class="modal__row">
+  |     <label class="modal__label modal__label--inline">Type</label>
+  |     <select class="modal__select" name="type">
   |       <option value="TASK" selected>Task</option>
   |       <option value="BUG">Bug</option>
   |       <option value="STORY">Story</option>
   |     </select>
-  |     <select class="mini-select" name="priority">
-  |       <option value="HIGH" selected>High</option>
+  |     <label class="modal__label modal__label--inline">Priority</label>
+  |     <select class="modal__select" name="priority">
+  |       <option value="LOW" selected>Low</option>
+  |       <option value="HIGH">High</option>
   |       <option value="IMMEDIATE">Immediate</option>
-  |       <option value="LOW">Low</option>
   |     </select>
-  |     {{#if epics.length}}
-  |       <select class="mini-select" name="epic_ref">
-  |         <option value="">No epic</option>
-  |         {{#each epics}}
-  |           <option value="{{ref}}">{{ref}} — {{name}}</option>
-  |         {{/each}}
-  |       </select>
-  |     {{/if}}
-  |     <span class="new-card-form__spacer"></span>
-  |     <button type="submit" class="btn primary new-card-form__btn">Add</button>
-  |     <button type="button" class="btn ghost new-card-form__btn" data-add-issue-cancel>Esc</button>
+  |   </div>
+  |   {{#if epics.length}}
+  |     <label class="modal__label">Epic</label>
+  |     <select class="modal__select" name="epic_ref">
+  |       <option value="">No epic</option>
+  |       {{#each epics}}
+  |         <option value="{{ref}}">{{ref}} — {{name}}</option>
+  |       {{/each}}
+  |     </select>
+  |   {{/if}}
+  |   <div class="modal__actions">
+  |     <button class="modal__btn modal__btn--cancel" type="button" data-dialog-close>Cancel</button>
+  |     <button class="modal__btn modal__btn--submit" type="submit">Add issue</button>
   |   </div>
   | </form>
 

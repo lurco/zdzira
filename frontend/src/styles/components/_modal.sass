@@ -58,6 +58,32 @@
     color: var(--muted)
     margin: 0
 
+  &__row
+    display: flex
+    gap: 10px
+    align-items: center
+
+  &__label--inline
+    margin: 0
+
+  &__input--multiline
+    min-height: 60px
+    resize: vertical
+    font-family: inherit
+
+  &__select
+    appearance: none
+    border: var(--border) solid var(--ink)
+    background: var(--paper-2)
+    +mono
+    font-size: 12px
+    font-weight: 700
+    text-transform: uppercase
+    letter-spacing: 0.04em
+    padding: 8px 10px
+    color: var(--ink)
+    cursor: pointer
+
   &__actions
     +flex-between
     gap: 12px
