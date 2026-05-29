@@ -192,3 +192,73 @@
 
     &:hover
       color: var(--acc-red)
+
+.issue-panel__links
+  padding: 12px 20px 4px
+  border-top: var(--border) solid var(--line)
+
+.issue-panel__link-form
+  display: flex
+  gap: 6px
+  margin-top: 8px
+
+  .issue-panel__link-ref
+    flex: 1
+    min-width: 0
+    padding: 6px 10px
+    font-size: 12px
+
+.link-list
+  list-style: none
+  padding: 0
+  margin: 0
+  display: flex
+  flex-direction: column
+  gap: 4px
+
+.link-item
+  display: flex
+  align-items: center
+  gap: 6px
+  font-size: 12px
+  padding: 4px 0
+
+  &__type
+    +mono
+    font-size: 10px
+    text-transform: uppercase
+    letter-spacing: 0.06em
+    color: var(--muted)
+    min-width: 64px
+
+  &__source, &__target
+    font-weight: 700
+
+  &__arrow
+    color: var(--muted)
+
+  &__name
+    color: var(--ink-soft)
+    flex: 1
+    overflow: hidden
+    text-overflow: ellipsis
+    white-space: nowrap
+
+  &__remove
+    appearance: none
+    background: transparent
+    border: 0
+    padding: 0 4px
+    font-size: 16px
+    line-height: 1
+    color: var(--muted)
+    cursor: pointer
+    flex-shrink: 0
+
+    &:hover
+      color: var(--acc-red)
+
+.link-list__empty
+  font-size: 12px
+  color: var(--muted)
+  margin: 4px 0

@@ -246,6 +246,20 @@ script#tmpl-issue-panel(type="text/x-handlebars-template")
   |   {{#if description}}
   |     <div class="issue-panel__description">{{description}}</div>
   |   {{/if}}
+  |   <section class="issue-panel__links">
+  |     <h3 class="issue-panel__section-title">Links</h3>
+  |     <div id="linksList"></div>
+  |     <form class="issue-panel__link-form" id="linkForm">
+  |       <input class="modal__input issue-panel__link-ref" name="target_ref" placeholder="Issue ref, e.g. {{projectSlug}}-42" autocomplete="off">
+  |       <select class="mini-select" name="type">
+  |         <option value="RELATES_TO">Relates to</option>
+  |         <option value="BLOCKS">Blocks</option>
+  |         <option value="IS_PART_OF">Is part of</option>
+  |         <option value="DUPLICATES">Duplicates</option>
+  |       </select>
+  |       <button class="btn primary" type="submit">Link</button>
+  |     </form>
+  |   </section>
   |   <section class="issue-panel__comments">
   |     <h3 class="issue-panel__section-title">Comments</h3>
   |     <div id="commentsList"></div>
@@ -352,3 +366,21 @@ script#tmpl-confirm-delete-comment(type="text/x-handlebars-template")
   |             data-dialog-close>Delete</button>
   |   </div>
   | </div>
+
+script#tmpl-links(type="text/x-handlebars-template")
+  | {{#if this.length}}
+  |   <ul class="link-list">
+  |     {{#each this}}
+  |       <li class="link-item">
+  |         <span class="link-item__type">{{lower type}}</span>
+  |         <span class="link-item__source mono">{{source.ref}}</span>
+  |         <span class="link-item__arrow">→</span>
+  |         <span class="link-item__target mono">{{target.ref}}</span>
+  |         <span class="link-item__name">{{target.name}}</span>
+  |         <button class="link-item__remove" type="button" data-link-id="{{id}}" aria-label="Remove link">×</button>
+  |       </li>
+  |     {{/each}}
+  |   </ul>
+  | {{else}}
+  |   <p class="link-list__empty">No links yet.</p>
+  | {{/if}}

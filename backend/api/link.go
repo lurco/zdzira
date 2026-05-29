@@ -19,12 +19,12 @@ func registerLinkRoutes(api huma.API, svcs *service.Services) {
 	}, func(ctx context.Context, input *struct {
 		Slug     string `path:"slug"     doc:"Project slug"                  example:"my-project"`
 		IssueRef string `path:"issueRef" doc:"Issue reference, e.g. PROJ-42"  example:"PROJ-42"`
-	}) (*struct{ Body []model.Link }, error) {
+	}) (*struct{ Body []service.EnrichedLink }, error) {
 		links, err := svcs.Links.ListForIssue(ctx, input.Slug, input.IssueRef)
 		if err != nil {
 			return nil, huma.Error404NotFound(err.Error())
 		}
-		return &struct{ Body []model.Link }{links}, nil
+		return &struct{ Body []service.EnrichedLink }{links}, nil
 	})
 
 	huma.Register(api, huma.Operation{
@@ -52,5 +52,23 @@ func registerLinkRoutes(api huma.API, svcs *service.Services) {
 			return nil, huma.Error422UnprocessableEntity(err.Error())
 		}
 		return &struct{ Body *model.Link }{l}, nil
+	})
+
+	huma.Register(api, huma.Operation{
+		OperationID:   "delete-link",
+		Method:        http.MethodDelete,
+		Path:          "/projects/{slug}/issues/{issueRef}/links/{id}",
+		Summary:       "Delete a link by ID",
+		DefaultStatus: http.StatusNoContent,
+		Tags:          []string{"Links"},
+	}, func(ctx context.Context, input *struct {
+		Slug     string `path:"slug"     doc:"Project slug"`
+		IssueRef string `path:"issueRef" doc:"Issue reference"`
+		ID       uint   `path:"id"       doc:"Link ID"`
+	}) (*struct{}, error) {
+		if err := svcs.Links.Delete(ctx, input.ID); err != nil {
+			return nil, huma.Error404NotFound(err.Error())
+		}
+		return nil, nil
 	})
 }

@@ -298,6 +298,44 @@ function loadComments(issueRef) {
   })
 }
 
+function loadLinks(issueRef) {
+  const listEl = document.getElementById('linksList')
+  if (!listEl) return
+
+  fetch(`/api/v1/projects/${PROJECT}/issues/${issueRef}/links`)
+    .then(r => r.json())
+    .then(links => {
+      listEl.innerHTML = renderTemplate('tmpl-links', links)
+      listEl.querySelectorAll('[data-link-id]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const id = btn.dataset.linkId
+          fetch(`/api/v1/projects/${PROJECT}/issues/${issueRef}/links/${id}`, { method: 'DELETE' })
+            .then(r => { if (!r.ok) throw new Error(r.status) })
+            .then(() => loadLinks(issueRef))
+            .catch(() => window.showToast('Failed to remove link'))
+        })
+      })
+    })
+
+  const form = document.getElementById('linkForm')
+  if (!form || form.dataset.wired) return
+  form.dataset.wired = '1'
+  form.addEventListener('submit', e => {
+    e.preventDefault()
+    const targetRef = form.querySelector('[name="target_ref"]')?.value.trim().toUpperCase()
+    const type = form.querySelector('[name="type"]')?.value
+    if (!targetRef) return
+    fetch(`/api/v1/projects/${PROJECT}/issues/${issueRef}/links`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ target_ref: targetRef, type }),
+    })
+      .then(r => { if (!r.ok) throw new Error(r.status) })
+      .then(() => { form.querySelector('[name="target_ref"]').value = ''; loadLinks(issueRef) })
+      .catch(() => window.showToast('Failed to create link — check the issue ref'))
+  })
+}
+
 document.body.addEventListener('htmx:afterRequest', event => {
   if (!event.detail.successful) return
 
@@ -305,6 +343,7 @@ document.body.addEventListener('htmx:afterRequest', event => {
     try { currentIssue = JSON.parse(event.detail.xhr.responseText) } catch {}
     if (currentIssue?.ref) {
       loadComments(currentIssue.ref)
+      loadLinks(currentIssue.ref)
       wireLaneSelect(currentIssue.ref)
     }
   }
