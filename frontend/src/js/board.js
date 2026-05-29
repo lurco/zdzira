@@ -11,11 +11,20 @@ import { PROJECT, refreshBoard } from './project'
 import Handlebars from 'handlebars'
 
 // SSE: refresh the board when any agent or other tab mutates the API.
-// Debounced to avoid double-render when a local htmx mutation also fires.
 let sseRefreshTimer = null
 let sseConnected = false
+
+function setSseStatus(text, ok) {
+  const el = document.getElementById('sseStatus')
+  if (!el) return
+  el.textContent = text
+  el.style.opacity = ok ? '1' : '0.5'
+  el.style.color = ok ? 'var(--acc-green)' : 'var(--acc-red)'
+}
+
 const es = new EventSource('/api/v1/events')
 es.onopen = () => {
+  setSseStatus('SSE ●', true)
   if (sseConnected) {
     // Reconnect after a drop — board may have missed events, force a refresh.
     clearTimeout(sseRefreshTimer)
@@ -29,8 +38,12 @@ es.onmessage = (e) => {
   sseRefreshTimer = setTimeout(refreshBoard, 300)
 }
 es.onerror = () => {
-  // EventSource auto-retries; onopen fires on reconnect and refreshes the board
+  setSseStatus('SSE ✕', false)
+  sseConnected = false
 }
+
+// Polling fallback: keeps the board fresh even when SSE is not working.
+setInterval(refreshBoard, 10_000)
 
 const boardEl = document.getElementById('board')
 let currentIssue = null
