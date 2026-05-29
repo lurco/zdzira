@@ -320,7 +320,10 @@ script#tmpl-comments(type="text/x-handlebars-template")
   |     {{#each this}}
   |       <li class="comment-item">
   |         <p class="comment-item__text">{{contents}}</p>
-  |         <time class="comment-item__time">{{formatDate created_at}}</time>
+  |         <div class="comment-item__footer">
+  |           <time class="comment-item__time">{{formatDate created_at}}</time>
+  |           <button class="comment-item__delete" type="button" data-comment-id="{{id}}" aria-label="Delete comment">×</button>
+  |         </div>
   |       </li>
   |     {{/each}}
   |   </ul>

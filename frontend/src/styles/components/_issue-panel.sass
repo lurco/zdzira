@@ -153,6 +153,11 @@
     white-space: pre-wrap
     word-break: break-word
 
+  &__footer
+    display: flex
+    align-items: center
+    justify-content: space-between
+
   &__time
     font-size: 10px
     font-weight: 700
@@ -160,3 +165,16 @@
     text-transform: uppercase
     color: var(--muted)
     font-family: 'JetBrains Mono', ui-monospace, monospace
+
+  &__delete
+    appearance: none
+    background: transparent
+    border: 0
+    padding: 0 4px
+    font-size: 16px
+    line-height: 1
+    color: var(--muted)
+    cursor: pointer
+
+    &:hover
+      color: var(--acc-red)

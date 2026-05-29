@@ -220,7 +220,16 @@ function loadComments(issueRef) {
 
   fetch(`/api/v1/projects/${PROJECT}/issues/${issueRef}/comments`)
     .then(r => r.json())
-    .then(comments => { listEl.innerHTML = renderTemplate('tmpl-comments', comments) })
+    .then(comments => {
+      listEl.innerHTML = renderTemplate('tmpl-comments', comments)
+      listEl.querySelectorAll('[data-comment-id]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const id = btn.dataset.commentId
+          fetch(`/api/v1/projects/${PROJECT}/issues/${issueRef}/comments/${id}`, { method: 'DELETE' })
+            .then(() => loadComments(issueRef))
+        })
+      })
+    })
 
   const form = document.getElementById('commentForm')
   if (!form || form.dataset.wired) return
