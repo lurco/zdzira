@@ -131,7 +131,6 @@ document.addEventListener('click', event => {
     return
   }
 
-
   const addBtn = event.target.closest('.add-card-btn')
   if (addBtn) {
     const lane = addBtn.closest('.lane')
@@ -196,8 +195,10 @@ document.body.addEventListener('submit', event => {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(body),
   })
-    .then(r => { if (!r.ok) throw new Error(r.status) })
-    .then(r => r.json())
+    .then(r => {
+      if (!r.ok) throw new Error(r.status)
+      return r.json()
+    })
     .then(issue => {
       currentIssue = issue
       const panel = document.getElementById('issuePanel')
