@@ -35,12 +35,43 @@ document.addEventListener('click', event => {
     return
   }
 
+  if (event.target.closest('[data-issue-panel-close]')) {
+    closeIssuePanel()
+    return
+  }
+
   if (event.target.closest('[data-lane-popover]')) return
   closeAllLanePopovers()
-
-  const card = event.target.closest('.card[data-card-ref]')
-  if (card) location.href = `/issue.html?project=${PROJECT}&ref=${card.dataset.cardRef}`
 })
+
+function closeIssuePanel() {
+  const panel = document.getElementById('issuePanel')
+  if (panel) panel.hidden = true
+  const url = new URL(location)
+  if (url.searchParams.has('issue')) {
+    url.searchParams.delete('issue')
+    history.pushState({}, '', url)
+  }
+}
+
+window.addEventListener('popstate', () => {
+  const ref = new URLSearchParams(location.search).get('issue')
+  if (ref) openIssuePanel(ref)
+  else closeIssuePanel()
+})
+
+function openIssuePanel(ref) {
+  const panel = document.getElementById('issuePanel')
+  if (!panel) return
+  window.htmx.ajax('GET', `/api/v1/projects/${PROJECT}/issues/${ref}`, {
+    source: panel,
+    target: panel,
+    swap: 'innerHTML',
+  })
+}
+
+const initialIssue = new URLSearchParams(location.search).get('issue')
+if (initialIssue) openIssuePanel(initialIssue)
 
 document.body.addEventListener('htmx:afterRequest', event => {
   if (!event.detail.successful) return

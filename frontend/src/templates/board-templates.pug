@@ -31,7 +31,11 @@ script#tmpl-board(type="text/x-handlebars-template")
   |     <div class="lane-body" data-lane-id="{{id}}">
   |       {{#if issues.length}}
   |         {{#each issues}}
-  |           <div class="card" draggable="true" data-drag-kind="card" data-card-ref="{{ref}}" data-lane-id="{{swimlane_id}}">
+  |           <div class="card" draggable="true" data-drag-kind="card" data-card-ref="{{ref}}" data-lane-id="{{swimlane_id}}"
+  |                hx-get="/api/v1/projects/{{projectSlug}}/issues/{{ref}}"
+  |                hx-target="#issuePanel"
+  |                hx-trigger="click"
+  |                hx-push-url="/board.html?project={{projectSlug}}&issue={{ref}}">
   |             <div class="card-strip" style="background:{{laneColor ../color}}"></div>
   |             <div class="card-top">
   |               <span class="card-id mono">{{ref}}</span>
@@ -59,6 +63,20 @@ script#tmpl-board(type="text/x-handlebars-template")
   |         hx-swap="none">
   |   <span class="plus">+</span> Add lane
   | </button>
+
+script#tmpl-issue-panel(type="text/x-handlebars-template")
+  | <div class="issue-panel__inner">
+  |   <header class="issue-panel__header">
+  |     <span class="issue-panel__ref mono">{{ref}}</span>
+  |     <span class="badge {{priorityClass priority}}">{{priority}}</span>
+  |     <span class="tag tag-{{lower type}}">{{type}}</span>
+  |     <button type="button" class="issue-panel__close" data-issue-panel-close aria-label="Close">×</button>
+  |   </header>
+  |   <h2 class="issue-panel__title">{{name}}</h2>
+  |   {{#if description}}
+  |     <div class="issue-panel__description">{{description}}</div>
+  |   {{/if}}
+  | </div>
 
 script#tmpl-confirm-delete-lane(type="text/x-handlebars-template")
   | <div class="modal__form">

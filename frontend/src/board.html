@@ -19,6 +19,13 @@
       </section>
       <pug src="includes/board-shell.pug" />
     </div>
+    <aside class="issue-panel"
+           id="issuePanel"
+           hx-ext="client-side-templates"
+           handlebars-template="tmpl-issue-panel"
+           hx-swap="innerHTML"
+           hx-on::after-swap="this.hidden = false"
+           hidden></aside>
     <pug src="includes/statusbar.pug" />
     <pug src="includes/shared-modal.pug" />
     <pug src="templates/topbar-template.pug" />

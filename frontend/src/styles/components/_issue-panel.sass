@@ -1,0 +1,53 @@
+@use '../abstracts/mixins' as *
+
+.issue-panel
+  position: fixed
+  top: 0
+  right: 0
+  bottom: 0
+  width: min(520px, 100vw)
+  background: var(--paper)
+  border-left: var(--border) solid var(--ink)
+  box-shadow: var(--shadow-lg)
+  z-index: 80
+  overflow-y: auto
+
+  &__inner
+    padding: 24px 28px
+
+  &__header
+    display: flex
+    align-items: center
+    gap: 10px
+    margin-bottom: 12px
+
+  &__ref
+    font-size: 13px
+    font-weight: 800
+
+  &__title
+    font-size: 24px
+    font-weight: 800
+    margin: 0 0 16px
+
+  &__description
+    font-size: 14px
+    line-height: 1.55
+    white-space: pre-wrap
+    border-top: 2px solid var(--line)
+    padding-top: 16px
+
+  &__close
+    margin-left: auto
+    appearance: none
+    background: transparent
+    border: 0
+    font-size: 22px
+    line-height: 1
+    cursor: pointer
+    color: var(--ink)
+    padding: 2px 8px
+
+    &:hover
+      background: var(--acc-yellow)
+      color: var(--chip-fg)
