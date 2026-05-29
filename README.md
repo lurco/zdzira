@@ -1,234 +1,105 @@
 # Zdzira
 
 A local issue tracker for personal software development in the AI age. No accounts, no auth — access is direct.
-Exposes a **REST API** for human access and an **MCP server** for AI agents (Claude Code, Claude Desktop, etc.).
-Runs as a single Go binary backed by SQLite.
+It exposes a **REST API** for humans and an **MCP server** for AI agents (Claude Code, Claude Desktop), running as a
+single Go binary backed by SQLite.
 
 ![Zdzira board](docs/screenshot1b.png)
 
----
-
 ## Features
 
-- Kanban board with drag-and-drop lanes and issues
-- Issues: types (Task / Bug / Story), priorities (Low / High / Immediate), epic grouping
-- Epics manager with issue listings
-- Comments on issues (visible to both humans and agents)
-- Issue links (Blocks, Duplicates, Relates To, Is Part Of)
-- Filtering by type, priority, epic, and free-text search
-- Real-time board sync via Server-Sent Events — agent changes appear instantly
-- Light, dark, and high-contrast themes
-- MCP server for AI agent integration
-- OpenAPI docs at `/docs`
-- Postman collection in `docs/`
+- Kanban board with drag-and-drop lanes and issues (Task / Bug / Story, priorities, epic grouping)
+- Comments and directed links (Blocks, Duplicates, Relates To, Is Part Of) on issues
+- Filtering by type, priority, epic, and free-text search; light / dark / high-contrast themes
+- Real-time board sync via Server-Sent Events — agent changes appear without a refresh
+- MCP server so AI agents work the board directly
 
----
+## Architecture
 
-## Quick Start
+One Go binary serves both interfaces over a single SQLite database. A mutation from either side is broadcast to open
+browsers via SSE, so an agent moving an issue updates the board live.
 
-### Binary (simplest)
+```mermaid
+flowchart LR
+    human([Human]) -->|browser| edge
+    agent([AI agent]) -->|MCP / streamable HTTP| mcp
 
-```sh
-go build -o bin/zdzira ./cmd/zdzira
-./bin/zdzira
+    subgraph edge["Vite :5173 (dev) / nginx :3400 (prod)"]
+    end
+    subgraph binary["Go binary :8080"]
+        rest["REST /api/v1"]
+        mcp["MCP /mcp"]
+        sse["SSE /api/v1/events"]
+    end
+    edge --> rest
+    rest & mcp --> db[("SQLite")]
+    rest & mcp -.->|mutation| sse -.->|live updates| edge
 ```
 
-Opens on `:8080`. SQLite database is created at `./zdzira.db`.
+Details: [`backend/README.md`](backend/README.md) · [`frontend/README.md`](frontend/README.md) ·
+domain glossary [`CONTEXT.md`](CONTEXT.md) · data model [`docs/erd.md`](docs/erd.md).
 
-Options:
-
-```sh
-./bin/zdzira -addr :9000 -db ~/my-projects.db
-```
-
-Then open `http://localhost:8080` in your browser.
-
----
-
-### Docker Compose — Development
-
-The dev stack runs the Go backend and a Vite dev server with hot-module reload. Nginx is disabled.
+## Quick start
 
 ```sh
-docker compose up
+go build -o bin/zdzira ./cmd/zdzira && ./bin/zdzira   # serves on :8080, db at ./zdzira.db
 ```
 
-| Service  | URL                   |
-|----------|-----------------------|
-| Frontend | http://localhost:5173 |
-| Backend  | http://localhost:8080 |
-
-The frontend Vite server proxies `/api/v1` and `/mcp` to the backend container.
-
-> **Backend changes** require a container rebuild: `docker compose up --build backend`
-
----
-
-### Docker Compose — Production
+Or with Docker:
 
 ```sh
-docker compose -f docker-compose.yml up --build
+docker compose up                              # dev: frontend :5173, backend :8080 (Vite HMR)
+docker compose -f docker-compose.yml up --build # prod: app on :3400 (nginx)
 ```
 
-| Service | URL                   |
-|---------|-----------------------|
-| App     | http://localhost:3400 |
+## MCP setup
 
-Nginx serves the built frontend and reverse-proxies API and MCP traffic to the backend.
+The MCP server runs at **`/mcp`** over streamable HTTP. The one thing that matters: **point Claude at a URL reachable
+from where Claude's *process* runs** — which is not always the URL your browser uses.
 
----
+**Claude Code (CLI)** — add the server with the URL for your setup (see table below):
 
-## MCP Setup
+```sh
+claude mcp add --transport http zdzira http://localhost:8080/mcp
+```
 
-The MCP server runs at `/mcp` over **streamable HTTP**.
-
-### Claude Desktop
-
-Add to `claude_desktop_config.json`:
+Or in your project's `.claude/settings.json`:
 
 ```json
-{
-  "mcpServers": {
-    "zdzira": {
-      "url": "http://localhost:8080/mcp"
-    }
-  }
-}
+{ "mcpServers": { "zdzira": { "type": "http", "url": "http://localhost:8080/mcp" } } }
 ```
 
-### Claude Code (CLI)
-
-Add to your project's `.claude/settings.json`:
+**Claude Desktop** — in `claude_desktop_config.json`, same `url` rules apply:
 
 ```json
-{
-  "mcpServers": {
-    "zdzira": {
-      "type": "http",
-      "url": "http://localhost:8080/mcp"
-    }
-  }
-}
+{ "mcpServers": { "zdzira": { "url": "http://localhost:8080/mcp" } } }
 ```
 
-### Claude Code running inside the Docker dev container
+### Which URL?
 
-When Claude Code itself runs inside the `backend` container, `localhost` refers to the container — not the host.
-Use the **internal Docker network hostname** instead:
+| Where Claude runs | Where the backend runs | URL |
+|---|---|---|
+| On your host (native Linux/macOS) | host or Docker (port 8080 published) | `http://localhost:8080/mcp` |
+| Inside a container | backend in Docker, port 8080 published | `http://host.docker.internal:8080/mcp` |
 
-```json
-{
-  "mcpServers": {
-    "zdzira": {
-      "type": "http",
-      "url": "http://backend:8080/mcp"
-    }
-  }
-}
-```
+`host.docker.internal` is needed because Claude's container is **not** on this project's Docker network (it would mean
+editing this repo's compose), so it reaches the backend via the host's published port, not the `backend` service name.
 
-### Available MCP Tools
+> **WSL caveat — don't assume what works in the browser works for Claude.** With the backend on WSL, your Windows
+> browser reaches `localhost:8080`, but a Docker container generally **cannot** reach a WSL-hosted process through
+> `localhost` or reliably through `host.docker.internal`. If Claude runs in a container, run the **backend in Docker
+> too** (so its published port is reachable via `host.docker.internal`), or target the backend's WSL IP. Always verify
+> reachability from Claude's own environment — e.g. `curl http://host.docker.internal:8080/health` should return
+> `{"status":"ok"}` before trusting the MCP config.
 
-| Tool             | Description                               |
-|------------------|-------------------------------------------|
-| `list_projects`  | List all projects                         |
-| `get_project`    | Get project details                       |
-| `create_project` | Create a new project                      |
-| `list_epics`     | List all epics in a project               |
-| `get_epic`       | Get epic details with linked issues       |
-| `create_epic`    | Create an epic                            |
-| `update_epic`    | Update an epic                            |
-| `list_issues`    | List issues (filterable by type/priority) |
-| `get_issue`      | Get a single issue                        |
-| `create_issue`   | Create an issue                           |
-| `update_issue`   | Update issue fields                       |
-| `move_issue`     | Move an issue to a different swimlane     |
-| `delete_issue`   | Delete an issue                           |
-| `add_comment`    | Add a comment to an issue                 |
-| `list_comments`  | List comments on an issue                 |
-| `link_issues`    | Link two issues                           |
-| `list_links`     | List links for an issue                   |
-| `list_swimlanes` | List swimlanes in a project               |
+See [`backend/README.md`](backend/README.md) for the MCP tool list and the full REST endpoint reference.
 
-Issues are referenced as `PROJ-42`, epics as `PROJ-E1`.
+## API & Postman
 
----
-
-## REST API
-
-Full OpenAPI spec at `http://localhost:8080/docs`. A committed snapshot lives at
-[`docs/openapi.json`](docs/openapi.json); regenerate it with `make openapi`.
-
-Base path: `/api/v1`
-
-| Method         | Path                                               | Description             |
-|----------------|----------------------------------------------------|-------------------------|
-| GET            | `/projects`                                        | List projects           |
-| POST           | `/projects`                                        | Create project          |
-| GET            | `/projects/{slug}`                                 | Get project             |
-| DELETE         | `/projects/{slug}`                                 | Delete project          |
-| GET            | `/projects/{slug}/board`                           | Get board view          |
-| GET            | `/projects/{slug}/epics`                           | List epics              |
-| POST           | `/projects/{slug}/epics`                           | Create epic             |
-| GET/PUT/DELETE | `/projects/{slug}/epics/{epicRef}`                 | Epic CRUD               |
-| GET            | `/projects/{slug}/issues`                          | List issues             |
-| POST           | `/projects/{slug}/issues`                          | Create issue            |
-| GET/PUT/DELETE | `/projects/{slug}/issues/{issueRef}`               | Issue CRUD              |
-| POST           | `/projects/{slug}/issues/{issueRef}/move`          | Move to swimlane        |
-| GET/POST       | `/projects/{slug}/issues/{issueRef}/comments`      | List / add comments     |
-| DELETE         | `/projects/{slug}/issues/{issueRef}/comments/{id}` | Delete comment          |
-| GET/POST       | `/projects/{slug}/issues/{issueRef}/links`         | List / create links     |
-| GET            | `/projects/{slug}/swimlanes`                       | List swimlanes          |
-| POST           | `/projects/{slug}/swimlanes`                       | Create swimlane         |
-| PATCH          | `/projects/{slug}/swimlanes/{id}`                  | Update swimlane         |
-| POST           | `/projects/{slug}/swimlanes/reorder`               | Reorder swimlanes       |
-| DELETE         | `/projects/{slug}/swimlanes/{id}`                  | Delete swimlane         |
-| GET            | `/projects/{slug}/audit`                           | List audit log          |
-| GET            | `/api/v1/events`                                   | SSE board update stream |
-| GET            | `/health`                                          | Liveness check          |
-| GET            | `/ready`                                           | Readiness check (DB)    |
-
-A **Postman collection** with DEV and Nginx environments is in `docs/`.
-
----
-
-## Development
-
-```sh
-make hooks           # wire up git hooks (run once after cloning)
-make install-tools   # install golangci-lint
-go test ./...        # run all backend tests
-make build           # build the binary to bin/zdzira
-make build-frontend  # build the frontend bundle to frontend/dist/
-```
-
-Commits follow [Conventional Commits](https://www.conventionalcommits.org). The commit-msg hook enforces this.
-
-### Project structure
-
-```
-backend/
-  api/       HTTP handlers and router (Chi + Huma)
-  mcp/       MCP server (streamable HTTP)
-  model/     GORM models
-  service/   Business logic
-  store/     Database layer (SQLite via GORM)
-cmd/zdzira/  Binary entry point
-frontend/
-  src/
-    js/      Vanilla JS (htmx, Handlebars, custom DnD)
-    styles/  SASS — neo-brutalist design system
-    templates/ Handlebars templates (rendered client-side)
-    includes/  Pug partials
-docs/        Screenshots, ERD, Postman collection, ADRs
-```
-
----
+- Live OpenAPI docs: `http://localhost:8080/docs` · committed snapshot: [`docs/openapi.json`](docs/openapi.json) (`make openapi`)
+- Postman collection + DEV/Nginx environments: [`docs/`](docs) — full endpoint reference is in [`backend/README.md`](backend/README.md)
 
 ## Screenshots
 
-![Issue panel](docs/screenshot1b.png)
-
-![Issue details view](docs/screenshot2.png)
-
-![Epic details view](docs/screenshot3.png)
+![Issue panel](docs/screenshot2.png)
+![Epic details](docs/screenshot3.png)
