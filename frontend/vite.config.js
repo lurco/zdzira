@@ -26,23 +26,14 @@ export default defineConfig({
     host: true,   // bind 0.0.0.0 so the port is reachable outside the container
     port: 5173,
     proxy: {
+      // SSE stream: no timeout so the long-lived connection is not cut.
+      // http-proxy streams the response as it arrives; the backend disables
+      // buffering (X-Accel-Buffering: no) so frames reach the browser live.
       '/api/v1/events': {
         target: backendUrl,
         changeOrigin: true,
-        // selfHandleResponse bypasses http-proxy's default response handling,
-        // which can buffer chunks. We copy headers and pipe directly so each
-        // SSE frame is forwarded to the browser as soon as the backend writes it.
-        selfHandleResponse: true,
         configure: proxy => {
           proxy.on('proxyReq', proxyReq => { proxyReq.setTimeout(0) })
-          proxy.on('proxyRes', (proxyRes, _req, res) => {
-            res.writeHead(proxyRes.statusCode, proxyRes.headers)
-            proxyRes.pipe(res)
-          })
-          proxy.on('error', (_err, _req, res) => {
-            if (!res.headersSent) res.writeHead(502)
-            res.end()
-          })
         },
       },
       '/api': { target: backendUrl, changeOrigin: true },

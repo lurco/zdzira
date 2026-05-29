@@ -42,9 +42,6 @@ es.onerror = () => {
   sseConnected = false
 }
 
-// Polling fallback: keeps the board fresh even when SSE is not working.
-setInterval(refreshBoard, 10_000)
-
 const boardEl = document.getElementById('board')
 let currentIssue = null
 let currentEpics = []
