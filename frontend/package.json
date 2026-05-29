@@ -17,6 +17,7 @@
   "dependencies": {
     "handlebars": "^4.7.9",
     "htmx-ext-client-side-templates": "^2.0.2",
+    "htmx-ext-json-enc": "^2.0.3",
     "htmx.org": "^2.0.4"
   }
 }
