@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32">
+  <!-- Neo-brutalist Zdzira mark: yellow plate, hard offset shadow, bold Z.
+       Mirrors the topbar .logo (plate #F5D547, ink border, 3px hard shadow). -->
+  <rect x="5.5" y="5.5" width="23" height="23" fill="#0A0908"/>
+  <rect x="2.5" y="2.5" width="23" height="23" fill="#F5D547" stroke="#0A0908" stroke-width="3"/>
+  <path d="M8 10 H21 L8 21 H21" fill="none" stroke="#0A0908" stroke-width="3.4"
+        stroke-linecap="square" stroke-linejoin="miter"/>
+</svg>
