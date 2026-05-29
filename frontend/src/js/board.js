@@ -419,19 +419,83 @@ function loadLinks(issueRef) {
   const form = document.getElementById('linkForm')
   if (!form || form.dataset.wired) return
   form.dataset.wired = '1'
+  wireLinkCombobox(form, issueRef)
+}
+
+// wireLinkCombobox turns the target-ref input into a validated autocomplete:
+// it suggests existing issues by ref or title (description shown on hover) and
+// only lets you link an issue that actually exists.
+function wireLinkCombobox(form, issueRef) {
+  const input = form.querySelector('#linkTargetInput')
+  const results = form.querySelector('#linkResults')
+  const byRef = new Map() // REF -> issue
+  let options = []
+
+  fetch(`/api/v1/projects/${PROJECT}/issues`)
+    .then(r => r.json())
+    .then(issues => {
+      options = issues.filter(i => i.ref !== issueRef)
+      options.forEach(i => byRef.set(i.ref.toUpperCase(), i))
+    })
+
+  function hideResults() {
+    results.hidden = true
+    input.setAttribute('aria-expanded', 'false')
+  }
+
+  function showSuggestions() {
+    const q = input.value.trim().toUpperCase()
+    const matches = q
+      ? options
+          .filter(i => i.ref.toUpperCase().includes(q) || i.name.toUpperCase().includes(q))
+          .slice(0, 8)
+      : []
+    if (!matches.length) return hideResults()
+    results.replaceChildren(...matches.map(issue => {
+      const li = document.createElement('li')
+      li.className = 'link-combobox__option'
+      li.setAttribute('role', 'option')
+      li.dataset.ref = issue.ref
+      li.title = issue.description || issue.name
+      const ref = document.createElement('span')
+      ref.className = 'mono'
+      ref.textContent = issue.ref
+      li.append(ref, ' ', document.createTextNode(issue.name))
+      return li
+    }))
+    results.hidden = false
+    input.setAttribute('aria-expanded', 'true')
+  }
+
+  input.addEventListener('input', showSuggestions)
+  input.addEventListener('focus', showSuggestions)
+  input.addEventListener('blur', () => setTimeout(hideResults, 120))
+  // mousedown (not click) so selection happens before the input blurs.
+  results.addEventListener('mousedown', e => {
+    const option = e.target.closest('[data-ref]')
+    if (!option) return
+    e.preventDefault()
+    input.value = option.dataset.ref
+    hideResults()
+  })
+
   form.addEventListener('submit', e => {
     e.preventDefault()
-    const targetRef = form.querySelector('[name="target_ref"]')?.value.trim().toUpperCase()
+    const targetRef = input.value.trim().toUpperCase()
     const type = form.querySelector('[name="type"]')?.value
     if (!targetRef) return
+    if (!byRef.has(targetRef)) {
+      window.showToast('Pick an existing issue from the list')
+      return
+    }
     fetch(`/api/v1/projects/${PROJECT}/issues/${issueRef}/links`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ target_ref: targetRef, type }),
     })
       .then(r => { if (!r.ok) throw new Error(r.status) })
-      .then(() => { form.querySelector('[name="target_ref"]').value = ''; loadLinks(issueRef) })
-      .catch(() => window.showToast('Failed to create link — check the issue ref'))
+      .then(() => { input.value = ''; loadLinks(issueRef) })
+      .catch(() => window.showToast('Failed to create link'))
   })
 }
 

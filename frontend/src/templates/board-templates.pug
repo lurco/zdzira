@@ -276,7 +276,10 @@ script#tmpl-issue-panel(type="text/x-handlebars-template")
   |     <h3 class="issue-panel__section-title">Links</h3>
   |     <div id="linksList"></div>
   |     <form class="issue-panel__link-form" id="linkForm">
-  |       <input class="modal__input issue-panel__link-ref" name="target_ref" placeholder="Issue ref, e.g. {{projectSlug}}-42" autocomplete="off">
+  |       <div class="link-combobox">
+  |         <input class="modal__input issue-panel__link-ref" name="target_ref" id="linkTargetInput" placeholder="Search issue by ref or title…" autocomplete="off" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="linkResults">
+  |         <ul class="link-combobox__results" id="linkResults" role="listbox" hidden></ul>
+  |       </div>
   |       <select class="mini-select" name="type">
   |         <option value="RELATES_TO">Relates to</option>
   |         <option value="BLOCKS">Blocks</option>

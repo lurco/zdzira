@@ -231,11 +231,46 @@
   gap: 6px
   margin-top: 8px
 
-  .issue-panel__link-ref
+  .link-combobox
     flex: 1
     min-width: 0
+
+  .issue-panel__link-ref
+    width: 100%
     padding: 6px 10px
     font-size: 12px
+
+.link-combobox
+  position: relative
+
+  &__results
+    position: absolute
+    z-index: 10
+    left: 0
+    right: 0
+    top: calc(100% + 2px)
+    list-style: none
+    margin: 0
+    padding: 0
+    max-height: 200px
+    overflow-y: auto
+    background: var(--paper)
+    border: 2px solid var(--line)
+    box-shadow: var(--shadow-sm)
+
+  &__option
+    display: flex
+    align-items: baseline
+    gap: 6px
+    padding: 6px 10px
+    font-size: 12px
+    cursor: pointer
+    white-space: nowrap
+    overflow: hidden
+    text-overflow: ellipsis
+
+    &:hover
+      background: var(--paper-2)
 
 .link-list
   list-style: none
