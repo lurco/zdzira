@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"fmt"
+	"strings"
 	"zdzira/backend/model"
 	"zdzira/backend/store"
 )
@@ -50,7 +51,7 @@ func (s *EpicService) Create(ctx context.Context, in CreateEpicInput) (*model.Ep
 	if err := s.stores.Epics.Create(ctx, e); err != nil {
 		return nil, err
 	}
-	s.audit.record(ctx, p.ID, "epic", fmt.Sprintf("%s-E%d", p.Shortcut, e.Number), "created")
+	s.audit.record(ctx, p.ID, "epic", fmt.Sprintf("%s-E%d", p.Shortcut, e.Number), "created", e.Name)
 	return setEpicRef(p.Shortcut, e), nil
 }
 
@@ -98,12 +99,19 @@ func (s *EpicService) Update(ctx context.Context, in UpdateEpicInput) (*model.Ep
 	if err != nil {
 		return nil, err
 	}
+	var changed []string
+	if e.Name != in.Name {
+		changed = append(changed, "name")
+	}
+	if !equalStringPtr(e.Description, in.Description) {
+		changed = append(changed, "description")
+	}
 	e.Name = in.Name
 	e.Description = in.Description
 	if err := s.stores.Epics.Update(ctx, e); err != nil {
 		return nil, err
 	}
-	s.audit.record(ctx, p.ID, "epic", fmt.Sprintf("%s-E%d", p.Shortcut, e.Number), "updated")
+	s.audit.record(ctx, p.ID, "epic", fmt.Sprintf("%s-E%d", p.Shortcut, e.Number), "updated", strings.Join(changed, ", "))
 	return setEpicRef(p.Shortcut, e), nil
 }
 
@@ -119,6 +127,6 @@ func (s *EpicService) Delete(ctx context.Context, projectSlug, ref string) error
 	if err := s.stores.Epics.Delete(ctx, e.ID); err != nil {
 		return err
 	}
-	s.audit.record(ctx, p.ID, "epic", fmt.Sprintf("%s-E%d", p.Shortcut, e.Number), "deleted")
+	s.audit.record(ctx, p.ID, "epic", fmt.Sprintf("%s-E%d", p.Shortcut, e.Number), "deleted", e.Name)
 	return nil
 }

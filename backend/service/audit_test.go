@@ -26,6 +26,7 @@ func TestAuditIssueUpdate_RecordsUpdated(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(t, "updated", entries[0].Action)
 	assert.Equal(t, "AUD-1", entries[0].Ref)
+	assert.Equal(t, "name, type, priority", entries[0].Detail)
 }
 
 func TestAuditIssueMoved_RecordsMoved(t *testing.T) {
@@ -45,6 +46,7 @@ func TestAuditIssueMoved_RecordsMoved(t *testing.T) {
 	entries, err := svcs.Audit.ListForProject(ctx, "audit-proj")
 	require.NoError(t, err)
 	assert.Equal(t, "moved", entries[0].Action)
+	assert.Equal(t, "Backlog → Done", entries[0].Detail)
 }
 
 func TestAuditIssueDelete_RecordsDeleted(t *testing.T) {

@@ -1,14 +1,16 @@
 # Append-only audit log — REST only, action + ref, per-project scope
 
 An `AuditEntry` table records every mutation to Issues and Epics. Each row stores: `project_id`, `entity_type` ("issue"
-or "epic"), `ref` (e.g. `PROJ-42`, `PROJ-E1`), `action` ("created", "updated", "moved", "deleted"), and `created_at`. No
-`updated_at`, no `deleted_at` — rows are never modified or removed.
+or "epic"), `ref` (e.g. `PROJ-42`, `PROJ-E1`), `action` ("created", "updated", "moved", "deleted"), an optional
+`detail` summary string, and `created_at`. No `updated_at`, no `deleted_at` — rows are never modified or removed.
 
 **Human-only:** The audit feed is intentionally excluded from MCP tools. Agents act on the current state; the audit
 trail is for human review only.
 
-**Action + ref only:** No payload snapshot. Keeps storage minimal for a local single-user tool; if "what did it look
-like" is needed, `created_at` can be correlated with git history or comments.
+**Action + ref + detail:** No full payload snapshot. A lightweight, optional `detail` string carries a human-readable
+summary of the change — "Backlog → In Progress" for a move, the changed field names ("name, priority") for an update,
+the entity name for create/delete. This keeps the log useful at a glance (ZDZ-17) without storing before/after copies; if
+"what did it look like" is needed, `created_at` can still be correlated with git history or comments.
 
 **Per-project scope:** Exposed at `GET /projects/{slug}/audit`. A global feed adds no value in a single-user tool and
 complicates queries.

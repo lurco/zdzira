@@ -81,8 +81,44 @@ func (s *IssueService) Create(ctx context.Context, in CreateIssueInput) (*model.
 	if err := s.stores.Issues.Create(ctx, issue); err != nil {
 		return nil, err
 	}
-	s.audit.record(ctx, p.ID, "issue", fmt.Sprintf("%s-%d", p.Shortcut, issue.Number), "created")
+	s.audit.record(ctx, p.ID, "issue", fmt.Sprintf("%s-%d", p.Shortcut, issue.Number), "created", issue.Name)
 	return setIssueRef(p.Shortcut, issue), nil
+}
+
+// changedIssueFields lists the fields that differ between two issue snapshots,
+// e.g. "priority, epic", for a human-readable audit detail.
+func changedIssueFields(before, after *model.Issue) string {
+	var changed []string
+	if before.Name != after.Name {
+		changed = append(changed, "name")
+	}
+	if !equalStringPtr(before.Description, after.Description) {
+		changed = append(changed, "description")
+	}
+	if before.Type != after.Type {
+		changed = append(changed, "type")
+	}
+	if before.Priority != after.Priority {
+		changed = append(changed, "priority")
+	}
+	if !equalUintPtr(before.EpicID, after.EpicID) {
+		changed = append(changed, "epic")
+	}
+	return strings.Join(changed, ", ")
+}
+
+func equalStringPtr(a, b *string) bool {
+	if a == nil || b == nil {
+		return a == b
+	}
+	return *a == *b
+}
+
+func equalUintPtr(a, b *uint) bool {
+	if a == nil || b == nil {
+		return a == b
+	}
+	return *a == *b
 }
 
 func (s *IssueService) Get(ctx context.Context, projectSlug, ref string) (*model.Issue, error) {
@@ -149,11 +185,16 @@ func (s *IssueService) Move(ctx context.Context, in MoveIssueInput) (*model.Issu
 		return nil, err
 	}
 
+	fromName := ""
+	if from, err := s.stores.Swimlanes.GetByID(ctx, issue.SwimlaneID); err == nil {
+		fromName = from.Name
+	}
+
 	issue.SwimlaneID = sl.ID
 	if err := s.stores.Issues.Update(ctx, issue); err != nil {
 		return nil, err
 	}
-	s.audit.record(ctx, p.ID, "issue", fmt.Sprintf("%s-%d", p.Shortcut, issue.Number), "moved")
+	s.audit.record(ctx, p.ID, "issue", fmt.Sprintf("%s-%d", p.Shortcut, issue.Number), "moved", fmt.Sprintf("%s → %s", fromName, sl.Name))
 	return setIssueRef(p.Shortcut, issue), nil
 }
 
@@ -176,6 +217,7 @@ func (s *IssueService) Update(ctx context.Context, in UpdateIssueInput) (*model.
 	if err != nil {
 		return nil, err
 	}
+	before := *issue
 	issue.Name = in.Name
 	issue.Description = in.Description
 	issue.Type = in.Type
@@ -194,7 +236,7 @@ func (s *IssueService) Update(ctx context.Context, in UpdateIssueInput) (*model.
 	if err := s.stores.Issues.Update(ctx, issue); err != nil {
 		return nil, err
 	}
-	s.audit.record(ctx, p.ID, "issue", fmt.Sprintf("%s-%d", p.Shortcut, issue.Number), "updated")
+	s.audit.record(ctx, p.ID, "issue", fmt.Sprintf("%s-%d", p.Shortcut, issue.Number), "updated", changedIssueFields(&before, issue))
 	return setIssueRef(p.Shortcut, issue), nil
 }
 
@@ -235,7 +277,7 @@ func (s *IssueService) Delete(ctx context.Context, projectSlug, ref string) erro
 	if err := s.stores.Issues.Delete(ctx, issue.ID); err != nil {
 		return err
 	}
-	s.audit.record(ctx, p.ID, "issue", fmt.Sprintf("%s-%d", p.Shortcut, issue.Number), "deleted")
+	s.audit.record(ctx, p.ID, "issue", fmt.Sprintf("%s-%d", p.Shortcut, issue.Number), "deleted", issue.Name)
 	return nil
 }
 

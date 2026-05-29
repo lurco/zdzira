@@ -19,11 +19,15 @@ func (s *AuditService) ListForProject(ctx context.Context, projectSlug string) (
 	return s.stores.Audit.ListByProject(ctx, p.ID)
 }
 
-func (s *AuditService) record(ctx context.Context, projectID uint, entityType, ref, action string) {
+// record appends an audit entry. detail is an optional human-readable summary
+// of the change (e.g. "Backlog → In Progress"); pass "" when there is nothing
+// useful to add beyond the action.
+func (s *AuditService) record(ctx context.Context, projectID uint, entityType, ref, action, detail string) {
 	_ = s.stores.Audit.Record(ctx, &model.AuditEntry{
 		ProjectID:  projectID,
 		EntityType: entityType,
 		Ref:        ref,
 		Action:     action,
+		Detail:     detail,
 	})
 }

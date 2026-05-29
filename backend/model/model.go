@@ -106,5 +106,6 @@ type AuditEntry struct {
 	EntityType string    `gorm:"not null"                json:"entity_type"`
 	Ref        string    `gorm:"not null"                json:"ref"`
 	Action     string    `gorm:"not null"                json:"action"`
+	Detail     string    `gorm:""                        json:"detail,omitempty"`
 	CreatedAt  time.Time `gorm:"not null;autoCreateTime" json:"created_at"`
 }
