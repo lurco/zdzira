@@ -4,6 +4,7 @@
 
 # Binary
 bin/
+/zdzira
 # Database
 *.db
 

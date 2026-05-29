@@ -133,9 +133,9 @@ script#tmpl-add-issue-form(type="text/x-handlebars-template")
   | <form class="modal__form"
   |       hx-post="/api/v1/projects/{{projectSlug}}/issues"
   |       hx-ext="json-enc"
+  |       hx-vals='{"swimlane_id": {{laneId}}}'
   |       hx-swap="none">
   |   <h2 class="modal__title">New issue in {{laneName}}</h2>
-  |   <input type="hidden" name="swimlane_id" value="{{laneId}}">
   |   <label class="modal__label">Title</label>
   |   <input class="modal__input" name="name" placeholder="What needs doing?" required autofocus>
   |   <label class="modal__label">Description</label>

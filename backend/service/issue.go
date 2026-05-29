@@ -70,7 +70,7 @@ func (s *IssueService) Create(ctx context.Context, in CreateIssueInput) (*model.
 		Position:    p.IssueCounter,
 	}
 
-	if in.EpicRef != nil {
+	if in.EpicRef != nil && *in.EpicRef != "" {
 		epic, err := s.resolveEpicRef(ctx, p, *in.EpicRef)
 		if err != nil {
 			return nil, err

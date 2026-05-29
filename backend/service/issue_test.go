@@ -188,6 +188,22 @@ func TestIssueCreate_AttachesToEpic(t *testing.T) {
 	assert.Equal(t, epic.ID, *issue.EpicID)
 }
 
+func TestIssueCreate_EmptyEpicRefMeansNoEpic(t *testing.T) {
+	svcs := newTestServices(t)
+	newProjectWithIssues(t, svcs)
+
+	emptyRef := ""
+	issue, err := svcs.Issues.Create(ctx, service.CreateIssueInput{
+		ProjectSlug: "tracker",
+		Name:        "no epic",
+		Type:        "TASK",
+		Priority:    "LOW",
+		EpicRef:     &emptyRef,
+	})
+	require.NoError(t, err)
+	assert.Nil(t, issue.EpicID)
+}
+
 func TestIssueGet_ByRef(t *testing.T) {
 	svcs := newTestServices(t)
 	newProjectWithIssues(t, svcs)
