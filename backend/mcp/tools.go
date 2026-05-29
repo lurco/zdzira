@@ -2,12 +2,25 @@ package mcp
 
 import (
 	"context"
+	"encoding/json"
+	"fmt"
 	"zdzira/backend/model"
 	"zdzira/backend/service"
 
 	"github.com/mark3labs/mcp-go/mcp"
 	"github.com/mark3labs/mcp-go/server"
 )
+
+// newListResult returns a slice as JSON text only. The MCP spec requires
+// structured content to be a JSON object, so list tools (which return arrays)
+// must not set it — clients reject a top-level array.
+func newListResult[T any](items []T) (*mcp.CallToolResult, error) {
+	b, err := json.Marshal(items)
+	if err != nil {
+		return nil, fmt.Errorf("marshal list result: %w", err)
+	}
+	return mcp.NewToolResultText(string(b)), nil
+}
 
 func registerProjectTools(s *server.MCPServer, svcs *service.Services) {
 	s.AddTool(
@@ -19,7 +32,7 @@ func registerProjectTools(s *server.MCPServer, svcs *service.Services) {
 			if err != nil {
 				return mcp.NewToolResultError(err.Error()), nil
 			}
-			return mcp.NewToolResultJSON(projects)
+			return newListResult(projects)
 		},
 	)
 
@@ -86,7 +99,7 @@ func registerEpicTools(s *server.MCPServer, svcs *service.Services) {
 			if err != nil {
 				return mcp.NewToolResultError(err.Error()), nil
 			}
-			return mcp.NewToolResultJSON(epics)
+			return newListResult(epics)
 		},
 	)
 
@@ -158,7 +171,7 @@ func registerIssueTools(s *server.MCPServer, svcs *service.Services) {
 			if err != nil {
 				return mcp.NewToolResultError(err.Error()), nil
 			}
-			return mcp.NewToolResultJSON(issues)
+			return newListResult(issues)
 		},
 	)
 
@@ -331,7 +344,7 @@ func registerSwimlaneTools(s *server.MCPServer, svcs *service.Services) {
 			if err != nil {
 				return mcp.NewToolResultError(err.Error()), nil
 			}
-			return mcp.NewToolResultJSON(swimlanes)
+			return newListResult(swimlanes)
 		},
 	)
 }
@@ -447,7 +460,7 @@ func registerCommentTools(s *server.MCPServer, svcs *service.Services) {
 			if err != nil {
 				return mcp.NewToolResultError(err.Error()), nil
 			}
-			return mcp.NewToolResultJSON(comments)
+			return newListResult(comments)
 		},
 	)
 }
@@ -510,7 +523,7 @@ func registerLinkTools(s *server.MCPServer, svcs *service.Services) {
 			if err != nil {
 				return mcp.NewToolResultError(err.Error()), nil
 			}
-			return mcp.NewToolResultJSON(links)
+			return newListResult(links)
 		},
 	)
 }
