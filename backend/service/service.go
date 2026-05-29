@@ -11,6 +11,7 @@ type Services struct {
 	Comments  *CommentService
 	Links     *LinkService
 	Swimlanes *SwimlaneService
+	Board     *BoardService
 	Audit     *AuditService
 }
 
@@ -23,6 +24,7 @@ func New(stores *store.Stores) *Services {
 		Comments:  &CommentService{stores: stores},
 		Links:     &LinkService{stores: stores},
 		Swimlanes: &SwimlaneService{stores: stores},
+		Board:     &BoardService{stores: stores},
 		Audit:     audit,
 	}
 }

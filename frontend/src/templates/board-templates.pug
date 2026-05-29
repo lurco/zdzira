@@ -1,0 +1,36 @@
+script#tmpl-board(type="text/x-handlebars-template")
+  | {{#each swimlanes}}
+  |   <div class="lane" data-lane-id="{{id}}" data-lane-name="{{name}}">
+  |     <div class="lane-header" draggable="true" data-drag-kind="lane" data-lane-id="{{id}}">
+  |       <span class="lane-swatch" style="background:{{laneColor color}}"></span>
+  |       <span class="lane-title">{{name}}</span>
+  |       <span class="lane-count">{{issues.length}}</span>
+  |       <button class="lane-menu" aria-label="Lane menu" type="button">⋯</button>
+  |     </div>
+  |     <div class="lane-body" data-lane-id="{{id}}">
+  |       {{#if issues.length}}
+  |         {{#each issues}}
+  |           <div class="card" draggable="true" data-drag-kind="card" data-card-ref="{{ref}}" data-lane-id="{{swimlane_id}}">
+  |             <div class="card-strip" style="background:{{laneColor ../color}}"></div>
+  |             <div class="card-top">
+  |               <span class="card-id mono">{{ref}}</span>
+  |               <span class="badge {{priorityClass priority}}">{{priority}}</span>
+  |             </div>
+  |             <div class="card-title">{{name}}</div>
+  |             <div class="card-meta">
+  |               <span class="tag tag-{{lower type}}">{{type}}</span>
+  |             </div>
+  |           </div>
+  |         {{/each}}
+  |       {{else}}
+  |         <div class="lane-empty">No issues</div>
+  |       {{/if}}
+  |     </div>
+  |     <div class="lane-footer">
+  |       <button class="add-card-btn" type="button" data-lane-id="{{id}}">+ Add issue</button>
+  |     </div>
+  |   </div>
+  | {{/each}}
+  | <button class="add-lane" type="button" data-add-lane>
+  |   <span class="plus">+</span> Add lane
+  | </button>
