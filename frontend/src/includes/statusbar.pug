@@ -1,11 +1,14 @@
 div.statusbar
-  div
-    span.dotg
-    span API :8080
-    span(style='margin-left:14px;')
-      span.dotg
-      |  MCP ready
-    span#sseStatus(style='margin-left:14px; opacity:0.6') SSE …
+  div.statusbar__conn
+    span.status#statusApi(title='REST API reachability')
+      span.status__dot
+      span.status__label API
+    span.status#statusMcp(title='MCP endpoint reachability')
+      span.status__dot
+      span.status__label MCP
+    span.status#statusSse(title='Live board updates (Server-Sent Events)')
+      span.status__dot
+      span.status__label SSE
   div.right
     span
       span#totalCount 0

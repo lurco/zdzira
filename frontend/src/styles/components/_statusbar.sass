@@ -16,18 +16,37 @@
   gap: 14px
   z-index: 40
 
-  .dotg
-    display: inline-block
-    width: 8px
-    height: 8px
-    background: var(--acc-green)
-    border: 1.5px solid var(--paper)
-    margin-right: 6px
-    vertical-align: middle
+  &__conn
+    display: flex
+    gap: 16px
 
   .right
     display: flex
     gap: 18px
+
+.status
+  display: inline-flex
+  align-items: center
+  gap: 6px
+
+  &__dot
+    width: 8px
+    height: 8px
+    border: 1.5px solid var(--paper)
+    background: var(--muted)
+    transition: background 0.2s ease
+
+  &.is-up &__dot
+    background: var(--acc-green)
+
+  &.is-down &__dot
+    background: var(--acc-red)
+
+  &.is-down
+    opacity: 0.6
+
+[data-mode="dark"] .status__dot
+  border-color: var(--ink)
 
 [data-mode="dark"] .statusbar
   background: var(--paper)

@@ -10,21 +10,36 @@ import { renderTemplate } from './dialog'
 import { PROJECT, refreshBoard } from './project'
 import Handlebars from 'handlebars'
 
-// SSE: refresh the board when any agent or other tab mutates the API.
+// Backend connection markers in the statusbar: API, MCP and SSE.
+// Each flips green (up) / red (down) from a real probe, so e.g. API up + SSE
+// down clearly signals a working backend whose live stream isn't reaching us.
 let sseRefreshTimer = null
 let sseConnected = false
 
-function setSseStatus(text, ok) {
-  const el = document.getElementById('sseStatus')
+function setStatus(id, up) {
+  const el = document.getElementById(id)
   if (!el) return
-  el.textContent = text
-  el.style.opacity = ok ? '1' : '0.5'
-  el.style.color = ok ? 'var(--acc-green)' : 'var(--acc-red)'
+  el.classList.toggle('is-up', up)
+  el.classList.toggle('is-down', !up)
 }
+
+// Probe the REST API and the MCP endpoint. /health returns 200 when the API is
+// up; for MCP any HTTP response (even 404) means the endpoint is reachable —
+// only a network failure counts as down.
+function pollBackend() {
+  fetch('/health', { cache: 'no-store' })
+    .then(r => setStatus('statusApi', r.ok))
+    .catch(() => setStatus('statusApi', false))
+  fetch('/mcp', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{}' })
+    .then(() => setStatus('statusMcp', true))
+    .catch(() => setStatus('statusMcp', false))
+}
+pollBackend()
+setInterval(pollBackend, 20_000)
 
 const es = new EventSource('/api/v1/events')
 es.onopen = () => {
-  setSseStatus('SSE ●', true)
+  setStatus('statusSse', true)
   if (sseConnected) {
     // Reconnect after a drop — board may have missed events, force a refresh.
     clearTimeout(sseRefreshTimer)
@@ -38,7 +53,7 @@ es.onmessage = (e) => {
   sseRefreshTimer = setTimeout(refreshBoard, 300)
 }
 es.onerror = () => {
-  setSseStatus('SSE ✕', false)
+  setStatus('statusSse', false)
   sseConnected = false
 }
 
