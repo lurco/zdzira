@@ -1,0 +1,2599 @@
+{
+  "components": {
+    "schemas": {
+      "Add-comment-to-issueRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "$schema": {
+            "description": "A URL to the JSON Schema for this object.",
+            "examples": [
+              "https://example.com/schemas/Add-comment-to-issueRequest.json"
+            ],
+            "format": "uri",
+            "readOnly": true,
+            "type": "string"
+          },
+          "contents": {
+            "description": "Comment text",
+            "examples": [
+              "Looks good, merging."
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "contents"
+        ],
+        "type": "object"
+      },
+      "AuditEntry": {
+        "additionalProperties": false,
+        "properties": {
+          "action": {
+            "type": "string"
+          },
+          "created_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "entity_type": {
+            "type": "string"
+          },
+          "id": {
+            "format": "int64",
+            "minimum": 0,
+            "type": "integer"
+          },
+          "project_id": {
+            "format": "int64",
+            "minimum": 0,
+            "type": "integer"
+          },
+          "ref": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "project_id",
+          "entity_type",
+          "ref",
+          "action",
+          "created_at"
+        ],
+        "type": "object"
+      },
+      "BoardLane": {
+        "additionalProperties": false,
+        "properties": {
+          "color": {
+            "type": "string"
+          },
+          "id": {
+            "format": "int64",
+            "minimum": 0,
+            "type": "integer"
+          },
+          "issues": {
+            "items": {
+              "$ref": "#/components/schemas/Issue"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "name": {
+            "type": "string"
+          },
+          "position": {
+            "format": "int64",
+            "minimum": 0,
+            "type": "integer"
+          },
+          "project_id": {
+            "format": "int64",
+            "minimum": 0,
+            "type": "integer"
+          }
+        },
+        "required": [
+          "issues",
+          "id",
+          "project_id",
+          "name",
+          "position"
+        ],
+        "type": "object"
+      },
+      "BoardView": {
+        "additionalProperties": false,
+        "properties": {
+          "$schema": {
+            "description": "A URL to the JSON Schema for this object.",
+            "examples": [
+              "https://example.com/schemas/BoardView.json"
+            ],
+            "format": "uri",
+            "readOnly": true,
+            "type": "string"
+          },
+          "epic_ref": {
+            "type": "string"
+          },
+          "epics": {
+            "items": {
+              "$ref": "#/components/schemas/Epic"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "swimlanes": {
+            "items": {
+              "$ref": "#/components/schemas/BoardLane"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "swimlanes",
+          "epics"
+        ],
+        "type": "object"
+      },
+      "Comment": {
+        "additionalProperties": false,
+        "properties": {
+          "$schema": {
+            "description": "A URL to the JSON Schema for this object.",
+            "examples": [
+              "https://example.com/schemas/Comment.json"
+            ],
+            "format": "uri",
+            "readOnly": true,
+            "type": "string"
+          },
+          "contents": {
+            "type": "string"
+          },
+          "created_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "epic_id": {
+            "format": "int64",
+            "minimum": 0,
+            "type": "integer"
+          },
+          "id": {
+            "format": "int64",
+            "minimum": 0,
+            "type": "integer"
+          },
+          "issue_id": {
+            "format": "int64",
+            "minimum": 0,
+            "type": "integer"
+          },
+          "project_id": {
+            "format": "int64",
+            "minimum": 0,
+            "type": "integer"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "contents",
+          "created_at",
+          "updated_at"
+        ],
+        "type": "object"
+      },
+      "Create-linkRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "$schema": {
+            "description": "A URL to the JSON Schema for this object.",
+            "examples": [
+              "https://example.com/schemas/Create-linkRequest.json"
+            ],
+            "format": "uri",
+            "readOnly": true,
+            "type": "string"
+          },
+          "target_ref": {
+            "description": "Target issue reference",
+            "examples": [
+              "PROJ-38"
+            ],
+            "type": "string"
+          },
+          "type": {
+            "description": "Link type",
+            "examples": [
+              "BLOCKS"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "target_ref",
+          "type"
+        ],
+        "type": "object"
+      },
+      "CreateEpicInput": {
+        "additionalProperties": false,
+        "properties": {
+          "$schema": {
+            "description": "A URL to the JSON Schema for this object.",
+            "examples": [
+              "https://example.com/schemas/CreateEpicInput.json"
+            ],
+            "format": "uri",
+            "readOnly": true,
+            "type": "string"
+          },
+          "description": {
+            "description": "Optional epic description",
+            "examples": [
+              "All issues related to the new OAuth flow"
+            ],
+            "type": "string"
+          },
+          "name": {
+            "description": "Epic name",
+            "examples": [
+              "User authentication overhaul"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "name"
+        ],
+        "type": "object"
+      },
+      "CreateIssueInput": {
+        "additionalProperties": false,
+        "properties": {
+          "$schema": {
+            "description": "A URL to the JSON Schema for this object.",
+            "examples": [
+              "https://example.com/schemas/CreateIssueInput.json"
+            ],
+            "format": "uri",
+            "readOnly": true,
+            "type": "string"
+          },
+          "description": {
+            "description": "Optional description",
+            "type": "string"
+          },
+          "epic_ref": {
+            "description": "Epic reference to attach to, e.g. PROJ-E1",
+            "examples": [
+              "PROJ-E1"
+            ],
+            "type": "string"
+          },
+          "name": {
+            "description": "Short issue title",
+            "examples": [
+              "Fix login timeout"
+            ],
+            "type": "string"
+          },
+          "priority": {
+            "description": "Priority level",
+            "examples": [
+              "HIGH"
+            ],
+            "type": "string"
+          },
+          "swimlane_id": {
+            "description": "Override starting swimlane ID",
+            "format": "int64",
+            "minimum": 0,
+            "type": "integer"
+          },
+          "type": {
+            "description": "Issue type",
+            "examples": [
+              "BUG"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "type",
+          "priority",
+          "name"
+        ],
+        "type": "object"
+      },
+      "CreateProjectInput": {
+        "additionalProperties": false,
+        "properties": {
+          "$schema": {
+            "description": "A URL to the JSON Schema for this object.",
+            "examples": [
+              "https://example.com/schemas/CreateProjectInput.json"
+            ],
+            "format": "uri",
+            "readOnly": true,
+            "type": "string"
+          },
+          "description": {
+            "description": "Optional project description",
+            "examples": [
+              "Tracks backend feature work"
+            ],
+            "type": "string"
+          },
+          "name": {
+            "description": "Full project name",
+            "examples": [
+              "My Project"
+            ],
+            "type": "string"
+          },
+          "shortcut": {
+            "description": "Uppercase issue prefix, e.g. PROJ or API",
+            "examples": [
+              "PROJ"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "shortcut"
+        ],
+        "type": "object"
+      },
+      "CreateSwimlaneInput": {
+        "additionalProperties": false,
+        "properties": {
+          "$schema": {
+            "description": "A URL to the JSON Schema for this object.",
+            "examples": [
+              "https://example.com/schemas/CreateSwimlaneInput.json"
+            ],
+            "format": "uri",
+            "readOnly": true,
+            "type": "string"
+          },
+          "name": {
+            "description": "Swimlane name",
+            "examples": [
+              "In Review"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "name"
+        ],
+        "type": "object"
+      },
+      "EnrichedLink": {
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "format": "int64",
+            "minimum": 0,
+            "type": "integer"
+          },
+          "source": {
+            "$ref": "#/components/schemas/LinkedIssue"
+          },
+          "target": {
+            "$ref": "#/components/schemas/LinkedIssue"
+          },
+          "type": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "type",
+          "source",
+          "target"
+        ],
+        "type": "object"
+      },
+      "Epic": {
+        "additionalProperties": false,
+        "properties": {
+          "$schema": {
+            "description": "A URL to the JSON Schema for this object.",
+            "examples": [
+              "https://example.com/schemas/Epic.json"
+            ],
+            "format": "uri",
+            "readOnly": true,
+            "type": "string"
+          },
+          "created_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "id": {
+            "format": "int64",
+            "minimum": 0,
+            "type": "integer"
+          },
+          "name": {
+            "type": "string"
+          },
+          "number": {
+            "format": "int64",
+            "minimum": 0,
+            "type": "integer"
+          },
+          "project_id": {
+            "format": "int64",
+            "minimum": 0,
+            "type": "integer"
+          },
+          "ref": {
+            "type": "string"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "number",
+          "ref",
+          "name",
+          "project_id",
+          "created_at",
+          "updated_at"
+        ],
+        "type": "object"
+      },
+      "ErrorDetail": {
+        "additionalProperties": false,
+        "properties": {
+          "location": {
+            "description": "Where the error occurred, e.g. 'body.items[3].tags' or 'path.thing-id'",
+            "type": "string"
+          },
+          "message": {
+            "description": "Error message text",
+            "type": "string"
+          },
+          "value": {
+            "description": "The value at the given location"
+          }
+        },
+        "type": "object"
+      },
+      "ErrorModel": {
+        "additionalProperties": false,
+        "properties": {
+          "$schema": {
+            "description": "A URL to the JSON Schema for this object.",
+            "examples": [
+              "https://example.com/schemas/ErrorModel.json"
+            ],
+            "format": "uri",
+            "readOnly": true,
+            "type": "string"
+          },
+          "detail": {
+            "description": "A human-readable explanation specific to this occurrence of the problem.",
+            "examples": [
+              "Property foo is required but is missing."
+            ],
+            "type": "string"
+          },
+          "errors": {
+            "description": "Optional list of individual error details",
+            "items": {
+              "$ref": "#/components/schemas/ErrorDetail"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "instance": {
+            "description": "A URI reference that identifies the specific occurrence of the problem.",
+            "examples": [
+              "https://example.com/error-log/abc123"
+            ],
+            "format": "uri",
+            "type": "string"
+          },
+          "status": {
+            "description": "HTTP status code",
+            "examples": [
+              400
+            ],
+            "format": "int64",
+            "type": "integer"
+          },
+          "title": {
+            "description": "A short, human-readable summary of the problem type. This value should not change between occurrences of the error.",
+            "examples": [
+              "Bad Request"
+            ],
+            "type": "string"
+          },
+          "type": {
+            "default": "about:blank",
+            "description": "A URI reference to human-readable documentation for the error.",
+            "examples": [
+              "https://example.com/errors/example"
+            ],
+            "format": "uri",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "Issue": {
+        "additionalProperties": false,
+        "properties": {
+          "$schema": {
+            "description": "A URL to the JSON Schema for this object.",
+            "examples": [
+              "https://example.com/schemas/Issue.json"
+            ],
+            "format": "uri",
+            "readOnly": true,
+            "type": "string"
+          },
+          "created_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "epic_id": {
+            "format": "int64",
+            "minimum": 0,
+            "type": "integer"
+          },
+          "epic_name": {
+            "type": "string"
+          },
+          "epic_ref": {
+            "type": "string"
+          },
+          "id": {
+            "format": "int64",
+            "minimum": 0,
+            "type": "integer"
+          },
+          "name": {
+            "type": "string"
+          },
+          "number": {
+            "format": "int64",
+            "minimum": 0,
+            "type": "integer"
+          },
+          "position": {
+            "format": "int64",
+            "minimum": 0,
+            "type": "integer"
+          },
+          "priority": {
+            "type": "string"
+          },
+          "project_id": {
+            "format": "int64",
+            "minimum": 0,
+            "type": "integer"
+          },
+          "ref": {
+            "type": "string"
+          },
+          "swimlane_id": {
+            "format": "int64",
+            "minimum": 0,
+            "type": "integer"
+          },
+          "type": {
+            "type": "string"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "number",
+          "ref",
+          "type",
+          "priority",
+          "name",
+          "project_id",
+          "swimlane_id",
+          "position",
+          "created_at",
+          "updated_at"
+        ],
+        "type": "object"
+      },
+      "Link": {
+        "additionalProperties": false,
+        "properties": {
+          "$schema": {
+            "description": "A URL to the JSON Schema for this object.",
+            "examples": [
+              "https://example.com/schemas/Link.json"
+            ],
+            "format": "uri",
+            "readOnly": true,
+            "type": "string"
+          },
+          "id": {
+            "format": "int64",
+            "minimum": 0,
+            "type": "integer"
+          },
+          "issue_a": {
+            "format": "int64",
+            "minimum": 0,
+            "type": "integer"
+          },
+          "issue_b": {
+            "format": "int64",
+            "minimum": 0,
+            "type": "integer"
+          },
+          "type": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "type",
+          "issue_a",
+          "issue_b"
+        ],
+        "type": "object"
+      },
+      "LinkedIssue": {
+        "additionalProperties": false,
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "ref": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "ref",
+          "name"
+        ],
+        "type": "object"
+      },
+      "MoveIssueInput": {
+        "additionalProperties": false,
+        "properties": {
+          "$schema": {
+            "description": "A URL to the JSON Schema for this object.",
+            "examples": [
+              "https://example.com/schemas/MoveIssueInput.json"
+            ],
+            "format": "uri",
+            "readOnly": true,
+            "type": "string"
+          },
+          "swimlane": {
+            "description": "Target swimlane name",
+            "examples": [
+              "In Progress"
+            ],
+            "type": "string"
+          },
+          "swimlane_id": {
+            "description": "Target swimlane ID",
+            "format": "int64",
+            "minimum": 0,
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "Project": {
+        "additionalProperties": false,
+        "properties": {
+          "$schema": {
+            "description": "A URL to the JSON Schema for this object.",
+            "examples": [
+              "https://example.com/schemas/Project.json"
+            ],
+            "format": "uri",
+            "readOnly": true,
+            "type": "string"
+          },
+          "created_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "epic_counter": {
+            "format": "int64",
+            "minimum": 0,
+            "type": "integer"
+          },
+          "id": {
+            "format": "int64",
+            "minimum": 0,
+            "type": "integer"
+          },
+          "issue_counter": {
+            "format": "int64",
+            "minimum": 0,
+            "type": "integer"
+          },
+          "name": {
+            "type": "string"
+          },
+          "shortcut": {
+            "type": "string"
+          },
+          "slug": {
+            "type": "string"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "slug",
+          "shortcut",
+          "issue_counter",
+          "epic_counter",
+          "created_at",
+          "updated_at"
+        ],
+        "type": "object"
+      },
+      "ReorderSwimlanesInput": {
+        "additionalProperties": false,
+        "properties": {
+          "$schema": {
+            "description": "A URL to the JSON Schema for this object.",
+            "examples": [
+              "https://example.com/schemas/ReorderSwimlanesInput.json"
+            ],
+            "format": "uri",
+            "readOnly": true,
+            "type": "string"
+          },
+          "ids": {
+            "description": "All swimlane IDs in their new left-to-right order",
+            "items": {
+              "format": "int64",
+              "minimum": 0,
+              "type": "integer"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "ids"
+        ],
+        "type": "object"
+      },
+      "Swimlane": {
+        "additionalProperties": false,
+        "properties": {
+          "$schema": {
+            "description": "A URL to the JSON Schema for this object.",
+            "examples": [
+              "https://example.com/schemas/Swimlane.json"
+            ],
+            "format": "uri",
+            "readOnly": true,
+            "type": "string"
+          },
+          "color": {
+            "type": "string"
+          },
+          "id": {
+            "format": "int64",
+            "minimum": 0,
+            "type": "integer"
+          },
+          "name": {
+            "type": "string"
+          },
+          "position": {
+            "format": "int64",
+            "minimum": 0,
+            "type": "integer"
+          },
+          "project_id": {
+            "format": "int64",
+            "minimum": 0,
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id",
+          "project_id",
+          "name",
+          "position"
+        ],
+        "type": "object"
+      },
+      "UpdateEpicInput": {
+        "additionalProperties": false,
+        "properties": {
+          "$schema": {
+            "description": "A URL to the JSON Schema for this object.",
+            "examples": [
+              "https://example.com/schemas/UpdateEpicInput.json"
+            ],
+            "format": "uri",
+            "readOnly": true,
+            "type": "string"
+          },
+          "description": {
+            "description": "Updated epic description",
+            "type": "string"
+          },
+          "name": {
+            "description": "Updated epic name",
+            "examples": [
+              "Auth overhaul (revised)"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "name"
+        ],
+        "type": "object"
+      },
+      "UpdateIssueInput": {
+        "additionalProperties": false,
+        "properties": {
+          "$schema": {
+            "description": "A URL to the JSON Schema for this object.",
+            "examples": [
+              "https://example.com/schemas/UpdateIssueInput.json"
+            ],
+            "format": "uri",
+            "readOnly": true,
+            "type": "string"
+          },
+          "description": {
+            "description": "Updated description",
+            "type": "string"
+          },
+          "epic_ref": {
+            "description": "Epic reference to assign, or empty string to unassign, e.g. PROJ-E1",
+            "examples": [
+              "PROJ-E1"
+            ],
+            "type": "string"
+          },
+          "name": {
+            "description": "Updated issue title",
+            "examples": [
+              "Fix login timeout (revised)"
+            ],
+            "type": "string"
+          },
+          "priority": {
+            "description": "Updated priority level",
+            "examples": [
+              "IMMEDIATE"
+            ],
+            "type": "string"
+          },
+          "type": {
+            "description": "Updated issue type",
+            "examples": [
+              "BUG"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "type",
+          "priority"
+        ],
+        "type": "object"
+      },
+      "UpdateSwimlaneInput": {
+        "additionalProperties": false,
+        "properties": {
+          "$schema": {
+            "description": "A URL to the JSON Schema for this object.",
+            "examples": [
+              "https://example.com/schemas/UpdateSwimlaneInput.json"
+            ],
+            "format": "uri",
+            "readOnly": true,
+            "type": "string"
+          },
+          "color": {
+            "description": "Lane colour as #rrggbb or null to clear",
+            "examples": [
+              "#ffe082"
+            ],
+            "type": "string"
+          },
+          "name": {
+            "description": "New swimlane name",
+            "examples": [
+              "In Review"
+            ],
+            "type": "string"
+          }
+        },
+        "type": "object"
+      }
+    }
+  },
+  "info": {
+    "description": "Local issue tracker for AI-assisted software development. REST API for human access; MCP server at /mcp for agent access.",
+    "title": "Zdzira API",
+    "version": "1.0.0"
+  },
+  "openapi": "3.1.0",
+  "paths": {
+    "/projects": {
+      "get": {
+        "operationId": "list-projects",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/Project"
+                  },
+                  "type": [
+                    "array",
+                    "null"
+                  ]
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "List all projects",
+        "tags": [
+          "Projects"
+        ]
+      },
+      "post": {
+        "operationId": "create-project",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateProjectInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Project"
+                }
+              }
+            },
+            "description": "Created"
+          },
+          "default": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Create a project",
+        "tags": [
+          "Projects"
+        ]
+      }
+    },
+    "/projects/{slug}": {
+      "delete": {
+        "operationId": "delete-project",
+        "parameters": [
+          {
+            "description": "Project slug",
+            "in": "path",
+            "name": "slug",
+            "required": true,
+            "schema": {
+              "description": "Project slug",
+              "examples": [
+                "my-project"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "default": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Delete a project and all its contents",
+        "tags": [
+          "Projects"
+        ]
+      },
+      "get": {
+        "operationId": "get-project",
+        "parameters": [
+          {
+            "description": "Project slug",
+            "in": "path",
+            "name": "slug",
+            "required": true,
+            "schema": {
+              "description": "Project slug",
+              "examples": [
+                "my-project"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Project"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Get a project by slug",
+        "tags": [
+          "Projects"
+        ]
+      }
+    },
+    "/projects/{slug}/audit": {
+      "get": {
+        "description": "Returns all recorded mutations for issues and epics in reverse-chronological order. Append-only — entries are never modified or deleted.",
+        "operationId": "list-audit-log",
+        "parameters": [
+          {
+            "description": "Project slug",
+            "in": "path",
+            "name": "slug",
+            "required": true,
+            "schema": {
+              "description": "Project slug",
+              "examples": [
+                "my-project"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/AuditEntry"
+                  },
+                  "type": [
+                    "array",
+                    "null"
+                  ]
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Audit log for a project (human-only, not available via MCP)",
+        "tags": [
+          "Audit"
+        ]
+      }
+    },
+    "/projects/{slug}/board": {
+      "get": {
+        "operationId": "get-board",
+        "parameters": [
+          {
+            "description": "Project slug",
+            "in": "path",
+            "name": "slug",
+            "required": true,
+            "schema": {
+              "description": "Project slug",
+              "examples": [
+                "my-project"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Filter to issues belonging to this epic reference, e.g. PROJ-E1",
+            "explode": false,
+            "in": "query",
+            "name": "epic",
+            "schema": {
+              "description": "Filter to issues belonging to this epic reference, e.g. PROJ-E1",
+              "examples": [
+                "PROJ-E1"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BoardView"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Aggregate board view: swimlanes with grouped issues and the project's epics",
+        "tags": [
+          "Board"
+        ]
+      }
+    },
+    "/projects/{slug}/epics": {
+      "get": {
+        "operationId": "list-epics",
+        "parameters": [
+          {
+            "description": "Project slug",
+            "in": "path",
+            "name": "slug",
+            "required": true,
+            "schema": {
+              "description": "Project slug",
+              "examples": [
+                "my-project"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/Epic"
+                  },
+                  "type": [
+                    "array",
+                    "null"
+                  ]
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "List all epics in a project",
+        "tags": [
+          "Epics"
+        ]
+      },
+      "post": {
+        "operationId": "create-epic",
+        "parameters": [
+          {
+            "description": "Project slug",
+            "in": "path",
+            "name": "slug",
+            "required": true,
+            "schema": {
+              "description": "Project slug",
+              "examples": [
+                "my-project"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateEpicInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Epic"
+                }
+              }
+            },
+            "description": "Created"
+          },
+          "default": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Create an epic",
+        "tags": [
+          "Epics"
+        ]
+      }
+    },
+    "/projects/{slug}/epics/{epicRef}": {
+      "delete": {
+        "operationId": "delete-epic",
+        "parameters": [
+          {
+            "description": "Project slug",
+            "in": "path",
+            "name": "slug",
+            "required": true,
+            "schema": {
+              "description": "Project slug",
+              "examples": [
+                "my-project"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Epic reference, e.g. PROJ-E1",
+            "in": "path",
+            "name": "epicRef",
+            "required": true,
+            "schema": {
+              "description": "Epic reference, e.g. PROJ-E1",
+              "examples": [
+                "PROJ-E1"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "default": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Delete an epic",
+        "tags": [
+          "Epics"
+        ]
+      },
+      "get": {
+        "operationId": "get-epic",
+        "parameters": [
+          {
+            "description": "Project slug",
+            "in": "path",
+            "name": "slug",
+            "required": true,
+            "schema": {
+              "description": "Project slug",
+              "examples": [
+                "my-project"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Epic reference, e.g. PROJ-E1",
+            "in": "path",
+            "name": "epicRef",
+            "required": true,
+            "schema": {
+              "description": "Epic reference, e.g. PROJ-E1",
+              "examples": [
+                "PROJ-E1"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Epic"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Get an epic by reference",
+        "tags": [
+          "Epics"
+        ]
+      },
+      "put": {
+        "operationId": "update-epic",
+        "parameters": [
+          {
+            "description": "Project slug",
+            "in": "path",
+            "name": "slug",
+            "required": true,
+            "schema": {
+              "description": "Project slug",
+              "examples": [
+                "my-project"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Epic reference, e.g. PROJ-E1",
+            "in": "path",
+            "name": "epicRef",
+            "required": true,
+            "schema": {
+              "description": "Epic reference, e.g. PROJ-E1",
+              "examples": [
+                "PROJ-E1"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateEpicInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Epic"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Update epic fields",
+        "tags": [
+          "Epics"
+        ]
+      }
+    },
+    "/projects/{slug}/issues": {
+      "get": {
+        "operationId": "list-issues",
+        "parameters": [
+          {
+            "description": "Project slug",
+            "in": "path",
+            "name": "slug",
+            "required": true,
+            "schema": {
+              "description": "Project slug",
+              "examples": [
+                "my-project"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Filter by type",
+            "explode": false,
+            "in": "query",
+            "name": "type",
+            "schema": {
+              "description": "Filter by type",
+              "examples": [
+                "BUG"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Filter by priority",
+            "explode": false,
+            "in": "query",
+            "name": "priority",
+            "schema": {
+              "description": "Filter by priority",
+              "examples": [
+                "HIGH"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Filter by swimlane ID",
+            "explode": false,
+            "in": "query",
+            "name": "swimlane_id",
+            "schema": {
+              "description": "Filter by swimlane ID",
+              "format": "int64",
+              "minimum": 0,
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Filter by epic ID",
+            "explode": false,
+            "in": "query",
+            "name": "epic_id",
+            "schema": {
+              "description": "Filter by epic ID",
+              "format": "int64",
+              "minimum": 0,
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/Issue"
+                  },
+                  "type": [
+                    "array",
+                    "null"
+                  ]
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "List issues in a project, with optional filters",
+        "tags": [
+          "Issues"
+        ]
+      },
+      "post": {
+        "operationId": "create-issue",
+        "parameters": [
+          {
+            "description": "Project slug",
+            "in": "path",
+            "name": "slug",
+            "required": true,
+            "schema": {
+              "description": "Project slug",
+              "examples": [
+                "my-project"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateIssueInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Issue"
+                }
+              }
+            },
+            "description": "Created"
+          },
+          "default": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Create an issue",
+        "tags": [
+          "Issues"
+        ]
+      }
+    },
+    "/projects/{slug}/issues/{issueRef}": {
+      "delete": {
+        "operationId": "delete-issue",
+        "parameters": [
+          {
+            "description": "Project slug",
+            "in": "path",
+            "name": "slug",
+            "required": true,
+            "schema": {
+              "description": "Project slug",
+              "examples": [
+                "my-project"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Issue reference, e.g. PROJ-42",
+            "in": "path",
+            "name": "issueRef",
+            "required": true,
+            "schema": {
+              "description": "Issue reference, e.g. PROJ-42",
+              "examples": [
+                "PROJ-42"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "default": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Delete an issue",
+        "tags": [
+          "Issues"
+        ]
+      },
+      "get": {
+        "operationId": "get-issue",
+        "parameters": [
+          {
+            "description": "Project slug",
+            "in": "path",
+            "name": "slug",
+            "required": true,
+            "schema": {
+              "description": "Project slug",
+              "examples": [
+                "my-project"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Issue reference, e.g. PROJ-42",
+            "in": "path",
+            "name": "issueRef",
+            "required": true,
+            "schema": {
+              "description": "Issue reference, e.g. PROJ-42",
+              "examples": [
+                "PROJ-42"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Issue"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Get an issue by reference",
+        "tags": [
+          "Issues"
+        ]
+      },
+      "put": {
+        "operationId": "update-issue",
+        "parameters": [
+          {
+            "description": "Project slug",
+            "in": "path",
+            "name": "slug",
+            "required": true,
+            "schema": {
+              "description": "Project slug",
+              "examples": [
+                "my-project"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Issue reference, e.g. PROJ-42",
+            "in": "path",
+            "name": "issueRef",
+            "required": true,
+            "schema": {
+              "description": "Issue reference, e.g. PROJ-42",
+              "examples": [
+                "PROJ-42"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateIssueInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Issue"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Update issue fields",
+        "tags": [
+          "Issues"
+        ]
+      }
+    },
+    "/projects/{slug}/issues/{issueRef}/comments": {
+      "get": {
+        "operationId": "list-comments-for-issue",
+        "parameters": [
+          {
+            "description": "Project slug",
+            "in": "path",
+            "name": "slug",
+            "required": true,
+            "schema": {
+              "description": "Project slug",
+              "examples": [
+                "my-project"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Issue reference, e.g. PROJ-42",
+            "in": "path",
+            "name": "issueRef",
+            "required": true,
+            "schema": {
+              "description": "Issue reference, e.g. PROJ-42",
+              "examples": [
+                "PROJ-42"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/Comment"
+                  },
+                  "type": [
+                    "array",
+                    "null"
+                  ]
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "List comments on an issue",
+        "tags": [
+          "Comments"
+        ]
+      },
+      "post": {
+        "operationId": "add-comment-to-issue",
+        "parameters": [
+          {
+            "description": "Project slug",
+            "in": "path",
+            "name": "slug",
+            "required": true,
+            "schema": {
+              "description": "Project slug",
+              "examples": [
+                "my-project"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Issue reference, e.g. PROJ-42",
+            "in": "path",
+            "name": "issueRef",
+            "required": true,
+            "schema": {
+              "description": "Issue reference, e.g. PROJ-42",
+              "examples": [
+                "PROJ-42"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Add-comment-to-issueRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Comment"
+                }
+              }
+            },
+            "description": "Created"
+          },
+          "default": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Add a comment to an issue",
+        "tags": [
+          "Comments"
+        ]
+      }
+    },
+    "/projects/{slug}/issues/{issueRef}/comments/{id}": {
+      "delete": {
+        "operationId": "delete-comment",
+        "parameters": [
+          {
+            "description": "Project slug",
+            "in": "path",
+            "name": "slug",
+            "required": true,
+            "schema": {
+              "description": "Project slug",
+              "examples": [
+                "my-project"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Issue reference, e.g. PROJ-42",
+            "in": "path",
+            "name": "issueRef",
+            "required": true,
+            "schema": {
+              "description": "Issue reference, e.g. PROJ-42",
+              "examples": [
+                "PROJ-42"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Comment ID",
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "description": "Comment ID",
+              "format": "int64",
+              "minimum": 0,
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "default": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Delete a comment",
+        "tags": [
+          "Comments"
+        ]
+      }
+    },
+    "/projects/{slug}/issues/{issueRef}/links": {
+      "get": {
+        "operationId": "list-links-for-issue",
+        "parameters": [
+          {
+            "description": "Project slug",
+            "in": "path",
+            "name": "slug",
+            "required": true,
+            "schema": {
+              "description": "Project slug",
+              "examples": [
+                "my-project"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Issue reference, e.g. PROJ-42",
+            "in": "path",
+            "name": "issueRef",
+            "required": true,
+            "schema": {
+              "description": "Issue reference, e.g. PROJ-42",
+              "examples": [
+                "PROJ-42"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/EnrichedLink"
+                  },
+                  "type": [
+                    "array",
+                    "null"
+                  ]
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "List all links for an issue (as source or target)",
+        "tags": [
+          "Links"
+        ]
+      },
+      "post": {
+        "operationId": "create-link",
+        "parameters": [
+          {
+            "description": "Project slug",
+            "in": "path",
+            "name": "slug",
+            "required": true,
+            "schema": {
+              "description": "Project slug",
+              "examples": [
+                "my-project"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Source issue reference",
+            "in": "path",
+            "name": "issueRef",
+            "required": true,
+            "schema": {
+              "description": "Source issue reference",
+              "examples": [
+                "PROJ-42"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Create-linkRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Link"
+                }
+              }
+            },
+            "description": "Created"
+          },
+          "default": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Create a directed link from this issue to another",
+        "tags": [
+          "Links"
+        ]
+      }
+    },
+    "/projects/{slug}/issues/{issueRef}/links/{id}": {
+      "delete": {
+        "operationId": "delete-link",
+        "parameters": [
+          {
+            "description": "Project slug",
+            "in": "path",
+            "name": "slug",
+            "required": true,
+            "schema": {
+              "description": "Project slug",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Issue reference",
+            "in": "path",
+            "name": "issueRef",
+            "required": true,
+            "schema": {
+              "description": "Issue reference",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Link ID",
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "description": "Link ID",
+              "format": "int64",
+              "minimum": 0,
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "default": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Delete a link by ID",
+        "tags": [
+          "Links"
+        ]
+      }
+    },
+    "/projects/{slug}/issues/{issueRef}/move": {
+      "post": {
+        "operationId": "move-issue",
+        "parameters": [
+          {
+            "description": "Project slug",
+            "in": "path",
+            "name": "slug",
+            "required": true,
+            "schema": {
+              "description": "Project slug",
+              "examples": [
+                "my-project"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Issue reference, e.g. PROJ-42",
+            "in": "path",
+            "name": "issueRef",
+            "required": true,
+            "schema": {
+              "description": "Issue reference, e.g. PROJ-42",
+              "examples": [
+                "PROJ-42"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MoveIssueInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Issue"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Move an issue to a different swimlane",
+        "tags": [
+          "Issues"
+        ]
+      }
+    },
+    "/projects/{slug}/swimlanes": {
+      "get": {
+        "operationId": "list-swimlanes",
+        "parameters": [
+          {
+            "description": "Project slug",
+            "in": "path",
+            "name": "slug",
+            "required": true,
+            "schema": {
+              "description": "Project slug",
+              "examples": [
+                "my-project"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/Swimlane"
+                  },
+                  "type": [
+                    "array",
+                    "null"
+                  ]
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "List swimlanes in a project",
+        "tags": [
+          "Swimlanes"
+        ]
+      },
+      "post": {
+        "operationId": "create-swimlane",
+        "parameters": [
+          {
+            "description": "Project slug",
+            "in": "path",
+            "name": "slug",
+            "required": true,
+            "schema": {
+              "description": "Project slug",
+              "examples": [
+                "my-project"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateSwimlaneInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Swimlane"
+                }
+              }
+            },
+            "description": "Created"
+          },
+          "default": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Add a swimlane to a project",
+        "tags": [
+          "Swimlanes"
+        ]
+      }
+    },
+    "/projects/{slug}/swimlanes/reorder": {
+      "post": {
+        "operationId": "reorder-swimlanes",
+        "parameters": [
+          {
+            "description": "Project slug",
+            "in": "path",
+            "name": "slug",
+            "required": true,
+            "schema": {
+              "description": "Project slug",
+              "examples": [
+                "my-project"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReorderSwimlanesInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/Swimlane"
+                  },
+                  "type": [
+                    "array",
+                    "null"
+                  ]
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Reorder all swimlanes in a project",
+        "tags": [
+          "Swimlanes"
+        ]
+      }
+    },
+    "/projects/{slug}/swimlanes/{id}": {
+      "delete": {
+        "operationId": "delete-swimlane",
+        "parameters": [
+          {
+            "description": "Project slug",
+            "in": "path",
+            "name": "slug",
+            "required": true,
+            "schema": {
+              "description": "Project slug",
+              "examples": [
+                "my-project"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Swimlane ID",
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "description": "Swimlane ID",
+              "format": "int64",
+              "minimum": 0,
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "default": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Delete a swimlane",
+        "tags": [
+          "Swimlanes"
+        ]
+      },
+      "patch": {
+        "operationId": "update-swimlane",
+        "parameters": [
+          {
+            "description": "Project slug",
+            "in": "path",
+            "name": "slug",
+            "required": true,
+            "schema": {
+              "description": "Project slug",
+              "examples": [
+                "my-project"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Swimlane ID",
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "description": "Swimlane ID",
+              "format": "int64",
+              "minimum": 0,
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateSwimlaneInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Swimlane"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Update a swimlane (name and/or colour)",
+        "tags": [
+          "Swimlanes"
+        ]
+      }
+    }
+  }
+}

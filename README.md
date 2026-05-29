@@ -156,7 +156,8 @@ Issues are referenced as `PROJ-42`, epics as `PROJ-E1`.
 
 ## REST API
 
-Full OpenAPI spec at `http://localhost:8080/docs`.
+Full OpenAPI spec at `http://localhost:8080/docs`. A committed snapshot lives at
+[`docs/openapi.json`](docs/openapi.json); regenerate it with `make openapi`.
 
 Base path: `/api/v1`
 

@@ -1,4 +1,4 @@
-.PHONY: hooks fmt lint test build build-frontend install-tools
+.PHONY: hooks fmt lint test build build-frontend install-tools openapi
 
 hooks:
 	git config core.hooksPath .githooks
@@ -20,3 +20,7 @@ build-frontend:
 
 install-tools:
 	go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
+
+# Regenerate the committed OpenAPI snapshot from the live route definitions.
+openapi:
+	go run ./cmd/zdzira -db ":memory:" -dump-openapi > docs/openapi.json

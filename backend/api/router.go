@@ -47,11 +47,6 @@ func NewRouter(svcs *service.Services, logger *slog.Logger, ready func(context.C
 		w.Write([]byte(`{"status":"ready"}`))
 	})
 
-	config := huma.DefaultConfig("Zdzira API", "1.0.0")
-	config.Info.Description = "Local issue tracker for AI-assisted software development. " +
-		"REST API for human access; MCP server at /mcp for agent access."
-	config.DocsPath = "" // disabled — we serve our own docs below
-
 	r.Get("/docs", func(w http.ResponseWriter, _ *http.Request) {
 		w.Header().Set("Content-Type", "text/html; charset=utf-8")
 		_, _ = w.Write([]byte(docsHTML))
@@ -60,16 +55,40 @@ func NewRouter(svcs *service.Services, logger *slog.Logger, ready func(context.C
 	r.Route("/api/v1", func(sub chi.Router) {
 		sub.Use(NotifyMiddleware(b))
 		sub.Get("/events", eventsHandler(b))
-		api := humachi.New(sub, config)
-		registerProjectRoutes(api, svcs)
-		registerEpicRoutes(api, svcs)
-		registerIssueRoutes(api, svcs)
-		registerSwimlaneRoutes(api, svcs)
-		registerBoardRoutes(api, svcs)
-		registerCommentRoutes(api, svcs)
-		registerLinkRoutes(api, svcs)
-		registerAuditRoutes(api, svcs)
+		api := humachi.New(sub, openAPIConfig())
+		registerAllRoutes(api, svcs)
 	})
 
 	return r
+}
+
+// openAPIConfig holds the single source of truth for API metadata, shared by
+// the live server and the offline spec exporter.
+func openAPIConfig() huma.Config {
+	config := huma.DefaultConfig("Zdzira API", "1.0.0")
+	config.Info.Description = "Local issue tracker for AI-assisted software development. " +
+		"REST API for human access; MCP server at /mcp for agent access."
+	config.DocsPath = "" // disabled — we serve our own docs at /docs
+	return config
+}
+
+// registerAllRoutes wires every resource onto the given API. Kept separate so
+// the same registration drives both the running server and OpenAPISpec.
+func registerAllRoutes(api huma.API, svcs *service.Services) {
+	registerProjectRoutes(api, svcs)
+	registerEpicRoutes(api, svcs)
+	registerIssueRoutes(api, svcs)
+	registerSwimlaneRoutes(api, svcs)
+	registerBoardRoutes(api, svcs)
+	registerCommentRoutes(api, svcs)
+	registerLinkRoutes(api, svcs)
+	registerAuditRoutes(api, svcs)
+}
+
+// OpenAPISpec builds the OpenAPI document offline (no listening server) and
+// returns it as indented JSON, matching what /api/v1/openapi.json serves.
+func OpenAPISpec(svcs *service.Services) ([]byte, error) {
+	api := humachi.New(chi.NewRouter(), openAPIConfig())
+	registerAllRoutes(api, svcs)
+	return json.MarshalIndent(api.OpenAPI(), "", "  ")
 }

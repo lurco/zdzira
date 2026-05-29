@@ -17,6 +17,7 @@ import (
 func main() {
 	dbPath := flag.String("db", "zdzira.db", "SQLite database path")
 	addr := flag.String("addr", ":8080", "Listen address")
+	dumpOpenAPI := flag.Bool("dump-openapi", false, "Print the OpenAPI spec to stdout and exit")
 	flag.Parse()
 
 	logger := slog.New(slog.NewJSONHandler(os.Stderr, &slog.HandlerOptions{
@@ -31,6 +32,15 @@ func main() {
 
 	stores := store.New(db)
 	svcs := service.New(stores)
+
+	if *dumpOpenAPI {
+		spec, err := api.OpenAPISpec(svcs)
+		if err != nil {
+			log.Fatalf("dump openapi: %v", err)
+		}
+		os.Stdout.Write(spec)
+		return
+	}
 
 	broadcaster := api.NewBroadcaster()
 
