@@ -155,6 +155,14 @@ document.addEventListener('click', event => {
     return
   }
 
+  const confirmDeleteComment = event.target.closest('[data-confirm-delete-comment]')
+  if (confirmDeleteComment && currentIssue) {
+    const id = confirmDeleteComment.dataset.confirmDeleteComment
+    fetch(`/api/v1/projects/${PROJECT}/issues/${currentIssue.ref}/comments/${id}`, { method: 'DELETE' })
+      .then(() => loadComments(currentIssue.ref))
+    return
+  }
+
   if (event.target.closest('[data-lane-popover]')) return
   closeAllLanePopovers()
 })
@@ -251,13 +259,6 @@ function loadComments(issueRef) {
     .then(r => r.json())
     .then(comments => {
       listEl.innerHTML = renderTemplate('tmpl-comments', comments)
-      listEl.querySelectorAll('[data-comment-id]').forEach(btn => {
-        btn.addEventListener('click', () => {
-          const id = btn.dataset.commentId
-          fetch(`/api/v1/projects/${PROJECT}/issues/${issueRef}/comments/${id}`, { method: 'DELETE' })
-            .then(() => loadComments(issueRef))
-        })
-      })
     })
 
   const form = document.getElementById('commentForm')

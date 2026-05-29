@@ -332,7 +332,7 @@ script#tmpl-comments(type="text/x-handlebars-template")
   |         <p class="comment-item__text">{{contents}}</p>
   |         <div class="comment-item__footer">
   |           <time class="comment-item__time">{{formatDate created_at}}</time>
-  |           <button class="comment-item__delete" type="button" data-comment-id="{{id}}" aria-label="Delete comment">×</button>
+  |           <button class="comment-item__delete" type="button" data-dialog-open="tmpl-confirm-delete-comment" data-dialog-data='{"id":{{id}}}' aria-label="Delete comment">×</button>
   |         </div>
   |       </li>
   |     {{/each}}
@@ -340,3 +340,15 @@ script#tmpl-comments(type="text/x-handlebars-template")
   | {{else}}
   |   <p class="comment-list__empty">No comments yet.</p>
   | {{/if}}
+
+script#tmpl-confirm-delete-comment(type="text/x-handlebars-template")
+  | <div class="modal__form">
+  |   <h2 class="modal__title">Delete comment?</h2>
+  |   <p class="modal__hint">This comment will be removed permanently.</p>
+  |   <div class="modal__actions">
+  |     <button class="modal__btn modal__btn--cancel" type="button" data-dialog-close>Cancel</button>
+  |     <button class="modal__btn modal__btn--submit" type="button"
+  |             data-confirm-delete-comment="{{id}}"
+  |             data-dialog-close>Delete</button>
+  |   </div>
+  | </div>
