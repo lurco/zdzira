@@ -375,7 +375,7 @@ function wireLaneSelect(issueRef) {
     fetch(`/api/v1/projects/${PROJECT}/issues/${issueRef}/move`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ swimlane_id: Number(select.value), position: 0 }),
+      body: JSON.stringify({ swimlane_id: Number(select.value) }),
     })
       .then(r => { if (!r.ok) throw new Error(r.status) })
       .then(() => refreshBoard())
