@@ -8,6 +8,7 @@ import './board-dnd'
 import './board-filter'
 import { renderTemplate } from './dialog'
 import { PROJECT, refreshBoard } from './project'
+import Handlebars from 'handlebars'
 
 // SSE: refresh the board when any agent or other tab mutates the API.
 // Debounced to avoid double-render when a local htmx mutation also fires.
@@ -21,6 +22,9 @@ es.onmessage = () => {
 const boardEl = document.getElementById('board')
 let currentIssue = null
 let currentEpics = []
+let currentLanes = []
+
+Handlebars.registerHelper('boardLanes', () => currentLanes)
 
 function boardPath() {
   const epic = new URLSearchParams(location.search).get('epic') || ''
@@ -214,6 +218,18 @@ window.addEventListener('popstate', () => {
 const initialIssue = new URLSearchParams(location.search).get('issue')
 if (initialIssue) openIssuePanel(initialIssue)
 
+function wireLaneSelect(issueRef) {
+  const select = document.getElementById('issueLaneSelect')
+  if (!select) return
+  select.addEventListener('change', () => {
+    fetch(`/api/v1/projects/${PROJECT}/issues/${issueRef}/move`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ swimlane_id: Number(select.value), position: 0 }),
+    }).then(() => refreshBoard())
+  })
+}
+
 function loadComments(issueRef) {
   const listEl = document.getElementById('commentsList')
   if (!listEl) return
@@ -255,13 +271,17 @@ document.body.addEventListener('htmx:afterRequest', event => {
 
   if (event.detail.target?.id === 'issuePanel') {
     try { currentIssue = JSON.parse(event.detail.xhr.responseText) } catch {}
-    if (currentIssue?.ref) loadComments(currentIssue.ref)
+    if (currentIssue?.ref) {
+      loadComments(currentIssue.ref)
+      wireLaneSelect(currentIssue.ref)
+    }
   }
 
   if (event.detail.target?.id === 'board') {
     try {
       const view = JSON.parse(event.detail.xhr.responseText)
       currentEpics = view.epics || []
+      currentLanes = (view.swimlanes || []).map(({ id, name }) => ({ id, name }))
       updateStatusBar(view)
     } catch {}
   }

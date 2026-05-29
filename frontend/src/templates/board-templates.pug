@@ -226,6 +226,16 @@ script#tmpl-issue-panel(type="text/x-handlebars-template")
   |     <button type="button" class="issue-panel__close" data-issue-panel-close aria-label="Close">×</button>
   |   </header>
   |   <h2 class="issue-panel__title">{{name}}</h2>
+  |   {{#if (boardLanes)}}
+  |     <div class="issue-panel__lane-row">
+  |       <span class="issue-panel__mover-label">Lane</span>
+  |       <select class="mini-select" id="issueLaneSelect">
+  |         {{#each (boardLanes)}}
+  |           <option value="{{id}}" {{#if (eq id ../swimlane_id)}}selected{{/if}}>{{name}}</option>
+  |         {{/each}}
+  |       </select>
+  |     </div>
+  |   {{/if}}
   |   {{#if epic_ref}}
   |     <button class="issue-panel__epic" type="button" data-open-epic-detail data-epic-ref="{{epic_ref}}">
   |       <span class="issue-panel__epic-label">Epic</span>
