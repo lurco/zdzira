@@ -17,11 +17,12 @@ func eventsHandler(b *Broadcaster) http.HandlerFunc {
 		w.Header().Set("Content-Type", "text/event-stream")
 		w.Header().Set("Cache-Control", "no-cache")
 		w.Header().Set("Connection", "keep-alive")
+		w.Header().Set("X-Accel-Buffering", "no")
 
 		ch, unsubscribe := b.Subscribe()
 		defer unsubscribe()
 
-		fmt.Fprintf(w, "data: connected\n\n")
+		fmt.Fprintf(w, "retry: 1000\ndata: connected\n\n")
 		flusher.Flush()
 
 		ticker := time.NewTicker(15 * time.Second)
