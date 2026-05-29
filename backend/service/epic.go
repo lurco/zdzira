@@ -51,7 +51,7 @@ func (s *EpicService) Create(ctx context.Context, in CreateEpicInput) (*model.Ep
 	if err := s.stores.Epics.Create(ctx, e); err != nil {
 		return nil, err
 	}
-	s.audit.record(ctx, p.ID, "epic", fmt.Sprintf("%s-E%d", p.Shortcut, e.Number), "created", e.Name)
+	s.audit.record(ctx, p.ID, "epic", fmt.Sprintf("%s-E%d", p.Shortcut, e.Number), "created", e.Name, "")
 	return setEpicRef(p.Shortcut, e), nil
 }
 
@@ -111,7 +111,7 @@ func (s *EpicService) Update(ctx context.Context, in UpdateEpicInput) (*model.Ep
 	if err := s.stores.Epics.Update(ctx, e); err != nil {
 		return nil, err
 	}
-	s.audit.record(ctx, p.ID, "epic", fmt.Sprintf("%s-E%d", p.Shortcut, e.Number), "updated", strings.Join(changed, ", "))
+	s.audit.record(ctx, p.ID, "epic", fmt.Sprintf("%s-E%d", p.Shortcut, e.Number), "updated", e.Name, strings.Join(changed, ", "))
 	return setEpicRef(p.Shortcut, e), nil
 }
 
@@ -127,6 +127,6 @@ func (s *EpicService) Delete(ctx context.Context, projectSlug, ref string) error
 	if err := s.stores.Epics.Delete(ctx, e.ID); err != nil {
 		return err
 	}
-	s.audit.record(ctx, p.ID, "epic", fmt.Sprintf("%s-E%d", p.Shortcut, e.Number), "deleted", e.Name)
+	s.audit.record(ctx, p.ID, "epic", fmt.Sprintf("%s-E%d", p.Shortcut, e.Number), "deleted", e.Name, "")
 	return nil
 }

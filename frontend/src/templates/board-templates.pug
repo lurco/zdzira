@@ -401,6 +401,7 @@ script#tmpl-audit-log(type="text/x-handlebars-template")
   |         <li class="audit-item">
   |           <span class="audit-item__action audit-item__action--{{action}}">{{action}}</span>
   |           <span class="audit-item__ref mono">{{ref}}</span>
+  |           <span class="audit-item__title">{{title}}</span>
   |           {{#if detail}}<span class="audit-item__detail">{{detail}}</span>{{/if}}
   |           <time class="audit-item__time">{{formatDate created_at}}</time>
   |         </li>

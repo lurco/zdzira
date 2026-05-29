@@ -105,6 +105,7 @@ type AuditEntry struct {
 	ProjectID  uint      `gorm:"not null;index"          json:"project_id"`
 	EntityType string    `gorm:"not null"                json:"entity_type"`
 	Ref        string    `gorm:"not null"                json:"ref"`
+	Title      string    `gorm:""                        json:"title,omitempty"`
 	Action     string    `gorm:"not null"                json:"action"`
 	Detail     string    `gorm:""                        json:"detail,omitempty"`
 	CreatedAt  time.Time `gorm:"not null;autoCreateTime" json:"created_at"`

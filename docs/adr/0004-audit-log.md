@@ -1,8 +1,9 @@
 # Append-only audit log — REST only, action + ref, per-project scope
 
 An `AuditEntry` table records every mutation to Issues and Epics. Each row stores: `project_id`, `entity_type` ("issue"
-or "epic"), `ref` (e.g. `PROJ-42`, `PROJ-E1`), `action` ("created", "updated", "moved", "deleted"), an optional
-`detail` summary string, and `created_at`. No `updated_at`, no `deleted_at` — rows are never modified or removed.
+or "epic"), `ref` (e.g. `PROJ-42`, `PROJ-E1`), `title` (the entity's name at the time of the action), `action`
+("created", "updated", "moved", "deleted"), an optional `detail` summary string, and `created_at`. No `updated_at`, no
+`deleted_at` — rows are never modified or removed.
 
 **Human-only:** The audit feed is intentionally excluded from MCP tools. Agents act on the current state; the audit
 trail is for human review only.

@@ -81,7 +81,7 @@ func (s *IssueService) Create(ctx context.Context, in CreateIssueInput) (*model.
 	if err := s.stores.Issues.Create(ctx, issue); err != nil {
 		return nil, err
 	}
-	s.audit.record(ctx, p.ID, "issue", fmt.Sprintf("%s-%d", p.Shortcut, issue.Number), "created", issue.Name)
+	s.audit.record(ctx, p.ID, "issue", fmt.Sprintf("%s-%d", p.Shortcut, issue.Number), "created", issue.Name, "")
 	return setIssueRef(p.Shortcut, issue), nil
 }
 
@@ -194,7 +194,7 @@ func (s *IssueService) Move(ctx context.Context, in MoveIssueInput) (*model.Issu
 	if err := s.stores.Issues.Update(ctx, issue); err != nil {
 		return nil, err
 	}
-	s.audit.record(ctx, p.ID, "issue", fmt.Sprintf("%s-%d", p.Shortcut, issue.Number), "moved", fmt.Sprintf("%s → %s", fromName, sl.Name))
+	s.audit.record(ctx, p.ID, "issue", fmt.Sprintf("%s-%d", p.Shortcut, issue.Number), "moved", issue.Name, fmt.Sprintf("%s → %s", fromName, sl.Name))
 	return setIssueRef(p.Shortcut, issue), nil
 }
 
@@ -236,7 +236,7 @@ func (s *IssueService) Update(ctx context.Context, in UpdateIssueInput) (*model.
 	if err := s.stores.Issues.Update(ctx, issue); err != nil {
 		return nil, err
 	}
-	s.audit.record(ctx, p.ID, "issue", fmt.Sprintf("%s-%d", p.Shortcut, issue.Number), "updated", changedIssueFields(&before, issue))
+	s.audit.record(ctx, p.ID, "issue", fmt.Sprintf("%s-%d", p.Shortcut, issue.Number), "updated", issue.Name, changedIssueFields(&before, issue))
 	return setIssueRef(p.Shortcut, issue), nil
 }
 
@@ -277,7 +277,7 @@ func (s *IssueService) Delete(ctx context.Context, projectSlug, ref string) erro
 	if err := s.stores.Issues.Delete(ctx, issue.ID); err != nil {
 		return err
 	}
-	s.audit.record(ctx, p.ID, "issue", fmt.Sprintf("%s-%d", p.Shortcut, issue.Number), "deleted", issue.Name)
+	s.audit.record(ctx, p.ID, "issue", fmt.Sprintf("%s-%d", p.Shortcut, issue.Number), "deleted", issue.Name, "")
 	return nil
 }
 

@@ -26,6 +26,7 @@ func TestAuditIssueUpdate_RecordsUpdated(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(t, "updated", entries[0].Action)
 	assert.Equal(t, "AUD-1", entries[0].Ref)
+	assert.Equal(t, "renamed", entries[0].Title)
 	assert.Equal(t, "name, type, priority", entries[0].Detail)
 }
 
