@@ -332,7 +332,7 @@ script#tmpl-comments(type="text/x-handlebars-template")
   |         <p class="comment-item__text">{{contents}}</p>
   |         <div class="comment-item__footer">
   |           <time class="comment-item__time">{{formatDate created_at}}</time>
-  |           <button class="comment-item__delete" type="button" data-dialog-open="tmpl-confirm-delete-comment" data-dialog-data='{"id":{{id}}}' aria-label="Delete comment">×</button>
+  |           <button class="comment-item__delete" type="button" data-dialog-open="tmpl-confirm-delete-comment" data-dialog-data='{"id": {{id}} }' aria-label="Delete comment">×</button>
   |         </div>
   |       </li>
   |     {{/each}}
