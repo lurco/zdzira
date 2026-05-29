@@ -50,6 +50,12 @@
     background: var(--acc-yellow)
     color: var(--chip-fg)
 
+  // The focus background is the same yellow as the global ::selection, which
+  // hides the highlight while editing. Give selected text a contrasting band.
+  &::selection
+    background: var(--ink)
+    color: var(--paper)
+
 .lane-count
   +mono
   font-size: 11px
