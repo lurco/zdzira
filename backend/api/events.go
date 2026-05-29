@@ -59,8 +59,11 @@ func (nw *notifyWriter) Write(b []byte) (int, error) {
 	return nw.ResponseWriter.Write(b)
 }
 
-// notifyMiddleware fires NotifyAll after any successful (2xx) write request.
-func notifyMiddleware(b *Broadcaster) func(http.Handler) http.Handler {
+func (nw *notifyWriter) Unwrap() http.ResponseWriter { return nw.ResponseWriter }
+
+// NotifyMiddleware fires NotifyAll after any successful (2xx) write request.
+// Apply it to any http.Handler whose mutations should trigger SSE board updates.
+func NotifyMiddleware(b *Broadcaster) func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			if r.Method == http.MethodGet || r.Method == http.MethodHead || r.Method == http.MethodOptions {

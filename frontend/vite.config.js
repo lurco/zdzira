@@ -26,7 +26,15 @@ export default defineConfig({
     host: true,   // bind 0.0.0.0 so the port is reachable outside the container
     port: 5173,
     proxy: {
-      '/api': { target: backendUrl },
+      '/api/v1/events': {
+        target: backendUrl,
+        changeOrigin: true,
+        // SSE requires an open, unbuffered connection
+        configure: proxy => {
+          proxy.on('proxyReq', (_, req) => { req.setTimeout(0) })
+        },
+      },
+      '/api': { target: backendUrl, changeOrigin: true },
       '/mcp': { target: backendUrl, ws: true },
     },
   },

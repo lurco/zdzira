@@ -26,7 +26,7 @@ const docsHTML = `<!doctype html>
 </body>
 </html>`
 
-func NewRouter(svcs *service.Services, logger *slog.Logger, ready func(context.Context) error) http.Handler {
+func NewRouter(svcs *service.Services, logger *slog.Logger, ready func(context.Context) error, b *Broadcaster) http.Handler {
 	r := chi.NewRouter()
 	r.Use(middleware.RequestID)
 	r.Use(middleware.Recoverer)
@@ -57,11 +57,9 @@ func NewRouter(svcs *service.Services, logger *slog.Logger, ready func(context.C
 		_, _ = w.Write([]byte(docsHTML))
 	})
 
-	broadcaster := NewBroadcaster()
-
 	r.Route("/api/v1", func(sub chi.Router) {
-		sub.Use(notifyMiddleware(broadcaster))
-		sub.Get("/events", eventsHandler(broadcaster))
+		sub.Use(NotifyMiddleware(b))
+		sub.Get("/events", eventsHandler(b))
 		api := humachi.New(sub, config)
 		registerProjectRoutes(api, svcs)
 		registerEpicRoutes(api, svcs)

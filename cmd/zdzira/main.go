@@ -32,9 +32,11 @@ func main() {
 	stores := store.New(db)
 	svcs := service.New(stores)
 
+	broadcaster := api.NewBroadcaster()
+
 	r := chi.NewRouter()
-	r.Mount("/", api.NewRouter(svcs, logger, stores.Ping))
-	r.Mount("/mcp", zdziramcp.NewHandler(svcs))
+	r.Mount("/", api.NewRouter(svcs, logger, stores.Ping, broadcaster))
+	r.Mount("/mcp", api.NotifyMiddleware(broadcaster)(zdziramcp.NewHandler(svcs)))
 
 	logger.Info("starting", "addr", *addr, "db", *dbPath)
 	if err := http.ListenAndServe(*addr, r); err != nil {
