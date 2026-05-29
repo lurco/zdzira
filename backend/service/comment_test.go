@@ -80,6 +80,32 @@ func TestCommentDelete_RemovesComment(t *testing.T) {
 	assert.Empty(t, remaining)
 }
 
+func TestCommentUpdateContents_ChangesTextKeepsParent(t *testing.T) {
+	svcs := newTestServices(t)
+	_, err := svcs.Projects.Create(ctx, service.CreateProjectInput{Name: "Cmt Proj", Shortcut: "CMT"})
+	require.NoError(t, err)
+	_, err = svcs.Issues.Create(ctx, service.CreateIssueInput{
+		ProjectSlug: "cmt-proj",
+		Name:        "issue",
+		Type:        "TASK",
+		Priority:    "LOW",
+	})
+	require.NoError(t, err)
+
+	c, err := svcs.Comments.AddToIssue(ctx, "cmt-proj", "CMT-1", "typo here")
+	require.NoError(t, err)
+
+	updated, err := svcs.Comments.UpdateContents(ctx, c.ID, "fixed text")
+	require.NoError(t, err)
+	assert.Equal(t, "fixed text", updated.Contents)
+	assert.Equal(t, c.IssueID, updated.IssueID)
+
+	comments, err := svcs.Comments.ListForIssue(ctx, "cmt-proj", "CMT-1")
+	require.NoError(t, err)
+	require.Len(t, comments, 1)
+	assert.Equal(t, "fixed text", comments[0].Contents)
+}
+
 func TestCommentAddToIssue_SetsIssueIDOnly(t *testing.T) {
 	svcs := newTestServices(t)
 	_, err := svcs.Projects.Create(ctx, service.CreateProjectInput{Name: "Comment Project", Shortcut: "COM"})

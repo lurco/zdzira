@@ -168,6 +168,38 @@ document.addEventListener('click', event => {
     return
   }
 
+  const editCommentBtn = event.target.closest('[data-edit-comment]')
+  if (editCommentBtn && currentIssue) {
+    const item = editCommentBtn.closest('.comment-item')
+    const id = editCommentBtn.dataset.editComment
+    const contents = item.querySelector('.comment-item__text').textContent
+    item.outerHTML = renderTemplate('tmpl-comment-edit', { id, contents })
+    return
+  }
+
+  const cancelCommentEdit = event.target.closest('[data-cancel-comment]')
+  if (cancelCommentEdit && currentIssue) {
+    loadComments(currentIssue.ref)
+    return
+  }
+
+  const saveCommentBtn = event.target.closest('[data-save-comment]')
+  if (saveCommentBtn && currentIssue) {
+    const id = saveCommentBtn.dataset.saveComment
+    const editor = saveCommentBtn.closest('.comment-edit')
+    const text = editor.querySelector('[name="contents"]').value.trim()
+    if (!text) return
+    fetch(`/api/v1/projects/${PROJECT}/issues/${currentIssue.ref}/comments/${id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ contents: text }),
+    })
+      .then(r => { if (!r.ok) throw new Error(r.status) })
+      .then(() => loadComments(currentIssue.ref))
+      .catch(() => window.showToast('Failed to edit comment'))
+    return
+  }
+
   const confirmDeleteComment = event.target.closest('[data-confirm-delete-comment]')
   if (confirmDeleteComment && currentIssue) {
     const id = confirmDeleteComment.dataset.confirmDeleteComment

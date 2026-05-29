@@ -13,6 +13,16 @@ func (s *gormCommentStore) Create(ctx context.Context, c *model.Comment) error {
 	return s.db.WithContext(ctx).Create(c).Error
 }
 
+func (s *gormCommentStore) GetByID(ctx context.Context, id uint) (*model.Comment, error) {
+	var c model.Comment
+	err := s.db.WithContext(ctx).First(&c, id).Error
+	return &c, err
+}
+
+func (s *gormCommentStore) Update(ctx context.Context, c *model.Comment) error {
+	return s.db.WithContext(ctx).Save(c).Error
+}
+
 func (s *gormCommentStore) ListByIssue(ctx context.Context, issueID uint) ([]model.Comment, error) {
 	var comments []model.Comment
 	err := s.db.WithContext(ctx).Where("issue_id = ?", issueID).Find(&comments).Error

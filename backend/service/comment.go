@@ -54,6 +54,18 @@ func (s *CommentService) ListForIssue(ctx context.Context, projectSlug, issueRef
 	return s.stores.Comments.ListByIssue(ctx, issue.ID)
 }
 
+func (s *CommentService) UpdateContents(ctx context.Context, id uint, contents string) (*model.Comment, error) {
+	c, err := s.stores.Comments.GetByID(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+	c.Contents = contents
+	if err := s.stores.Comments.Update(ctx, c); err != nil {
+		return nil, err
+	}
+	return c, nil
+}
+
 func (s *CommentService) Delete(ctx context.Context, id uint) error {
 	return s.stores.Comments.Delete(ctx, id)
 }

@@ -851,6 +851,31 @@
         ],
         "type": "object"
       },
+      "Update-commentRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "$schema": {
+            "description": "A URL to the JSON Schema for this object.",
+            "examples": [
+              "https://example.com/schemas/Update-commentRequest.json"
+            ],
+            "format": "uri",
+            "readOnly": true,
+            "type": "string"
+          },
+          "contents": {
+            "description": "Updated comment text",
+            "examples": [
+              "Actually, let's hold off."
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "contents"
+        ],
+        "type": "object"
+      },
       "UpdateEpicInput": {
         "additionalProperties": false,
         "properties": {
@@ -2046,6 +2071,85 @@
           }
         },
         "summary": "Delete a comment",
+        "tags": [
+          "Comments"
+        ]
+      },
+      "put": {
+        "operationId": "update-comment",
+        "parameters": [
+          {
+            "description": "Project slug",
+            "in": "path",
+            "name": "slug",
+            "required": true,
+            "schema": {
+              "description": "Project slug",
+              "examples": [
+                "my-project"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Issue reference, e.g. PROJ-42",
+            "in": "path",
+            "name": "issueRef",
+            "required": true,
+            "schema": {
+              "description": "Issue reference, e.g. PROJ-42",
+              "examples": [
+                "PROJ-42"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Comment ID",
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "description": "Comment ID",
+              "format": "int64",
+              "minimum": 0,
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Update-commentRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Comment"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Edit a comment's contents",
         "tags": [
           "Comments"
         ]

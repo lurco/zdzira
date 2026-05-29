@@ -49,6 +49,27 @@ func registerCommentRoutes(api huma.API, svcs *service.Services) {
 	})
 
 	huma.Register(api, huma.Operation{
+		OperationID: "update-comment",
+		Method:      http.MethodPut,
+		Path:        "/projects/{slug}/issues/{issueRef}/comments/{id}",
+		Summary:     "Edit a comment's contents",
+		Tags:        []string{"Comments"},
+	}, func(ctx context.Context, input *struct {
+		Slug     string `path:"slug"     doc:"Project slug"                  example:"my-project"`
+		IssueRef string `path:"issueRef" doc:"Issue reference, e.g. PROJ-42"  example:"PROJ-42"`
+		ID       uint   `path:"id"       doc:"Comment ID"`
+		Body     struct {
+			Contents string `json:"contents" doc:"Updated comment text" example:"Actually, let's hold off."`
+		}
+	}) (*struct{ Body *model.Comment }, error) {
+		c, err := svcs.Comments.UpdateContents(ctx, input.ID, input.Body.Contents)
+		if err != nil {
+			return nil, huma.Error404NotFound(err.Error())
+		}
+		return &struct{ Body *model.Comment }{c}, nil
+	})
+
+	huma.Register(api, huma.Operation{
 		OperationID:   "delete-comment",
 		Method:        http.MethodDelete,
 		Path:          "/projects/{slug}/issues/{issueRef}/comments/{id}",

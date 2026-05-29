@@ -180,6 +180,24 @@
     color: var(--muted)
     font-family: 'JetBrains Mono', ui-monospace, monospace
 
+  &__actions
+    display: flex
+    align-items: center
+    gap: 4px
+
+  &__edit
+    appearance: none
+    background: transparent
+    border: 0
+    padding: 0 4px
+    font-size: 14px
+    line-height: 1
+    color: var(--muted)
+    cursor: pointer
+
+    &:hover
+      color: var(--ink)
+
   &__delete
     appearance: none
     background: transparent
@@ -192,6 +210,17 @@
 
     &:hover
       color: var(--acc-red)
+
+.comment-edit
+  &__input
+    min-height: 64px
+    resize: vertical
+    font-size: 13px
+
+  &__actions
+    display: flex
+    justify-content: flex-end
+    gap: 8px
 
 .issue-panel__links
   padding: 12px 20px 4px

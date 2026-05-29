@@ -83,6 +83,8 @@ type SwimlaneStore interface {
 
 type CommentStore interface {
 	Create(ctx context.Context, c *model.Comment) error
+	GetByID(ctx context.Context, id uint) (*model.Comment, error)
+	Update(ctx context.Context, c *model.Comment) error
 	ListByIssue(ctx context.Context, issueID uint) ([]model.Comment, error)
 	ListByEpic(ctx context.Context, epicID uint) ([]model.Comment, error)
 	ListByProject(ctx context.Context, projectID uint) ([]model.Comment, error)
