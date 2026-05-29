@@ -4,6 +4,7 @@ import './handlebars-helpers'
 import '../styles/main.sass'
 import './mode'
 import './topbar'
+import './board-dnd'
 import { PROJECT, PROJECT_API } from './project'
 
 const boardEl = document.getElementById('board')
