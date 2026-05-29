@@ -148,6 +148,14 @@ document.addEventListener('click', event => {
     return
   }
 
+  if (event.target.closest('[data-open-audit]')) {
+    fetch(`/api/v1/projects/${PROJECT}/audit`)
+      .then(r => { if (!r.ok) throw new Error(r.status); return r.json() })
+      .then(entries => window.openDialog('tmpl-audit-log', { entries }))
+      .catch(() => window.showToast('Failed to load activity'))
+    return
+  }
+
   const epicDetailBtn = event.target.closest('[data-open-epic-detail]')
   if (epicDetailBtn) {
     openEpicDetail(epicDetailBtn.getAttribute('data-epic-ref'))

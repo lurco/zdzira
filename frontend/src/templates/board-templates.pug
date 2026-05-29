@@ -363,6 +363,25 @@ script#tmpl-comment-edit(type="text/x-handlebars-template")
   |   </div>
   | </li>
 
+script#tmpl-audit-log(type="text/x-handlebars-template")
+  | <div class="modal__form audit-log">
+  |   <h2 class="modal__title">Activity</h2>
+  |   {{#if entries.length}}
+  |     <ul class="audit-list">
+  |       {{#each entries}}
+  |         <li class="audit-item">
+  |           <span class="audit-item__action audit-item__action--{{action}}">{{action}}</span>
+  |           <span class="audit-item__ref mono">{{ref}}</span>
+  |           {{#if detail}}<span class="audit-item__detail">{{detail}}</span>{{/if}}
+  |           <time class="audit-item__time">{{formatDate created_at}}</time>
+  |         </li>
+  |       {{/each}}
+  |     </ul>
+  |   {{else}}
+  |     <p class="modal__hint">No activity recorded yet.</p>
+  |   {{/if}}
+  | </div>
+
 script#tmpl-confirm-delete-comment(type="text/x-handlebars-template")
   | <div class="modal__form">
   |   <h2 class="modal__title">Delete comment?</h2>
