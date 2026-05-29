@@ -1,11 +1,32 @@
 script#tmpl-board(type="text/x-handlebars-template")
   | {{#each swimlanes}}
   |   <div class="lane" data-lane-id="{{id}}" data-lane-name="{{name}}">
-  |     <div class="lane-header" draggable="true" data-drag-kind="lane" data-lane-id="{{id}}">
+  |     <div class="lane-header">
   |       <span class="lane-swatch" style="background:{{laneColor color}}"></span>
-  |       <span class="lane-title">{{name}}</span>
+  |       <input class="lane-title" name="name" value="{{name}}" maxlength="40"
+  |              hx-patch="/api/v1/projects/{{projectSlug}}/swimlanes/{{id}}"
+  |              hx-trigger="blur changed"
+  |              hx-ext="json-enc"
+  |              hx-include="this"
+  |              hx-swap="none">
   |       <span class="lane-count">{{issues.length}}</span>
-  |       <button class="lane-menu" aria-label="Lane menu" type="button">⋯</button>
+  |       <button class="lane-menu" type="button" data-lane-menu="{{id}}" aria-label="Lane menu">⋯</button>
+  |     </div>
+  |     <div class="popover" data-lane-popover="{{id}}" hidden>
+  |       <div class="popover__swatches">
+  |         {{#each (laneColors)}}
+  |           <button class="popover__swatch" type="button" style="background:{{this}}"
+  |                   hx-patch="/api/v1/projects/{{projectSlug}}/swimlanes/{{../id}}"
+  |                   hx-ext="json-enc"
+  |                   hx-vals='{"color":"{{this}}"}'
+  |                   hx-swap="none"></button>
+  |         {{/each}}
+  |       </div>
+  |       <button class="popover__btn popover__danger" type="button"
+  |               data-dialog-open="tmpl-confirm-delete-lane"
+  |               data-dialog-data='{"laneId":{{id}},"laneName":"{{name}}"}'>
+  |         Delete lane
+  |       </button>
   |     </div>
   |     <div class="lane-body" data-lane-id="{{id}}">
   |       {{#if issues.length}}
@@ -31,6 +52,23 @@ script#tmpl-board(type="text/x-handlebars-template")
   |     </div>
   |   </div>
   | {{/each}}
-  | <button class="add-lane" type="button" data-add-lane>
+  | <button class="add-lane" type="button"
+  |         hx-post="/api/v1/projects/{{projectSlug}}/swimlanes"
+  |         hx-ext="json-enc"
+  |         hx-vals='{"name":"New lane"}'
+  |         hx-swap="none">
   |   <span class="plus">+</span> Add lane
   | </button>
+
+script#tmpl-confirm-delete-lane(type="text/x-handlebars-template")
+  | <div class="modal__form">
+  |   <h2 class="modal__title">Delete "{{laneName}}"?</h2>
+  |   <p class="modal__hint">This will also remove the lane's issues.</p>
+  |   <div class="modal__actions">
+  |     <button class="modal__btn modal__btn--cancel" type="button" data-dialog-close>Cancel</button>
+  |     <button class="modal__btn modal__btn--submit" type="button"
+  |             hx-delete="/api/v1/projects/{{projectSlug}}/swimlanes/{{laneId}}"
+  |             hx-swap="none"
+  |             data-dialog-close>Delete</button>
+  |   </div>
+  | </div>

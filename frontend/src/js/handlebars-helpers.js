@@ -15,3 +15,15 @@ Handlebars.registerHelper('priorityClass', priority => {
 })
 
 Handlebars.registerHelper('lower', value => String(value || '').toLowerCase())
+
+Handlebars.registerHelper('projectSlug', () => {
+  return new URLSearchParams(location.search).get('project') || 'main'
+})
+
+const LANE_COLORS = [
+  '#2A6FDB', '#F5D547', '#7A4FD6',
+  '#E63946', '#2A9D5A', '#6B655A', '#0A0908',
+]
+Handlebars.registerHelper('laneColors', () => LANE_COLORS)
+
+Handlebars.registerHelper('json', value => JSON.stringify(value))
