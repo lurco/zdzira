@@ -1,5 +1,5 @@
 header.topbar
-  .brand
+  a.brand(href='/')
     span.logo(aria-hidden='true')
       span.plate
       span.face Z
@@ -15,6 +15,7 @@ header.topbar
   )
     option(value='', disabled, selected) Loading…
   .topbar-right
+    button.btn.ghost(type='button', data-dialog-open='tmpl-new-project-form') + Project
     .mode-switch(role='tablist', aria-label='Color mode')
       button.mode-switch__btn(data-set='light', aria-pressed='true') Light
       button.mode-switch__btn(data-set='dark', aria-pressed='false') Dark
