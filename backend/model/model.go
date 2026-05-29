@@ -34,6 +34,7 @@ type Swimlane struct {
 type Epic struct {
 	ID          uint    `gorm:"primarykey"     json:"id"`
 	Number      uint    `gorm:"not null"       json:"number"`
+	Ref         string  `gorm:"-"              json:"ref"`
 	Name        string  `gorm:"not null"       json:"name"`
 	Description *string `                      json:"description,omitempty"`
 	ProjectID   uint    `gorm:"not null;index" json:"project_id"`
@@ -44,6 +45,7 @@ type Epic struct {
 type Issue struct {
 	ID          uint      `gorm:"primarykey"     json:"id"`
 	Number      uint      `gorm:"not null"       json:"number"`
+	Ref         string    `gorm:"-"              json:"ref"`
 	Type        IssueType `gorm:"not null"       json:"type"`
 	Priority    Priority  `gorm:"not null"       json:"priority"`
 	Name        string    `gorm:"not null"       json:"name"`

@@ -18,6 +18,18 @@ type CreateEpicInput struct {
 	Description *string `json:"description,omitempty" doc:"Optional epic description"  example:"All issues related to the new OAuth flow"`
 }
 
+func setEpicRef(shortcut string, e *model.Epic) *model.Epic {
+	e.Ref = fmt.Sprintf("%s-E%d", shortcut, e.Number)
+	return e
+}
+
+func setEpicRefs(shortcut string, epics []model.Epic) []model.Epic {
+	for i := range epics {
+		epics[i].Ref = fmt.Sprintf("%s-E%d", shortcut, epics[i].Number)
+	}
+	return epics
+}
+
 func (s *EpicService) Create(ctx context.Context, in CreateEpicInput) (*model.Epic, error) {
 	p, err := s.stores.Projects.GetBySlug(ctx, in.ProjectSlug)
 	if err != nil {
@@ -39,7 +51,7 @@ func (s *EpicService) Create(ctx context.Context, in CreateEpicInput) (*model.Ep
 		return nil, err
 	}
 	s.audit.record(ctx, p.ID, "epic", fmt.Sprintf("%s-E%d", p.Shortcut, e.Number), "created")
-	return e, nil
+	return setEpicRef(p.Shortcut, e), nil
 }
 
 func (s *EpicService) Get(ctx context.Context, projectSlug, ref string) (*model.Epic, error) {
@@ -51,7 +63,11 @@ func (s *EpicService) Get(ctx context.Context, projectSlug, ref string) (*model.
 	if err != nil {
 		return nil, err
 	}
-	return s.stores.Epics.GetByRef(ctx, p.ID, number)
+	e, err := s.stores.Epics.GetByRef(ctx, p.ID, number)
+	if err != nil {
+		return nil, err
+	}
+	return setEpicRef(p.Shortcut, e), nil
 }
 
 func (s *EpicService) List(ctx context.Context, projectSlug string) ([]model.Epic, error) {
@@ -59,7 +75,11 @@ func (s *EpicService) List(ctx context.Context, projectSlug string) ([]model.Epi
 	if err != nil {
 		return nil, fmt.Errorf("project %q not found", projectSlug)
 	}
-	return s.stores.Epics.ListByProject(ctx, p.ID)
+	epics, err := s.stores.Epics.ListByProject(ctx, p.ID)
+	if err != nil {
+		return nil, err
+	}
+	return setEpicRefs(p.Shortcut, epics), nil
 }
 
 type UpdateEpicInput struct {
@@ -84,7 +104,7 @@ func (s *EpicService) Update(ctx context.Context, in UpdateEpicInput) (*model.Ep
 		return nil, err
 	}
 	s.audit.record(ctx, p.ID, "epic", fmt.Sprintf("%s-E%d", p.Shortcut, e.Number), "updated")
-	return e, nil
+	return setEpicRef(p.Shortcut, e), nil
 }
 
 func (s *EpicService) Delete(ctx context.Context, projectSlug, ref string) error {

@@ -31,6 +31,18 @@ type MoveIssueInput struct {
 	SwimlaneID   *uint  `json:"swimlane_id,omitempty" doc:"Target swimlane ID"`
 }
 
+func setIssueRef(shortcut string, issue *model.Issue) *model.Issue {
+	issue.Ref = fmt.Sprintf("%s-%d", shortcut, issue.Number)
+	return issue
+}
+
+func setIssueRefs(shortcut string, issues []model.Issue) []model.Issue {
+	for i := range issues {
+		issues[i].Ref = fmt.Sprintf("%s-%d", shortcut, issues[i].Number)
+	}
+	return issues
+}
+
 func (s *IssueService) Create(ctx context.Context, in CreateIssueInput) (*model.Issue, error) {
 	p, err := s.stores.Projects.GetBySlug(ctx, in.ProjectSlug)
 	if err != nil {
@@ -70,7 +82,7 @@ func (s *IssueService) Create(ctx context.Context, in CreateIssueInput) (*model.
 		return nil, err
 	}
 	s.audit.record(ctx, p.ID, "issue", fmt.Sprintf("%s-%d", p.Shortcut, issue.Number), "created")
-	return issue, nil
+	return setIssueRef(p.Shortcut, issue), nil
 }
 
 func (s *IssueService) Get(ctx context.Context, projectSlug, ref string) (*model.Issue, error) {
@@ -82,7 +94,11 @@ func (s *IssueService) Get(ctx context.Context, projectSlug, ref string) (*model
 	if err != nil {
 		return nil, err
 	}
-	return s.stores.Issues.GetByRef(ctx, p.ID, number)
+	issue, err := s.stores.Issues.GetByRef(ctx, p.ID, number)
+	if err != nil {
+		return nil, err
+	}
+	return setIssueRef(p.Shortcut, issue), nil
 }
 
 func (s *IssueService) List(ctx context.Context, projectSlug string) ([]model.Issue, error) {
@@ -90,7 +106,11 @@ func (s *IssueService) List(ctx context.Context, projectSlug string) ([]model.Is
 	if err != nil {
 		return nil, fmt.Errorf("project %q not found", projectSlug)
 	}
-	return s.stores.Issues.ListByProject(ctx, p.ID)
+	issues, err := s.stores.Issues.ListByProject(ctx, p.ID)
+	if err != nil {
+		return nil, err
+	}
+	return setIssueRefs(p.Shortcut, issues), nil
 }
 
 func (s *IssueService) Move(ctx context.Context, in MoveIssueInput) (*model.Issue, error) {
@@ -126,7 +146,7 @@ func (s *IssueService) Move(ctx context.Context, in MoveIssueInput) (*model.Issu
 		return nil, err
 	}
 	s.audit.record(ctx, p.ID, "issue", fmt.Sprintf("%s-%d", p.Shortcut, issue.Number), "moved")
-	return issue, nil
+	return setIssueRef(p.Shortcut, issue), nil
 }
 
 type UpdateIssueInput struct {
@@ -155,7 +175,7 @@ func (s *IssueService) Update(ctx context.Context, in UpdateIssueInput) (*model.
 		return nil, err
 	}
 	s.audit.record(ctx, p.ID, "issue", fmt.Sprintf("%s-%d", p.Shortcut, issue.Number), "updated")
-	return issue, nil
+	return setIssueRef(p.Shortcut, issue), nil
 }
 
 type IssueFilterInput struct {
@@ -171,12 +191,16 @@ func (s *IssueService) Filter(ctx context.Context, in IssueFilterInput) ([]model
 	if err != nil {
 		return nil, fmt.Errorf("project %q not found", in.ProjectSlug)
 	}
-	return s.stores.Issues.ListFiltered(ctx, p.ID, store.IssueStoreFilter{
+	issues, err := s.stores.Issues.ListFiltered(ctx, p.ID, store.IssueStoreFilter{
 		Type:       in.Type,
 		Priority:   in.Priority,
 		SwimlaneID: in.SwimlaneID,
 		EpicID:     in.EpicID,
 	})
+	if err != nil {
+		return nil, err
+	}
+	return setIssueRefs(p.Shortcut, issues), nil
 }
 
 func (s *IssueService) Delete(ctx context.Context, projectSlug, ref string) error {
