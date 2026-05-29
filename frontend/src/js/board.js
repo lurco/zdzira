@@ -41,6 +41,20 @@ document.addEventListener('click', event => {
     return
   }
 
+  if (event.target.closest('[data-issue-edit]') && currentIssue) {
+    const panel = document.getElementById('issuePanel')
+    panel.innerHTML = renderTemplate('tmpl-issue-edit-form', { ...currentIssue, projectSlug: PROJECT })
+    window.htmx.process(panel)
+    return
+  }
+
+  if (event.target.closest('[data-issue-edit-cancel]') && currentIssue) {
+    const panel = document.getElementById('issuePanel')
+    panel.innerHTML = renderTemplate('tmpl-issue-panel', currentIssue)
+    window.htmx.process(panel)
+    return
+  }
+
   const addBtn = event.target.closest('.add-card-btn')
   if (addBtn) {
     openAddIssueForm(Number(addBtn.dataset.laneId))
@@ -85,6 +99,8 @@ window.addEventListener('popstate', () => {
   else closeIssuePanel()
 })
 
+let currentIssue = null
+
 function openIssuePanel(ref) {
   const panel = document.getElementById('issuePanel')
   if (!panel) return
@@ -100,6 +116,11 @@ if (initialIssue) openIssuePanel(initialIssue)
 
 document.body.addEventListener('htmx:afterRequest', event => {
   if (!event.detail.successful) return
+
+  if (event.detail.target?.id === 'issuePanel') {
+    try { currentIssue = JSON.parse(event.detail.xhr.responseText) } catch {}
+  }
+
   const verb = event.detail.requestConfig?.verb
   if (!verb || verb === 'get') return
   refreshBoard()

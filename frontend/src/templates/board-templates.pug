@@ -95,6 +95,7 @@ script#tmpl-issue-panel(type="text/x-handlebars-template")
   |     <span class="issue-panel__ref mono">{{ref}}</span>
   |     <span class="badge {{priorityClass priority}}">{{priority}}</span>
   |     <span class="tag tag-{{lower type}}">{{type}}</span>
+  |     <button type="button" class="btn ghost" data-issue-edit>Edit</button>
   |     <button type="button" class="issue-panel__close" data-issue-panel-close aria-label="Close">×</button>
   |   </header>
   |   <h2 class="issue-panel__title">{{name}}</h2>
@@ -102,6 +103,36 @@ script#tmpl-issue-panel(type="text/x-handlebars-template")
   |     <div class="issue-panel__description">{{description}}</div>
   |   {{/if}}
   | </div>
+
+script#tmpl-issue-edit-form(type="text/x-handlebars-template")
+  | <form class="issue-panel__inner"
+  |       hx-put="/api/v1/projects/{{projectSlug}}/issues/{{ref}}"
+  |       hx-ext="json-enc"
+  |       hx-target="#issuePanel"
+  |       hx-swap="innerHTML">
+  |   <header class="issue-panel__header">
+  |     <span class="issue-panel__ref mono">{{ref}}</span>
+  |     <span class="issue-panel__spacer"></span>
+  |     <button type="submit" class="btn primary">Save</button>
+  |     <button type="button" class="btn ghost" data-issue-edit-cancel>Cancel</button>
+  |   </header>
+  |   <label class="modal__label">Title</label>
+  |   <input class="modal__input" name="name" value="{{name}}" required>
+  |   <label class="modal__label">Description</label>
+  |   <textarea class="modal__input issue-panel__edit-description" name="description">{{description}}</textarea>
+  |   <div class="issue-panel__edit-row">
+  |     <select class="mini-select" name="type">
+  |       <option value="TASK" {{#if (eq type "TASK")}}selected{{/if}}>Task</option>
+  |       <option value="BUG" {{#if (eq type "BUG")}}selected{{/if}}>Bug</option>
+  |       <option value="STORY" {{#if (eq type "STORY")}}selected{{/if}}>Story</option>
+  |     </select>
+  |     <select class="mini-select" name="priority">
+  |       <option value="IMMEDIATE" {{#if (eq priority "IMMEDIATE")}}selected{{/if}}>Immediate</option>
+  |       <option value="HIGH" {{#if (eq priority "HIGH")}}selected{{/if}}>High</option>
+  |       <option value="LOW" {{#if (eq priority "LOW")}}selected{{/if}}>Low</option>
+  |     </select>
+  |   </div>
+  | </form>
 
 script#tmpl-confirm-delete-lane(type="text/x-handlebars-template")
   | <div class="modal__form">
