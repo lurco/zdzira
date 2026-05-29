@@ -9,6 +9,15 @@ import './board-filter'
 import { renderTemplate } from './dialog'
 import { PROJECT, refreshBoard } from './project'
 
+// SSE: refresh the board when any agent or other tab mutates the API.
+// Debounced to avoid double-render when a local htmx mutation also fires.
+let sseRefreshTimer = null
+const es = new EventSource('/api/v1/events')
+es.onmessage = () => {
+  clearTimeout(sseRefreshTimer)
+  sseRefreshTimer = setTimeout(refreshBoard, 300)
+}
+
 const boardEl = document.getElementById('board')
 let currentIssue = null
 let currentEpics = []

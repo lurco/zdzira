@@ -57,7 +57,11 @@ func NewRouter(svcs *service.Services, logger *slog.Logger, ready func(context.C
 		_, _ = w.Write([]byte(docsHTML))
 	})
 
+	broadcaster := NewBroadcaster()
+
 	r.Route("/api/v1", func(sub chi.Router) {
+		sub.Use(notifyMiddleware(broadcaster))
+		sub.Get("/events", eventsHandler(broadcaster))
 		api := humachi.New(sub, config)
 		registerProjectRoutes(api, svcs)
 		registerEpicRoutes(api, svcs)
