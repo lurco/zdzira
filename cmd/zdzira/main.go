@@ -33,7 +33,7 @@ func main() {
 	svcs := service.New(stores)
 
 	r := chi.NewRouter()
-	r.Mount("/", api.NewRouter(svcs, logger))
+	r.Mount("/", api.NewRouter(svcs, logger, stores.Ping))
 	r.Mount("/mcp", zdziramcp.NewHandler(svcs))
 
 	logger.Info("starting", "addr", *addr, "db", *dbPath)

@@ -8,6 +8,7 @@ import (
 )
 
 type Stores struct {
+	db        *gorm.DB
 	Projects  ProjectStore
 	Epics     EpicStore
 	Issues    IssueStore
@@ -19,6 +20,7 @@ type Stores struct {
 
 func New(db *gorm.DB) *Stores {
 	return &Stores{
+		db:        db,
 		Projects:  &gormProjectStore{db},
 		Epics:     &gormEpicStore{db},
 		Issues:    &gormIssueStore{db},
@@ -27,6 +29,10 @@ func New(db *gorm.DB) *Stores {
 		Links:     &gormLinkStore{db},
 		Audit:     &gormAuditStore{db},
 	}
+}
+
+func (s *Stores) Ping(ctx context.Context) error {
+	return s.db.WithContext(ctx).Exec("SELECT 1").Error
 }
 
 type ProjectStore interface {

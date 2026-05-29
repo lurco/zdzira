@@ -19,7 +19,8 @@ func newTestServer(t *testing.T) *httptest.Server {
 	t.Helper()
 	db, err := store.Open(":memory:")
 	require.NoError(t, err)
-	return httptest.NewServer(api.NewRouter(service.New(store.New(db)), slog.Default()))
+	stores := store.New(db)
+	return httptest.NewServer(api.NewRouter(service.New(stores), slog.Default(), stores.Ping))
 }
 
 func do(t *testing.T, srv *httptest.Server, method, path string, body any) *http.Response {

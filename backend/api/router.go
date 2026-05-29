@@ -1,6 +1,8 @@
 package api
 
 import (
+	"context"
+	"encoding/json"
 	"log/slog"
 	"net/http"
 	"zdzira/backend/service"
@@ -24,11 +26,26 @@ const docsHTML = `<!doctype html>
 </body>
 </html>`
 
-func NewRouter(svcs *service.Services, logger *slog.Logger) http.Handler {
+func NewRouter(svcs *service.Services, logger *slog.Logger, ready func(context.Context) error) http.Handler {
 	r := chi.NewRouter()
 	r.Use(middleware.RequestID)
 	r.Use(middleware.Recoverer)
 	r.Use(SlogMiddleware(logger))
+
+	r.Get("/health", func(w http.ResponseWriter, _ *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		w.Write([]byte(`{"status":"ok"}`))
+	})
+
+	r.Get("/ready", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		if err := ready(r.Context()); err != nil {
+			w.WriteHeader(http.StatusServiceUnavailable)
+			json.NewEncoder(w).Encode(map[string]string{"status": "unavailable", "error": err.Error()})
+			return
+		}
+		w.Write([]byte(`{"status":"ready"}`))
+	})
 
 	config := huma.DefaultConfig("Zdzira API", "1.0.0")
 	config.Info.Description = "Local issue tracker for AI-assisted software development. " +
