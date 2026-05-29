@@ -19,7 +19,7 @@ const docsHTML = `<!doctype html>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
 </head>
 <body>
-  <script id="api-reference" data-url="/openapi.json"></script>
+  <script id="api-reference" data-url="/api/v1/openapi.json"></script>
   <script src="https://cdn.jsdelivr.net/npm/@scalar/api-reference"></script>
 </body>
 </html>`
@@ -35,20 +35,21 @@ func NewRouter(svcs *service.Services, logger *slog.Logger) http.Handler {
 		"REST API for human access; MCP server at /mcp for agent access."
 	config.DocsPath = "" // disabled — we serve our own docs below
 
-	api := humachi.New(r, config)
-
 	r.Get("/docs", func(w http.ResponseWriter, _ *http.Request) {
 		w.Header().Set("Content-Type", "text/html; charset=utf-8")
 		_, _ = w.Write([]byte(docsHTML))
 	})
 
-	registerProjectRoutes(api, svcs)
-	registerEpicRoutes(api, svcs)
-	registerIssueRoutes(api, svcs)
-	registerSwimlaneRoutes(api, svcs)
-	registerCommentRoutes(api, svcs)
-	registerLinkRoutes(api, svcs)
-	registerAuditRoutes(api, svcs)
+	r.Route("/api/v1", func(sub chi.Router) {
+		api := humachi.New(sub, config)
+		registerProjectRoutes(api, svcs)
+		registerEpicRoutes(api, svcs)
+		registerIssueRoutes(api, svcs)
+		registerSwimlaneRoutes(api, svcs)
+		registerCommentRoutes(api, svcs)
+		registerLinkRoutes(api, svcs)
+		registerAuditRoutes(api, svcs)
+	})
 
 	return r
 }

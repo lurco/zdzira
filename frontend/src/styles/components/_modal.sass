@@ -1,0 +1,83 @@
+@use '../abstracts/mixins' as *
+
+.modal
+  border: var(--border) solid var(--ink)
+  box-shadow: var(--shadow-lg)
+  background: var(--paper)
+  color: var(--ink)
+  padding: 0
+  max-width: 420px
+  width: calc(100vw - 48px)
+
+  &::backdrop
+    background: rgba(0, 0, 0, 0.5)
+    backdrop-filter: blur(2px)
+
+  &__form
+    display: flex
+    flex-direction: column
+    gap: 10px
+    padding: 28px 28px 24px
+
+  &__title
+    font-size: 18px
+    font-weight: 700
+    margin: 0 0 8px
+
+  &__label
+    font-size: 12px
+    font-weight: 700
+    text-transform: uppercase
+    letter-spacing: 0.06em
+    +mono
+
+  &__input
+    appearance: none
+    background: var(--paper-2)
+    border: var(--border) solid var(--ink)
+    box-shadow: var(--shadow-sm)
+    color: var(--ink)
+    font-size: 14px
+    padding: 10px 12px
+    width: 100%
+    box-sizing: border-box
+
+    &:focus
+      outline: 3px solid var(--acc-yellow)
+      outline-offset: 2px
+
+  &__error
+    font-size: 12px
+    color: var(--acc-red)
+    font-weight: 700
+    margin: 0
+
+  &__actions
+    +flex-between
+    gap: 12px
+    margin-top: 8px
+
+  &__btn
+    appearance: none
+    border: var(--border) solid var(--ink)
+    box-shadow: var(--shadow-sm)
+    padding: 10px 20px
+    font-size: 13px
+    font-weight: 700
+    text-transform: uppercase
+    letter-spacing: 0.06em
+    cursor: pointer
+    +mono
+    flex: 1
+
+    &:active
+      box-shadow: none
+      transform: translate(3px, 3px)
+
+    &--cancel
+      background: var(--paper-2)
+      color: var(--ink)
+
+    &--submit
+      background: var(--ink)
+      color: var(--paper)

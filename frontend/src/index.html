@@ -20,5 +20,20 @@
         <button class="project-new" id="newProjectBtn">+ New project</button>
       </main>
     </div>
+
+    <dialog class="modal" id="newProjectDialog">
+      <form class="modal__form" id="newProjectForm" method="dialog">
+        <h2 class="modal__title">New project</h2>
+        <label class="modal__label" for="projectName">Name</label>
+        <input class="modal__input" id="projectName" type="text" placeholder="My Project" required autocomplete="off" />
+        <label class="modal__label" for="projectShortcut">Issue prefix</label>
+        <input class="modal__input" id="projectShortcut" type="text" placeholder="PROJ" maxlength="6" required autocomplete="off" />
+        <p class="modal__error" id="newProjectError" hidden></p>
+        <div class="modal__actions">
+          <button class="modal__btn modal__btn--cancel" type="button" id="newProjectCancel">Cancel</button>
+          <button class="modal__btn modal__btn--submit" type="submit">Create</button>
+        </div>
+      </form>
+    </dialog>
   </body>
 </html>

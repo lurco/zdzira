@@ -31,30 +31,46 @@ async function loadProjects() {
   }
 }
 
-async function createProject() {
-  const name = prompt('Project name:')
-  if (!name) return
-  const shortcut = prompt('Issue prefix (e.g. PROJ):')
-  if (!shortcut) return
-  try {
-    const res = await fetch('/api/v1/projects', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name, shortcut }),
-    })
-    if (!res.ok) {
-      const err = await res.json().catch(() => ({}))
-      throw new Error(err.detail || `${res.status} ${res.statusText}`)
+function initNewProjectDialog() {
+  const dialog = document.getElementById('newProjectDialog')
+  const form = document.getElementById('newProjectForm')
+  const errorEl = document.getElementById('newProjectError')
+  const cancelBtn = document.getElementById('newProjectCancel')
+  if (!dialog) return
+
+  document.getElementById('newProjectBtn').addEventListener('click', () => {
+    form.reset()
+    errorEl.hidden = true
+    dialog.showModal()
+  })
+
+  cancelBtn.addEventListener('click', () => dialog.close())
+
+  form.addEventListener('submit', async e => {
+    e.preventDefault()
+    const name = document.getElementById('projectName').value.trim()
+    const shortcut = document.getElementById('projectShortcut').value.trim()
+    errorEl.hidden = true
+    try {
+      const res = await fetch('/api/v1/projects', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, shortcut }),
+      })
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}))
+        throw new Error(err.detail || `${res.status} ${res.statusText}`)
+      }
+      const p = await res.json()
+      location.href = `/board.html?project=${esc(p.slug)}`
+    } catch (err) {
+      errorEl.textContent = err.message
+      errorEl.hidden = false
     }
-    const p = await res.json()
-    location.href = `/board.html?project=${esc(p.slug)}`
-  } catch (e) {
-    alert('Failed to create project: ' + e.message)
-  }
+  })
 }
 
 document.addEventListener('DOMContentLoaded', () => {
   loadProjects()
-  const btn = document.getElementById('newProjectBtn')
-  if (btn) btn.addEventListener('click', createProject)
+  initNewProjectDialog()
 })
