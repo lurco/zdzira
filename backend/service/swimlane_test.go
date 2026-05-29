@@ -45,6 +45,40 @@ func TestSwimlaneUpdate_ChangesName(t *testing.T) {
 	assert.Equal(t, "Todo", updated.Name)
 }
 
+func TestSwimlaneReorder_RewritesPositions(t *testing.T) {
+	svcs := newTestServices(t)
+	p, err := svcs.Projects.Create(ctx, service.CreateProjectInput{Name: "Board", Shortcut: "BRD"})
+	require.NoError(t, err)
+	lanes, err := svcs.Swimlanes.ListByProject(ctx, p.ID)
+	require.NoError(t, err)
+	require.Len(t, lanes, 3)
+
+	// reverse the seeded Backlog/In Progress/Done order
+	reordered, err := svcs.Swimlanes.Reorder(ctx, service.ReorderSwimlanesInput{
+		ProjectSlug: "board",
+		IDs:         []uint{lanes[2].ID, lanes[1].ID, lanes[0].ID},
+	})
+	require.NoError(t, err)
+	assert.Equal(t, lanes[2].ID, reordered[0].ID)
+	assert.Equal(t, lanes[0].ID, reordered[2].ID)
+	assert.Equal(t, uint(1), reordered[0].Position)
+	assert.Equal(t, uint(3), reordered[2].Position)
+}
+
+func TestSwimlaneReorder_RejectsPartialList(t *testing.T) {
+	svcs := newTestServices(t)
+	p, err := svcs.Projects.Create(ctx, service.CreateProjectInput{Name: "Board", Shortcut: "BRD"})
+	require.NoError(t, err)
+	lanes, err := svcs.Swimlanes.ListByProject(ctx, p.ID)
+	require.NoError(t, err)
+
+	_, err = svcs.Swimlanes.Reorder(ctx, service.ReorderSwimlanesInput{
+		ProjectSlug: "board",
+		IDs:         []uint{lanes[0].ID},
+	})
+	require.Error(t, err)
+}
+
 func TestSwimlaneUpdate_SetsAndClearsColor(t *testing.T) {
 	svcs := newTestServices(t)
 	p, err := svcs.Projects.Create(ctx, service.CreateProjectInput{Name: "Board", Shortcut: "BRD"})

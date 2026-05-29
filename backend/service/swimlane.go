@@ -23,6 +23,11 @@ type UpdateSwimlaneInput struct {
 	Color       *string `json:"color,omitempty" doc:"Lane colour as #rrggbb or null to clear" example:"#ffe082"`
 }
 
+type ReorderSwimlanesInput struct {
+	ProjectSlug string `json:"-"`
+	IDs         []uint `json:"ids" doc:"All swimlane IDs in their new left-to-right order"`
+}
+
 func (s *SwimlaneService) ListByProject(ctx context.Context, projectID uint) ([]model.Swimlane, error) {
 	return s.stores.Swimlanes.ListByProject(ctx, projectID)
 }
@@ -53,6 +58,38 @@ func (s *SwimlaneService) Create(ctx context.Context, in CreateSwimlaneInput) (*
 		return nil, err
 	}
 	return sl, nil
+}
+
+// Reorder rewrites every swimlane's position to match the given order. The
+// IDs must be exactly the project's swimlanes, so a partial list is rejected
+// rather than silently leaving gaps.
+func (s *SwimlaneService) Reorder(ctx context.Context, in ReorderSwimlanesInput) ([]model.Swimlane, error) {
+	p, err := s.stores.Projects.GetBySlug(ctx, in.ProjectSlug)
+	if err != nil {
+		return nil, fmt.Errorf("project %q not found", in.ProjectSlug)
+	}
+	swimlanes, err := s.stores.Swimlanes.ListByProject(ctx, p.ID)
+	if err != nil {
+		return nil, err
+	}
+	byID := make(map[uint]*model.Swimlane, len(swimlanes))
+	for i := range swimlanes {
+		byID[swimlanes[i].ID] = &swimlanes[i]
+	}
+	if len(in.IDs) != len(swimlanes) {
+		return nil, fmt.Errorf("expected %d swimlane ids, got %d", len(swimlanes), len(in.IDs))
+	}
+	for position, id := range in.IDs {
+		sl, ok := byID[id]
+		if !ok {
+			return nil, fmt.Errorf("swimlane %d not found in project", id)
+		}
+		sl.Position = uint(position) + 1
+		if err := s.stores.Swimlanes.Update(ctx, sl); err != nil {
+			return nil, err
+		}
+	}
+	return s.stores.Swimlanes.ListByProject(ctx, p.ID)
 }
 
 func (s *SwimlaneService) Delete(ctx context.Context, projectSlug string, id uint) error {

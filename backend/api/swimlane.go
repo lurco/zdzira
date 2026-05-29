@@ -66,6 +66,24 @@ func registerSwimlaneRoutes(api huma.API, svcs *service.Services) {
 	})
 
 	huma.Register(api, huma.Operation{
+		OperationID: "reorder-swimlanes",
+		Method:      http.MethodPost,
+		Path:        "/projects/{slug}/swimlanes/reorder",
+		Summary:     "Reorder all swimlanes in a project",
+		Tags:        []string{"Swimlanes"},
+	}, func(ctx context.Context, input *struct {
+		Slug string `path:"slug" doc:"Project slug" example:"my-project"`
+		Body service.ReorderSwimlanesInput
+	}) (*struct{ Body []model.Swimlane }, error) {
+		input.Body.ProjectSlug = input.Slug
+		swimlanes, err := svcs.Swimlanes.Reorder(ctx, input.Body)
+		if err != nil {
+			return nil, huma.Error422UnprocessableEntity(err.Error())
+		}
+		return &struct{ Body []model.Swimlane }{swimlanes}, nil
+	})
+
+	huma.Register(api, huma.Operation{
 		OperationID:   "delete-swimlane",
 		Method:        http.MethodDelete,
 		Path:          "/projects/{slug}/swimlanes/{id}",
