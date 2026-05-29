@@ -47,6 +47,7 @@ func (s *BoardService) Get(ctx context.Context, projectSlug string, filter Board
 
 	setIssueRefs(p.Shortcut, issues)
 	setEpicRefs(p.Shortcut, epics)
+	annotateIssuesWithEpic(issues, epics)
 
 	if filter.EpicRef != "" {
 		issues = filterIssuesByEpic(issues, epics, filter.EpicRef)
@@ -63,6 +64,22 @@ func (s *BoardService) Get(ctx context.Context, projectSlug string, filter Board
 	}
 
 	return &BoardView{Swimlanes: lanes, Epics: epics, EpicRef: filter.EpicRef}, nil
+}
+
+func annotateIssuesWithEpic(issues []model.Issue, epics []model.Epic) {
+	byID := make(map[uint]model.Epic, len(epics))
+	for _, e := range epics {
+		byID[e.ID] = e
+	}
+	for i := range issues {
+		if issues[i].EpicID == nil {
+			continue
+		}
+		if e, ok := byID[*issues[i].EpicID]; ok {
+			issues[i].EpicRef = e.Ref
+			issues[i].EpicName = e.Name
+		}
+	}
 }
 
 func filterIssuesByEpic(issues []model.Issue, epics []model.Epic, epicRef string) []model.Issue {

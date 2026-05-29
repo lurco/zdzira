@@ -53,6 +53,8 @@ type Issue struct {
 	Description *string   `                      json:"description,omitempty"`
 	ProjectID   uint      `gorm:"not null;index" json:"project_id"`
 	EpicID      *uint     `gorm:"index"          json:"epic_id,omitempty"`
+	EpicRef     string    `gorm:"-"              json:"epic_ref,omitempty"`
+	EpicName    string    `gorm:"-"              json:"epic_name,omitempty"`
 	SwimlaneID  uint      `gorm:"not null;index" json:"swimlane_id"`
 	Position    uint      `gorm:"not null"       json:"position"`
 	Timestamps

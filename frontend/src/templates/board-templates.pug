@@ -44,6 +44,9 @@ script#tmpl-board(type="text/x-handlebars-template")
   |             <div class="card-title">{{name}}</div>
   |             <div class="card-meta">
   |               <span class="tag tag-{{lower type}}">{{type}}</span>
+  |               {{#if epic_ref}}
+  |                 <span class="card-epic" title="{{epic_name}}">{{epic_ref}}</span>
+  |               {{/if}}
   |             </div>
   |           </div>
   |         {{/each}}
@@ -124,6 +127,13 @@ script#tmpl-issue-panel(type="text/x-handlebars-template")
   |     <button type="button" class="issue-panel__close" data-issue-panel-close aria-label="Close">×</button>
   |   </header>
   |   <h2 class="issue-panel__title">{{name}}</h2>
+  |   {{#if epic_ref}}
+  |     <div class="issue-panel__epic">
+  |       <span class="issue-panel__epic-label">Epic</span>
+  |       <span class="issue-panel__epic-ref">{{epic_ref}}</span>
+  |       <span class="issue-panel__epic-name">{{epic_name}}</span>
+  |     </div>
+  |   {{/if}}
   |   {{#if description}}
   |     <div class="issue-panel__description">{{description}}</div>
   |   {{/if}}

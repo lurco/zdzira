@@ -98,7 +98,15 @@ func (s *IssueService) Get(ctx context.Context, projectSlug, ref string) (*model
 	if err != nil {
 		return nil, err
 	}
-	return setIssueRef(p.Shortcut, issue), nil
+	setIssueRef(p.Shortcut, issue)
+	if issue.EpicID != nil {
+		if epic, err := s.stores.Epics.GetByID(ctx, *issue.EpicID); err == nil {
+			setEpicRef(p.Shortcut, epic)
+			issue.EpicRef = epic.Ref
+			issue.EpicName = epic.Name
+		}
+	}
+	return issue, nil
 }
 
 func (s *IssueService) List(ctx context.Context, projectSlug string) ([]model.Issue, error) {

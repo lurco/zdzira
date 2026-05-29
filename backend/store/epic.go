@@ -13,6 +13,12 @@ func (s *gormEpicStore) Create(ctx context.Context, e *model.Epic) error {
 	return s.db.WithContext(ctx).Create(e).Error
 }
 
+func (s *gormEpicStore) GetByID(ctx context.Context, id uint) (*model.Epic, error) {
+	var e model.Epic
+	err := s.db.WithContext(ctx).First(&e, id).Error
+	return &e, err
+}
+
 func (s *gormEpicStore) GetByRef(ctx context.Context, projectID uint, number uint) (*model.Epic, error) {
 	var e model.Epic
 	err := s.db.WithContext(ctx).

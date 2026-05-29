@@ -39,6 +39,7 @@ type ProjectStore interface {
 
 type EpicStore interface {
 	Create(ctx context.Context, e *model.Epic) error
+	GetByID(ctx context.Context, id uint) (*model.Epic, error)
 	GetByRef(ctx context.Context, projectID uint, number uint) (*model.Epic, error)
 	ListByProject(ctx context.Context, projectID uint) ([]model.Epic, error)
 	Update(ctx context.Context, e *model.Epic) error
