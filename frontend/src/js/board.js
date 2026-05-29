@@ -9,10 +9,19 @@ import { renderTemplate } from './dialog'
 import { PROJECT, refreshBoard } from './project'
 
 const boardEl = document.getElementById('board')
+let currentIssue = null
+let currentEpics = []
+
+function syncBoardURL() {
+  const epic = new URLSearchParams(location.search).get('epic') || ''
+  const path = epic
+    ? `/api/v1/projects/${PROJECT}/board?epic=${encodeURIComponent(epic)}`
+    : `/api/v1/projects/${PROJECT}/board`
+  boardEl.setAttribute('hx-get', path)
+}
 
 if (boardEl) {
-  boardEl.setAttribute('hx-get', `/api/v1/projects/${PROJECT}/board`)
-  boardEl.setAttribute('hx-vals', 'js:{epic: new URLSearchParams(location.search).get("epic") || ""}')
+  syncBoardURL()
   boardEl.setAttribute('hx-trigger', 'boardUpdated from:body')
   boardEl.setAttribute('hx-ext', 'client-side-templates')
   boardEl.setAttribute('handlebars-template', 'tmpl-board')
@@ -33,6 +42,7 @@ if (epicFilterEl) {
     if (epicFilterEl.value) url.searchParams.set('epic', epicFilterEl.value)
     else url.searchParams.delete('epic')
     history.replaceState({}, '', url)
+    syncBoardURL()
     refreshBoard()
   })
 }
@@ -95,15 +105,35 @@ document.addEventListener('click', event => {
     return
   }
 
+  if (event.target.closest('[data-open-epics-manager]')) {
+    window.openDialog('tmpl-epics-manager', { epics: currentEpics, projectSlug: PROJECT })
+    return
+  }
+
   if (event.target.closest('[data-lane-popover]')) return
   closeAllLanePopovers()
+})
+
+document.body.addEventListener('epicsChanged', () => {
+  fetch(`/api/v1/projects/${PROJECT}/epics`).then(r => r.json()).then(epics => {
+    currentEpics = epics
+    const body = document.getElementById('sharedModalBody')
+    if (body && body.querySelector('.epics-manager')) {
+      body.innerHTML = renderTemplate('tmpl-epics-manager', { epics, projectSlug: PROJECT })
+      window.htmx.process(body)
+    }
+  })
 })
 
 function openAddIssueForm(laneId) {
   const laneBody = document.querySelector(`.lane-body[data-lane-id="${laneId}"]`)
   if (!laneBody) return
   document.querySelectorAll('.new-card-form').forEach(form => form.remove())
-  const html = renderTemplate('tmpl-add-issue-form', { laneId, projectSlug: PROJECT })
+  const html = renderTemplate('tmpl-add-issue-form', {
+    laneId,
+    projectSlug: PROJECT,
+    epics: currentEpics,
+  })
   const wrapper = document.createElement('div')
   wrapper.innerHTML = html
   const form = wrapper.firstElementChild
@@ -123,14 +153,6 @@ function closeIssuePanel() {
   }
 }
 
-window.addEventListener('popstate', () => {
-  const ref = new URLSearchParams(location.search).get('issue')
-  if (ref) openIssuePanel(ref)
-  else closeIssuePanel()
-})
-
-let currentIssue = null
-
 function openIssuePanel(ref) {
   const panel = document.getElementById('issuePanel')
   if (!panel) return
@@ -141,6 +163,12 @@ function openIssuePanel(ref) {
   })
 }
 
+window.addEventListener('popstate', () => {
+  const ref = new URLSearchParams(location.search).get('issue')
+  if (ref) openIssuePanel(ref)
+  else closeIssuePanel()
+})
+
 const initialIssue = new URLSearchParams(location.search).get('issue')
 if (initialIssue) openIssuePanel(initialIssue)
 
@@ -149,6 +177,13 @@ document.body.addEventListener('htmx:afterRequest', event => {
 
   if (event.detail.target?.id === 'issuePanel') {
     try { currentIssue = JSON.parse(event.detail.xhr.responseText) } catch {}
+  }
+
+  if (event.detail.target?.id === 'board') {
+    try {
+      const view = JSON.parse(event.detail.xhr.responseText)
+      currentEpics = view.epics || []
+    } catch {}
   }
 
   const verb = event.detail.requestConfig?.verb

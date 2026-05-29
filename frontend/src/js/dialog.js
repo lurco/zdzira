@@ -58,6 +58,7 @@ document.body.addEventListener('htmx:afterRequest', event => {
   const modal = document.getElementById(MODAL_ID)
   if (!modal || !modal.open) return
   if (!modal.contains(event.detail.elt)) return
+  if (event.detail.elt.closest('[data-dialog-keep-open]')) return
   closeDialog()
 })
 
