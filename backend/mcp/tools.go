@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"strings"
 	"zdzira/backend/model"
 	"zdzira/backend/service"
 
@@ -20,6 +21,45 @@ func newListResult[T any](items []T) (*mcp.CallToolResult, error) {
 		return nil, fmt.Errorf("marshal list result: %w", err)
 	}
 	return mcp.NewToolResultText(string(b)), nil
+}
+
+// issueSummary is the AI-facing issue shape: human-readable names instead
+// of internal IDs, only the fields an agent actually needs.
+type issueSummary struct {
+	Ref          string `json:"ref"`
+	Name         string `json:"name"`
+	Type         string `json:"type"`
+	Priority     string `json:"priority"`
+	SwimlaneName string `json:"swimlane_name"`
+	EpicRef      string `json:"epic_ref,omitempty"`
+	Description  string `json:"description,omitempty"`
+}
+
+func toIssueSummary(iss model.Issue, slName string) issueSummary {
+	desc := ""
+	if iss.Description != nil {
+		desc = *iss.Description
+	}
+	return issueSummary{
+		Ref:          iss.Ref,
+		Name:         iss.Name,
+		Type:         string(iss.Type),
+		Priority:     string(iss.Priority),
+		SwimlaneName: slName,
+		EpicRef:      iss.EpicRef,
+		Description:  desc,
+	}
+}
+
+// swimlaneNameMap builds id→name and lowercase-name→id maps for a project.
+func swimlaneNameMap(swimlanes []model.Swimlane) (byID map[uint]string, byName map[string]uint) {
+	byID = make(map[uint]string, len(swimlanes))
+	byName = make(map[string]uint, len(swimlanes))
+	for _, sl := range swimlanes {
+		byID[sl.ID] = sl.Name
+		byName[strings.ToLower(sl.Name)] = sl.ID
+	}
+	return
 }
 
 func registerProjectTools(s *server.MCPServer, svcs *service.Services) {
@@ -159,7 +199,57 @@ func registerEpicTools(s *server.MCPServer, svcs *service.Services) {
 func registerIssueTools(s *server.MCPServer, svcs *service.Services) {
 	s.AddTool(
 		mcp.NewTool("list_issues",
-			mcp.WithDescription("List all issues in a project."),
+			mcp.WithDescription("List issues in a project. Returns human-readable swimlane names. Use optional filters to narrow scope."),
+			mcp.WithString("project", mcp.Required(), mcp.Description("Project slug")),
+			mcp.WithString("swimlane", mcp.Description("Filter by swimlane name, e.g. \"In Progress\", \"Backlog\", \"Done\"")),
+			mcp.WithString("type", mcp.Description("Filter by type: TASK, BUG, or STORY")),
+			mcp.WithString("priority", mcp.Description("Filter by priority: LOW, HIGH, or IMMEDIATE")),
+		),
+		func(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+			slug, err := req.RequireString("project")
+			if err != nil {
+				return mcp.NewToolResultError(err.Error()), nil
+			}
+
+			swimlanes, err := svcs.Swimlanes.ListForProject(ctx, slug)
+			if err != nil {
+				return mcp.NewToolResultError(err.Error()), nil
+			}
+			byID, byName := swimlaneNameMap(swimlanes)
+
+			in := service.IssueFilterInput{ProjectSlug: slug}
+			if slName := req.GetString("swimlane", ""); slName != "" {
+				id, ok := byName[strings.ToLower(slName)]
+				if !ok {
+					return mcp.NewToolResultError(fmt.Sprintf("swimlane %q not found", slName)), nil
+				}
+				in.SwimlaneID = &id
+			}
+			if t := req.GetString("type", ""); t != "" {
+				it := model.IssueType(strings.ToUpper(t))
+				in.Type = &it
+			}
+			if p := req.GetString("priority", ""); p != "" {
+				pr := model.Priority(strings.ToUpper(p))
+				in.Priority = &pr
+			}
+
+			issues, err := svcs.Issues.Filter(ctx, in)
+			if err != nil {
+				return mcp.NewToolResultError(err.Error()), nil
+			}
+
+			summaries := make([]issueSummary, len(issues))
+			for i, iss := range issues {
+				summaries[i] = toIssueSummary(iss, byID[iss.SwimlaneID])
+			}
+			return newListResult(summaries)
+		},
+	)
+
+	s.AddTool(
+		mcp.NewTool("get_board",
+			mcp.WithDescription("Get the full board for a project — all swimlanes with their issues. Best starting point for understanding the current project state."),
 			mcp.WithString("project", mcp.Required(), mcp.Description("Project slug")),
 		),
 		func(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
@@ -167,17 +257,34 @@ func registerIssueTools(s *server.MCPServer, svcs *service.Services) {
 			if err != nil {
 				return mcp.NewToolResultError(err.Error()), nil
 			}
-			issues, err := svcs.Issues.List(ctx, slug)
+			view, err := svcs.Board.Get(ctx, slug, service.BoardFilter{})
 			if err != nil {
 				return mcp.NewToolResultError(err.Error()), nil
 			}
-			return newListResult(issues)
+
+			type laneSummary struct {
+				Name   string         `json:"name"`
+				Issues []issueSummary `json:"issues"`
+			}
+			lanes := make([]laneSummary, len(view.Swimlanes))
+			for i, lane := range view.Swimlanes {
+				issueSums := make([]issueSummary, len(lane.Issues))
+				for j, iss := range lane.Issues {
+					issueSums[j] = toIssueSummary(iss, lane.Name)
+				}
+				lanes[i] = laneSummary{Name: lane.Name, Issues: issueSums}
+			}
+			b, err := json.Marshal(lanes)
+			if err != nil {
+				return mcp.NewToolResultError(err.Error()), nil
+			}
+			return mcp.NewToolResultText(string(b)), nil
 		},
 	)
 
 	s.AddTool(
 		mcp.NewTool("get_issue",
-			mcp.WithDescription("Get an issue by its ref (e.g. PROJ-42)."),
+			mcp.WithDescription("Get full details for a single issue by its ref (e.g. PROJ-42)."),
 			mcp.WithString("project", mcp.Required(), mcp.Description("Project slug")),
 			mcp.WithString("issue_ref", mcp.Required(), mcp.Description("Issue reference, e.g. PROJ-42")),
 		),
@@ -194,19 +301,21 @@ func registerIssueTools(s *server.MCPServer, svcs *service.Services) {
 			if err != nil {
 				return mcp.NewToolResultError(err.Error()), nil
 			}
-			return mcp.NewToolResultJSON(issue)
+			swimlanes, _ := svcs.Swimlanes.ListForProject(ctx, slug)
+			byID, _ := swimlaneNameMap(swimlanes)
+			return mcp.NewToolResultJSON(toIssueSummary(*issue, byID[issue.SwimlaneID]))
 		},
 	)
 
 	s.AddTool(
 		mcp.NewTool("create_issue",
-			mcp.WithDescription("Create a new issue in a project. Returns the issue ref (e.g. PROJ-42)."),
+			mcp.WithDescription("Create a new issue. Returns the issue ref (e.g. PROJ-42). New issues land in the first swimlane (usually Backlog)."),
 			mcp.WithString("project", mcp.Required(), mcp.Description("Project slug")),
 			mcp.WithString("name", mcp.Required(), mcp.Description("Issue title")),
-			mcp.WithString("type", mcp.Required(), mcp.Description("Issue type: TASK, BUG, or STORY")),
-			mcp.WithString("priority", mcp.Required(), mcp.Description("Priority: LOW, HIGH, or IMMEDIATE")),
+			mcp.WithString("type", mcp.Required(), mcp.Description("TASK, BUG, or STORY")),
+			mcp.WithString("priority", mcp.Required(), mcp.Description("LOW, HIGH, or IMMEDIATE")),
 			mcp.WithString("description", mcp.Description("Optional description")),
-			mcp.WithString("epic_ref", mcp.Description("Optional epic ref to associate, e.g. PROJ-E1")),
+			mcp.WithString("epic_ref", mcp.Description("Optional epic ref, e.g. PROJ-E1")),
 		),
 		func(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 			slug, err := req.RequireString("project")
@@ -273,7 +382,7 @@ func registerIssueTools(s *server.MCPServer, svcs *service.Services) {
 			if err != nil {
 				return mcp.NewToolResultError(err.Error()), nil
 			}
-			return mcp.NewToolResultJSON(issue)
+			return mcp.NewToolResultText(fmt.Sprintf("moved %s to %q", issue.Ref, swimlane)), nil
 		},
 	)
 }
@@ -281,13 +390,14 @@ func registerIssueTools(s *server.MCPServer, svcs *service.Services) {
 func registerUpdateIssueTools(s *server.MCPServer, svcs *service.Services) {
 	s.AddTool(
 		mcp.NewTool("update_issue",
-			mcp.WithDescription("Update an issue's name, type, priority, or description."),
+			mcp.WithDescription("Update an issue. All fields are optional — omit any field to keep its current value."),
 			mcp.WithString("project", mcp.Required(), mcp.Description("Project slug")),
 			mcp.WithString("issue_ref", mcp.Required(), mcp.Description("Issue reference, e.g. PROJ-42")),
-			mcp.WithString("name", mcp.Required(), mcp.Description("Updated issue title")),
-			mcp.WithString("type", mcp.Required(), mcp.Description("Issue type: TASK, BUG, or STORY")),
-			mcp.WithString("priority", mcp.Required(), mcp.Description("Priority: LOW, HIGH, or IMMEDIATE")),
-			mcp.WithString("description", mcp.Description("Optional updated description")),
+			mcp.WithString("name", mcp.Description("New title (omit to keep current)")),
+			mcp.WithString("type", mcp.Description("New type: TASK, BUG, or STORY (omit to keep current)")),
+			mcp.WithString("priority", mcp.Description("New priority: LOW, HIGH, or IMMEDIATE (omit to keep current)")),
+			mcp.WithString("description", mcp.Description("New description (omit to keep current)")),
+			mcp.WithString("epic_ref", mcp.Description("Epic ref to attach (empty string to detach, omit for no change)")),
 		),
 		func(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 			slug, err := req.RequireString("project")
@@ -298,28 +408,40 @@ func registerUpdateIssueTools(s *server.MCPServer, svcs *service.Services) {
 			if err != nil {
 				return mcp.NewToolResultError(err.Error()), nil
 			}
-			name, err := req.RequireString("name")
+
+			// Fetch current state; apply only what was explicitly provided.
+			current, err := svcs.Issues.Get(ctx, slug, ref)
 			if err != nil {
 				return mcp.NewToolResultError(err.Error()), nil
 			}
-			issueType, err := req.RequireString("type")
-			if err != nil {
-				return mcp.NewToolResultError(err.Error()), nil
-			}
-			priority, err := req.RequireString("priority")
-			if err != nil {
-				return mcp.NewToolResultError(err.Error()), nil
-			}
+
 			in := service.UpdateIssueInput{
 				ProjectSlug: slug,
 				IssueRef:    ref,
-				Name:        name,
-				Type:        model.IssueType(issueType),
-				Priority:    model.Priority(priority),
+				Name:        current.Name,
+				Type:        current.Type,
+				Priority:    current.Priority,
+				Description: current.Description,
+			}
+			if name := req.GetString("name", ""); name != "" {
+				in.Name = name
+			}
+			if t := req.GetString("type", ""); t != "" {
+				in.Type = model.IssueType(strings.ToUpper(t))
+			}
+			if p := req.GetString("priority", ""); p != "" {
+				in.Priority = model.Priority(strings.ToUpper(p))
 			}
 			if desc := req.GetString("description", ""); desc != "" {
 				in.Description = &desc
 			}
+			if args := req.GetArguments(); args != nil {
+				if _, provided := args["epic_ref"]; provided {
+					er := req.GetString("epic_ref", "")
+					in.EpicRef = &er
+				}
+			}
+
 			issue, err := svcs.Issues.Update(ctx, in)
 			if err != nil {
 				return mcp.NewToolResultError(err.Error()), nil
@@ -332,7 +454,7 @@ func registerUpdateIssueTools(s *server.MCPServer, svcs *service.Services) {
 func registerSwimlaneTools(s *server.MCPServer, svcs *service.Services) {
 	s.AddTool(
 		mcp.NewTool("list_swimlanes",
-			mcp.WithDescription("List all swimlanes in a project."),
+			mcp.WithDescription("List all swimlanes (board columns) in a project with their names and colors."),
 			mcp.WithString("project", mcp.Required(), mcp.Description("Project slug")),
 		),
 		func(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
