@@ -25,11 +25,18 @@ function getModal() {
 }
 
 export function openDialog(templateId, data = {}) {
-  const modal = getModal()
-  const body = document.getElementById(BODY_ID)
-  body.innerHTML = getCompiled(templateId)(data)
-  window.htmx.process(body)
-  modal.showModal()
+  try {
+    const modal = getModal()
+    const body = document.getElementById(BODY_ID)
+    if (!body) throw new Error(`#${BODY_ID} not in DOM`)
+    body.innerHTML = getCompiled(templateId)(data)
+    window.htmx.process(body)
+    if (modal.open) modal.close()
+    modal.showModal()
+  } catch (err) {
+    console.error('openDialog failed', { templateId, data, err })
+    throw err
+  }
 }
 
 export function closeDialog() {
