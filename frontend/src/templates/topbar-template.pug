@@ -1,0 +1,8 @@
+script#tmpl-project-options(type="text/x-handlebars-template")
+  | {{#if length}}
+  |   {{#each this}}
+  |     <option value="{{slug}}" {{selectedIfCurrentProject slug}}>{{name}}</option>
+  |   {{/each}}
+  | {{else}}
+  |   <option value="">No projects</option>
+  | {{/if}}

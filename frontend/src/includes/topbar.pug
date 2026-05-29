@@ -4,7 +4,15 @@ header.topbar
       span.plate
       span.face Z
     span.brand-name Zdzira
-  select.project-switcher#projectSwitcher(aria-label='Current project')
+  select.project-switcher#projectSwitcher(
+    aria-label='Current project',
+    hx-get='/api/v1/projects',
+    hx-trigger='load',
+    hx-ext='client-side-templates',
+    handlebars-template='tmpl-project-options',
+    hx-target='this',
+    hx-swap='innerHTML'
+  )
     option(value='', disabled, selected) Loading…
   .topbar-right
     .mode-switch(role='tablist', aria-label='Color mode')
