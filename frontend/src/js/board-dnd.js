@@ -109,11 +109,16 @@ document.addEventListener('drop', event => {
   const toLaneId = Number(laneBody.dataset.laneId)
   const movingRef = dragRef
 
-  window.htmx.ajax('POST', `${PROJECT_API}/issues/${movingRef}/move`, {
-    values: { swimlane_id: toLaneId },
-    swap: 'none',
-  }).then(refreshBoard)
+  moveIssue(movingRef, toLaneId)
 })
+
+function moveIssue(ref, swimlaneId) {
+  fetch(`${PROJECT_API}/issues/${ref}/move`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ swimlane_id: swimlaneId }),
+  }).then(refreshBoard)
+}
 
 document.addEventListener('dragend', () => {
   document.querySelectorAll(`.${DRAGGING_CLASS}`).forEach(el => el.classList.remove(DRAGGING_CLASS))
