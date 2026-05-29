@@ -153,6 +153,9 @@ function updateStatusBar(view) {
   if (laneEl) laneEl.textContent = lanes.length
 }
 
+const projectInfoEl = document.getElementById('projectInfo')
+if (projectInfoEl) projectInfoEl.textContent = `proj: ${PROJECT}`
+
 function openEpicDetail(ref) {
   const base = `/api/v1/projects/${PROJECT}`
   fetch(`${base}/epics/${ref}`)
@@ -202,11 +205,39 @@ window.addEventListener('popstate', () => {
 const initialIssue = new URLSearchParams(location.search).get('issue')
 if (initialIssue) openIssuePanel(initialIssue)
 
+function loadComments(issueRef) {
+  const listEl = document.getElementById('commentsList')
+  if (!listEl) return
+
+  fetch(`/api/v1/projects/${PROJECT}/issues/${issueRef}/comments`)
+    .then(r => r.json())
+    .then(comments => { listEl.innerHTML = renderTemplate('tmpl-comments', comments) })
+
+  const form = document.getElementById('commentForm')
+  if (!form || form.dataset.wired) return
+  form.dataset.wired = '1'
+  form.addEventListener('submit', e => {
+    e.preventDefault()
+    const textarea = form.querySelector('[name="contents"]')
+    const text = textarea?.value.trim()
+    if (!text) return
+    fetch(`/api/v1/projects/${PROJECT}/issues/${issueRef}/comments`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ contents: text }),
+    }).then(() => {
+      textarea.value = ''
+      loadComments(issueRef)
+    })
+  })
+}
+
 document.body.addEventListener('htmx:afterRequest', event => {
   if (!event.detail.successful) return
 
   if (event.detail.target?.id === 'issuePanel') {
     try { currentIssue = JSON.parse(event.detail.xhr.responseText) } catch {}
+    if (currentIssue?.ref) loadComments(currentIssue.ref)
   }
 
   if (event.detail.target?.id === 'board') {

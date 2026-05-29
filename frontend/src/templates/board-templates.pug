@@ -38,9 +38,8 @@ script#tmpl-board(type="text/x-handlebars-template")
   |                hx-trigger="click"
   |                handlebars-template="tmpl-issue-panel"
   |                hx-push-url="/board.html?project={{projectSlug}}&issue={{ref}}">
-  |             <div class="card-strip" style="background:{{laneColor ../color}}"></div>
   |             <div class="card-top">
-  |               <span class="card-id mono">{{ref}}</span>
+  |               <span class="card-id mono" style="border-bottom: 2px solid {{laneColor ../color}}">{{ref}}</span>
   |               <span class="badge {{priorityClass priority}}">{{priority}}</span>
   |             </div>
   |             <div class="card-title">{{name}}</div>
@@ -237,6 +236,16 @@ script#tmpl-issue-panel(type="text/x-handlebars-template")
   |   {{#if description}}
   |     <div class="issue-panel__description">{{description}}</div>
   |   {{/if}}
+  |   <section class="issue-panel__comments">
+  |     <h3 class="issue-panel__section-title">Comments</h3>
+  |     <div id="commentsList"></div>
+  |     <form class="issue-panel__comment-form" id="commentForm">
+  |       <textarea class="modal__input issue-panel__comment-input" name="contents" placeholder="Write a comment…" rows="3"></textarea>
+  |       <div class="issue-panel__comment-actions">
+  |         <button class="btn primary" type="submit">Post</button>
+  |       </div>
+  |     </form>
+  |   </section>
   | </div>
 
 script#tmpl-issue-edit-form(type="text/x-handlebars-template")
@@ -304,3 +313,17 @@ script#tmpl-confirm-delete-lane(type="text/x-handlebars-template")
   |             data-dialog-close>Delete</button>
   |   </div>
   | </div>
+
+script#tmpl-comments(type="text/x-handlebars-template")
+  | {{#if this.length}}
+  |   <ul class="comment-list">
+  |     {{#each this}}
+  |       <li class="comment-item">
+  |         <p class="comment-item__text">{{contents}}</p>
+  |         <time class="comment-item__time">{{formatDate created_at}}</time>
+  |       </li>
+  |     {{/each}}
+  |   </ul>
+  | {{else}}
+  |   <p class="comment-list__empty">No comments yet.</p>
+  | {{/if}}

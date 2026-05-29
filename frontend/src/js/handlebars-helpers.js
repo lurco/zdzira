@@ -32,3 +32,9 @@ Handlebars.registerHelper('selectedIfCurrentEpic', ref => {
   const current = new URLSearchParams(location.search).get('epic')
   return ref === current ? 'selected' : ''
 })
+
+Handlebars.registerHelper('formatDate', dateStr => {
+  if (!dateStr) return ''
+  const d = new Date(dateStr)
+  return d.toLocaleString(undefined, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })
+})
