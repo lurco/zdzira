@@ -35,6 +35,7 @@ script#tmpl-board(type="text/x-handlebars-template")
   |                hx-get="/api/v1/projects/{{projectSlug}}/issues/{{ref}}"
   |                hx-target="#issuePanel"
   |                hx-trigger="click"
+  |                handlebars-template="tmpl-issue-panel"
   |                hx-push-url="/board.html?project={{projectSlug}}&issue={{ref}}">
   |             <div class="card-strip" style="background:{{laneColor ../color}}"></div>
   |             <div class="card-top">
@@ -167,7 +168,8 @@ script#tmpl-epic-detail(type="text/x-handlebars-template")
   |     <p class="modal__hint">No issues in this epic yet.</p>
   |   {{/if}}
   |   <div class="modal__actions">
-  |     <button class="modal__btn modal__btn--cancel" type="button" data-dialog-close>Close</button>
+  |     <button class="modal__btn modal__btn--cancel" type="button" data-open-epics-manager>← Epics</button>
+  |     <button class="modal__btn modal__btn--submit" type="button" data-dialog-close>Close</button>
   |   </div>
   | </div>
 
