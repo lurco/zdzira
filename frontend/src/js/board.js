@@ -108,6 +108,12 @@ document.addEventListener('click', event => {
     return
   }
 
+  const epicDetailBtn = event.target.closest('[data-open-epic-detail]')
+  if (epicDetailBtn) {
+    openEpicDetail(epicDetailBtn.getAttribute('data-epic-ref'))
+    return
+  }
+
   const epicEditBtn = event.target.closest('[data-open-epic-edit]')
   if (epicEditBtn) {
     window.openDialog('tmpl-epic-edit', {
@@ -133,6 +139,17 @@ document.body.addEventListener('epicsChanged', () => {
     }
   })
 })
+
+function openEpicDetail(ref) {
+  const base = `/api/v1/projects/${PROJECT}`
+  fetch(`${base}/epics/${ref}`)
+    .then(r => r.json())
+    .then(epic =>
+      fetch(`${base}/issues?epic_id=${epic.id}`)
+        .then(r => r.json())
+        .then(issues => window.openDialog('tmpl-epic-detail', { ...epic, issues, projectSlug: PROJECT })),
+    )
+}
 
 function openAddIssueDialog(laneId, laneName) {
   window.openDialog('tmpl-add-issue-form', {

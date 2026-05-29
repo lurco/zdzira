@@ -80,8 +80,13 @@ script#tmpl-epics-manager(type="text/x-handlebars-template")
   |     <ul class="epics-manager__list">
   |       {{#each epics}}
   |         <li class="epics-manager__row">
-  |           <span class="epics-manager__ref mono">{{ref}}</span>
-  |           <span class="epics-manager__name">{{name}}</span>
+  |           <button class="epics-manager__open"
+  |                   type="button"
+  |                   data-open-epic-detail
+  |                   data-epic-ref="{{ref}}">
+  |             <span class="epics-manager__ref mono">{{ref}}</span>
+  |             <span class="epics-manager__name">{{name}}</span>
+  |           </button>
   |           <button class="btn ghost epics-manager__edit"
   |                   type="button"
   |                   data-open-epic-edit
@@ -128,6 +133,43 @@ script#tmpl-epic-edit(type="text/x-handlebars-template")
   |     <button class="modal__btn modal__btn--submit" type="submit">Save</button>
   |   </div>
   | </form>
+
+script#tmpl-epic-detail(type="text/x-handlebars-template")
+  | <div class="modal__form epic-detail">
+  |   <header class="epic-detail__header">
+  |     <span class="epic-detail__ref mono">{{ref}}</span>
+  |     <h2 class="modal__title epic-detail__name">{{name}}</h2>
+  |     <button class="btn ghost"
+  |             type="button"
+  |             data-open-epic-edit
+  |             data-epic-ref="{{ref}}"
+  |             data-epic-name="{{name}}"
+  |             data-epic-description="{{description}}">Edit</button>
+  |   </header>
+  |   {{#if description}}
+  |     <p class="epic-detail__description">{{description}}</p>
+  |   {{else}}
+  |     <p class="modal__hint">No description.</p>
+  |   {{/if}}
+  |   <h3 class="epic-detail__subtitle">Issues ({{issues.length}})</h3>
+  |   {{#if issues.length}}
+  |     <ul class="epic-detail__issues">
+  |       {{#each issues}}
+  |         <li class="epic-detail__issue">
+  |           <span class="epic-detail__issue-ref mono">{{ref}}</span>
+  |           <span class="badge {{priorityClass priority}}">{{priority}}</span>
+  |           <span class="tag tag-{{lower type}}">{{type}}</span>
+  |           <span class="epic-detail__issue-name">{{name}}</span>
+  |         </li>
+  |       {{/each}}
+  |     </ul>
+  |   {{else}}
+  |     <p class="modal__hint">No issues in this epic yet.</p>
+  |   {{/if}}
+  |   <div class="modal__actions">
+  |     <button class="modal__btn modal__btn--cancel" type="button" data-dialog-close>Close</button>
+  |   </div>
+  | </div>
 
 script#tmpl-add-issue-form(type="text/x-handlebars-template")
   | <form class="modal__form"
@@ -183,11 +225,11 @@ script#tmpl-issue-panel(type="text/x-handlebars-template")
   |   </header>
   |   <h2 class="issue-panel__title">{{name}}</h2>
   |   {{#if epic_ref}}
-  |     <div class="issue-panel__epic">
+  |     <button class="issue-panel__epic" type="button" data-open-epic-detail data-epic-ref="{{epic_ref}}">
   |       <span class="issue-panel__epic-label">Epic</span>
   |       <span class="issue-panel__epic-ref">{{epic_ref}}</span>
   |       <span class="issue-panel__epic-name">{{epic_name}}</span>
-  |     </div>
+  |     </button>
   |   {{/if}}
   |   {{#if description}}
   |     <div class="issue-panel__description">{{description}}</div>
