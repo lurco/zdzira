@@ -27,3 +27,8 @@ const LANE_COLORS = [
 Handlebars.registerHelper('laneColors', () => LANE_COLORS)
 
 Handlebars.registerHelper('json', value => JSON.stringify(value))
+
+Handlebars.registerHelper('selectedIfCurrentEpic', ref => {
+  const current = new URLSearchParams(location.search).get('epic')
+  return ref === current ? 'selected' : ''
+})

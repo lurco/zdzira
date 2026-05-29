@@ -16,9 +16,10 @@ func registerBoardRoutes(api huma.API, svcs *service.Services) {
 		Summary:     "Aggregate board view: swimlanes with grouped issues and the project's epics",
 		Tags:        []string{"Board"},
 	}, func(ctx context.Context, input *struct {
-		Slug string `path:"slug" doc:"Project slug" example:"my-project"`
+		Slug    string `path:"slug"    doc:"Project slug" example:"my-project"`
+		EpicRef string `query:"epic"   doc:"Filter to issues belonging to this epic reference, e.g. PROJ-E1" example:"PROJ-E1"`
 	}) (*struct{ Body *service.BoardView }, error) {
-		view, err := svcs.Board.Get(ctx, input.Slug)
+		view, err := svcs.Board.Get(ctx, input.Slug, service.BoardFilter{EpicRef: input.EpicRef})
 		if err != nil {
 			return nil, huma.Error404NotFound(err.Error())
 		}

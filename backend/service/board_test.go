@@ -31,7 +31,7 @@ func TestBoardGet_GroupsIssuesByLane(t *testing.T) {
 	})
 	require.NoError(t, err)
 
-	view, err := svcs.Board.Get(ctx, "board")
+	view, err := svcs.Board.Get(ctx, "board", service.BoardFilter{})
 	require.NoError(t, err)
 	require.Len(t, view.Swimlanes, 3)
 
@@ -45,4 +45,32 @@ func TestBoardGet_GroupsIssuesByLane(t *testing.T) {
 	assert.Equal(t, "BRD-3", view.Swimlanes[1].Issues[0].Ref)
 
 	assert.Empty(t, view.Swimlanes[2].Issues)
+}
+
+func TestBoardGet_FilterByEpic(t *testing.T) {
+	svcs := newTestServices(t)
+	_, err := svcs.Projects.Create(ctx, service.CreateProjectInput{Name: "Board", Shortcut: "BRD"})
+	require.NoError(t, err)
+
+	swimlanes, err := svcs.Swimlanes.ListForProject(ctx, "board")
+	require.NoError(t, err)
+	backlog := swimlanes[0]
+
+	epic, err := svcs.Epics.Create(ctx, service.CreateEpicInput{ProjectSlug: "board", Name: "Auth"})
+	require.NoError(t, err)
+
+	_, err = svcs.Issues.Create(ctx, service.CreateIssueInput{
+		ProjectSlug: "board", Name: "Login", SwimlaneID: &backlog.ID, EpicRef: &epic.Ref,
+	})
+	require.NoError(t, err)
+	_, err = svcs.Issues.Create(ctx, service.CreateIssueInput{
+		ProjectSlug: "board", Name: "Unrelated", SwimlaneID: &backlog.ID,
+	})
+	require.NoError(t, err)
+
+	view, err := svcs.Board.Get(ctx, "board", service.BoardFilter{EpicRef: epic.Ref})
+	require.NoError(t, err)
+	assert.Equal(t, epic.Ref, view.EpicRef)
+	assert.Len(t, view.Swimlanes[0].Issues, 1)
+	assert.Equal(t, "Login", view.Swimlanes[0].Issues[0].Name)
 }

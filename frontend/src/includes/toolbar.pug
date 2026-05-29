@@ -23,5 +23,14 @@ div.toolbar
       span.dot(style='background:var(--acc-violet)')
       | Story
   .toolbar-right
-    button.btn.ghost#epicToggleBtn(aria-pressed='false') Epics
-    button.btn.primary#addIssueBtn + Issue
+    select.epic-filter(
+      id='epicFilter',
+      aria-label='Filter by epic',
+      hx-ext='client-side-templates',
+      handlebars-template='tmpl-epic-options',
+      hx-target='this',
+      hx-swap='innerHTML'
+    )
+      option(value='') All issues
+    button.btn.ghost(type='button', data-dialog-open='tmpl-new-epic-form') + Epic
+    button.btn.primary#addIssueBtn(type='button') + Issue

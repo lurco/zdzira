@@ -12,12 +12,29 @@ const boardEl = document.getElementById('board')
 
 if (boardEl) {
   boardEl.setAttribute('hx-get', `/api/v1/projects/${PROJECT}/board`)
-  boardEl.setAttribute('hx-trigger', 'load, boardUpdated from:body')
+  boardEl.setAttribute('hx-vals', 'js:{epic: new URLSearchParams(location.search).get("epic") || ""}')
+  boardEl.setAttribute('hx-trigger', 'boardUpdated from:body')
   boardEl.setAttribute('hx-ext', 'client-side-templates')
   boardEl.setAttribute('handlebars-template', 'tmpl-board')
   boardEl.setAttribute('hx-target', 'this')
   boardEl.setAttribute('hx-swap', 'innerHTML')
   window.htmx.process(boardEl)
+  refreshBoard()
+}
+
+const epicFilterEl = document.getElementById('epicFilter')
+if (epicFilterEl) {
+  epicFilterEl.setAttribute('hx-get', `/api/v1/projects/${PROJECT}/epics`)
+  epicFilterEl.setAttribute('hx-trigger', 'epicsChanged from:body')
+  window.htmx.process(epicFilterEl)
+  window.htmx.trigger(epicFilterEl, 'epicsChanged')
+  epicFilterEl.addEventListener('change', () => {
+    const url = new URL(location)
+    if (epicFilterEl.value) url.searchParams.set('epic', epicFilterEl.value)
+    else url.searchParams.delete('epic')
+    history.replaceState({}, '', url)
+    refreshBoard()
+  })
 }
 
 function closeAllLanePopovers() {
@@ -63,6 +80,12 @@ document.addEventListener('click', event => {
 
   if (event.target.closest('[data-add-issue-cancel]')) {
     document.querySelectorAll('.new-card-form').forEach(form => form.remove())
+    return
+  }
+
+  if (event.target.closest('#addIssueBtn')) {
+    const firstLane = document.querySelector('.lane-body[data-lane-id]')
+    if (firstLane) openAddIssueForm(Number(firstLane.dataset.laneId))
     return
   }
 
@@ -124,4 +147,7 @@ document.body.addEventListener('htmx:afterRequest', event => {
   const verb = event.detail.requestConfig?.verb
   if (!verb || verb === 'get') return
   refreshBoard()
+
+  const path = event.detail.requestConfig?.path || ''
+  if (path.includes('/epics')) window.htmx.trigger(document.body, 'epicsChanged')
 })

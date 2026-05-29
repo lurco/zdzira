@@ -64,6 +64,28 @@ script#tmpl-board(type="text/x-handlebars-template")
   |   <span class="plus">+</span> Add lane
   | </button>
 
+script#tmpl-epic-options(type="text/x-handlebars-template")
+  | <option value="">All issues</option>
+  | {{#each this}}
+  |   <option value="{{ref}}" {{selectedIfCurrentEpic ref}}>{{ref}} — {{name}}</option>
+  | {{/each}}
+
+script#tmpl-new-epic-form(type="text/x-handlebars-template")
+  | <form class="modal__form"
+  |       hx-post="/api/v1/projects/{{projectSlug}}/epics"
+  |       hx-ext="json-enc"
+  |       hx-swap="none">
+  |   <h2 class="modal__title">New epic</h2>
+  |   <label class="modal__label">Name</label>
+  |   <input class="modal__input" name="name" required autofocus>
+  |   <label class="modal__label">Description</label>
+  |   <textarea class="modal__input" name="description"></textarea>
+  |   <div class="modal__actions">
+  |     <button class="modal__btn modal__btn--cancel" type="button" data-dialog-close>Cancel</button>
+  |     <button class="modal__btn modal__btn--submit" type="submit">Create</button>
+  |   </div>
+  | </form>
+
 script#tmpl-add-issue-form(type="text/x-handlebars-template")
   | <form class="new-card-form"
   |       hx-post="/api/v1/projects/{{projectSlug}}/issues"
