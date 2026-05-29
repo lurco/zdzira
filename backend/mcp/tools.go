@@ -537,9 +537,10 @@ func registerDeleteIssueTools(s *server.MCPServer, svcs *service.Services) {
 func registerCommentTools(s *server.MCPServer, svcs *service.Services) {
 	s.AddTool(
 		mcp.NewTool("add_comment",
-			mcp.WithDescription("Add a comment to an issue."),
+			mcp.WithDescription("Add a comment to an issue or an epic. Provide exactly one of issue_ref or epic_ref."),
 			mcp.WithString("project", mcp.Required(), mcp.Description("Project slug")),
-			mcp.WithString("issue_ref", mcp.Required(), mcp.Description("Issue reference, e.g. PROJ-42")),
+			mcp.WithString("issue_ref", mcp.Description("Issue reference, e.g. PROJ-42")),
+			mcp.WithString("epic_ref", mcp.Description("Epic reference, e.g. PROJ-E1")),
 			mcp.WithString("contents", mcp.Required(), mcp.Description("Comment text")),
 		),
 		func(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
@@ -547,15 +548,21 @@ func registerCommentTools(s *server.MCPServer, svcs *service.Services) {
 			if err != nil {
 				return mcp.NewToolResultError(err.Error()), nil
 			}
-			ref, err := req.RequireString("issue_ref")
-			if err != nil {
-				return mcp.NewToolResultError(err.Error()), nil
-			}
 			contents, err := req.RequireString("contents")
 			if err != nil {
 				return mcp.NewToolResultError(err.Error()), nil
 			}
-			c, err := svcs.Comments.AddToIssue(ctx, slug, ref, contents)
+			issueRef := req.GetString("issue_ref", "")
+			epicRef := req.GetString("epic_ref", "")
+			if err := requireOneRef(issueRef, epicRef); err != nil {
+				return mcp.NewToolResultError(err.Error()), nil
+			}
+			var c *model.Comment
+			if issueRef != "" {
+				c, err = svcs.Comments.AddToIssue(ctx, slug, issueRef, contents)
+			} else {
+				c, err = svcs.Comments.AddToEpic(ctx, slug, epicRef, contents)
+			}
 			if err != nil {
 				return mcp.NewToolResultError(err.Error()), nil
 			}
@@ -565,26 +572,44 @@ func registerCommentTools(s *server.MCPServer, svcs *service.Services) {
 
 	s.AddTool(
 		mcp.NewTool("list_comments",
-			mcp.WithDescription("List all comments on an issue."),
+			mcp.WithDescription("List all comments on an issue or an epic. Provide exactly one of issue_ref or epic_ref."),
 			mcp.WithString("project", mcp.Required(), mcp.Description("Project slug")),
-			mcp.WithString("issue_ref", mcp.Required(), mcp.Description("Issue reference, e.g. PROJ-42")),
+			mcp.WithString("issue_ref", mcp.Description("Issue reference, e.g. PROJ-42")),
+			mcp.WithString("epic_ref", mcp.Description("Epic reference, e.g. PROJ-E1")),
 		),
 		func(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 			slug, err := req.RequireString("project")
 			if err != nil {
 				return mcp.NewToolResultError(err.Error()), nil
 			}
-			ref, err := req.RequireString("issue_ref")
-			if err != nil {
+			issueRef := req.GetString("issue_ref", "")
+			epicRef := req.GetString("epic_ref", "")
+			if err := requireOneRef(issueRef, epicRef); err != nil {
 				return mcp.NewToolResultError(err.Error()), nil
 			}
-			comments, err := svcs.Comments.ListForIssue(ctx, slug, ref)
+			var comments []model.Comment
+			if issueRef != "" {
+				comments, err = svcs.Comments.ListForIssue(ctx, slug, issueRef)
+			} else {
+				comments, err = svcs.Comments.ListForEpic(ctx, slug, epicRef)
+			}
 			if err != nil {
 				return mcp.NewToolResultError(err.Error()), nil
 			}
 			return newListResult(comments)
 		},
 	)
+}
+
+// requireOneRef ensures exactly one of issue_ref / epic_ref was provided.
+func requireOneRef(issueRef, epicRef string) error {
+	switch {
+	case issueRef == "" && epicRef == "":
+		return fmt.Errorf("provide either issue_ref or epic_ref")
+	case issueRef != "" && epicRef != "":
+		return fmt.Errorf("provide only one of issue_ref or epic_ref, not both")
+	}
+	return nil
 }
 
 func registerLinkTools(s *server.MCPServer, svcs *service.Services) {

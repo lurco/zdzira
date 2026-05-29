@@ -167,11 +167,37 @@ script#tmpl-epic-detail(type="text/x-handlebars-template")
   |   {{else}}
   |     <p class="modal__hint">No issues in this epic yet.</p>
   |   {{/if}}
+  |   <section class="epic-detail__comments">
+  |     <h3 class="epic-detail__subtitle">Comments</h3>
+  |     <div id="epicCommentsList"></div>
+  |     <form class="epic-detail__comment-form" id="epicCommentForm">
+  |       <textarea class="modal__input" name="contents" placeholder="Write a comment…" rows="3"></textarea>
+  |       <div class="epic-detail__comment-actions">
+  |         <button class="btn primary" type="submit">Post</button>
+  |       </div>
+  |     </form>
+  |   </section>
   |   <div class="modal__actions">
   |     <button class="modal__btn modal__btn--cancel" type="button" data-open-epics-manager>← Epics</button>
   |     <button class="modal__btn modal__btn--submit" type="button" data-dialog-close>Close</button>
   |   </div>
   | </div>
+
+script#tmpl-epic-comments(type="text/x-handlebars-template")
+  | {{#if this.length}}
+  |   <ul class="comment-list">
+  |     {{#each this}}
+  |       <li class="comment-item">
+  |         <p class="comment-item__text">{{contents}}</p>
+  |         <div class="comment-item__footer">
+  |           <time class="comment-item__time">{{formatDate created_at}}</time>
+  |         </div>
+  |       </li>
+  |     {{/each}}
+  |   </ul>
+  | {{else}}
+  |   <p class="comment-list__empty">No comments yet.</p>
+  | {{/if}}
 
 script#tmpl-add-issue-form(type="text/x-handlebars-template")
   | <form class="modal__form"

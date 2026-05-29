@@ -80,6 +80,25 @@ func TestCommentDelete_RemovesComment(t *testing.T) {
 	assert.Empty(t, remaining)
 }
 
+func TestCommentListForEpic_ReturnsEpicComments(t *testing.T) {
+	svcs := newTestServices(t)
+	_, err := svcs.Projects.Create(ctx, service.CreateProjectInput{Name: "Cmt Proj", Shortcut: "CMT"})
+	require.NoError(t, err)
+	_, err = svcs.Epics.Create(ctx, service.CreateEpicInput{ProjectSlug: "cmt-proj", Name: "epic"})
+	require.NoError(t, err)
+
+	_, err = svcs.Comments.AddToEpic(ctx, "cmt-proj", "CMT-E1", "first")
+	require.NoError(t, err)
+	_, err = svcs.Comments.AddToEpic(ctx, "cmt-proj", "CMT-E1", "second")
+	require.NoError(t, err)
+
+	comments, err := svcs.Comments.ListForEpic(ctx, "cmt-proj", "CMT-E1")
+	require.NoError(t, err)
+	require.Len(t, comments, 2)
+	assert.NotNil(t, comments[0].EpicID)
+	assert.Nil(t, comments[0].IssueID)
+}
+
 func TestCommentUpdateContents_ChangesTextKeepsParent(t *testing.T) {
 	svcs := newTestServices(t)
 	_, err := svcs.Projects.Create(ctx, service.CreateProjectInput{Name: "Cmt Proj", Shortcut: "CMT"})

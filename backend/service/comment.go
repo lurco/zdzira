@@ -37,6 +37,22 @@ func (s *CommentService) AddToEpic(ctx context.Context, projectSlug, epicRef, co
 	return c, s.stores.Comments.Create(ctx, c)
 }
 
+func (s *CommentService) ListForEpic(ctx context.Context, projectSlug, epicRef string) ([]model.Comment, error) {
+	p, err := s.stores.Projects.GetBySlug(ctx, projectSlug)
+	if err != nil {
+		return nil, fmt.Errorf("project %q not found", projectSlug)
+	}
+	number, err := parseEpicRef(p.Shortcut, epicRef)
+	if err != nil {
+		return nil, err
+	}
+	epic, err := s.stores.Epics.GetByRef(ctx, p.ID, number)
+	if err != nil {
+		return nil, err
+	}
+	return s.stores.Comments.ListByEpic(ctx, epic.ID)
+}
+
 func (s *CommentService) AddToProject(ctx context.Context, projectSlug, contents string) (*model.Comment, error) {
 	p, err := s.stores.Projects.GetBySlug(ctx, projectSlug)
 	if err != nil {

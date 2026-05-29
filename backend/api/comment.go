@@ -49,6 +49,44 @@ func registerCommentRoutes(api huma.API, svcs *service.Services) {
 	})
 
 	huma.Register(api, huma.Operation{
+		OperationID: "list-comments-for-epic",
+		Method:      http.MethodGet,
+		Path:        "/projects/{slug}/epics/{epicRef}/comments",
+		Summary:     "List comments on an epic",
+		Tags:        []string{"Comments"},
+	}, func(ctx context.Context, input *struct {
+		Slug    string `path:"slug"    doc:"Project slug"                 example:"my-project"`
+		EpicRef string `path:"epicRef" doc:"Epic reference, e.g. PROJ-E1" example:"PROJ-E1"`
+	}) (*struct{ Body []model.Comment }, error) {
+		comments, err := svcs.Comments.ListForEpic(ctx, input.Slug, input.EpicRef)
+		if err != nil {
+			return nil, huma.Error404NotFound(err.Error())
+		}
+		return &struct{ Body []model.Comment }{comments}, nil
+	})
+
+	huma.Register(api, huma.Operation{
+		OperationID:   "add-comment-to-epic",
+		Method:        http.MethodPost,
+		Path:          "/projects/{slug}/epics/{epicRef}/comments",
+		Summary:       "Add a comment to an epic",
+		DefaultStatus: http.StatusCreated,
+		Tags:          []string{"Comments"},
+	}, func(ctx context.Context, input *struct {
+		Slug    string `path:"slug"    doc:"Project slug"                 example:"my-project"`
+		EpicRef string `path:"epicRef" doc:"Epic reference, e.g. PROJ-E1" example:"PROJ-E1"`
+		Body    struct {
+			Contents string `json:"contents" doc:"Comment text" example:"Scope looks right."`
+		}
+	}) (*struct{ Body *model.Comment }, error) {
+		c, err := svcs.Comments.AddToEpic(ctx, input.Slug, input.EpicRef, input.Body.Contents)
+		if err != nil {
+			return nil, huma.Error422UnprocessableEntity(err.Error())
+		}
+		return &struct{ Body *model.Comment }{c}, nil
+	})
+
+	huma.Register(api, huma.Operation{
 		OperationID: "update-comment",
 		Method:      http.MethodPut,
 		Path:        "/projects/{slug}/issues/{issueRef}/comments/{id}",

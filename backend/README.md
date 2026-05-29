@@ -80,6 +80,6 @@ Agent-facing tools exposed at `/mcp`:
 | `list_issues` / `get_issue` / `create_issue` / `update_issue` | Issue read, create, update (filterable list) |
 | `move_issue` / `delete_issue` | Move between swimlanes / delete |
 | `get_board` | Full board (swimlanes + issues) |
-| `add_comment` / `list_comments` | Issue comments |
+| `add_comment` / `list_comments` | Comments on an issue or epic (one of `issue_ref` / `epic_ref`) |
 | `link_issues` / `list_links` | Issue links |
 | `list_swimlanes` | Swimlanes in a project |

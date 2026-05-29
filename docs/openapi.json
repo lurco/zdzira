@@ -1,6 +1,31 @@
 {
   "components": {
     "schemas": {
+      "Add-comment-to-epicRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "$schema": {
+            "description": "A URL to the JSON Schema for this object.",
+            "examples": [
+              "https://example.com/schemas/Add-comment-to-epicRequest.json"
+            ],
+            "format": "uri",
+            "readOnly": true,
+            "type": "string"
+          },
+          "contents": {
+            "description": "Comment text",
+            "examples": [
+              "Scope looks right."
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "contents"
+        ],
+        "type": "object"
+      },
       "Add-comment-to-issueRequest": {
         "additionalProperties": false,
         "properties": {
@@ -1548,6 +1573,138 @@
         "summary": "Update epic fields",
         "tags": [
           "Epics"
+        ]
+      }
+    },
+    "/projects/{slug}/epics/{epicRef}/comments": {
+      "get": {
+        "operationId": "list-comments-for-epic",
+        "parameters": [
+          {
+            "description": "Project slug",
+            "in": "path",
+            "name": "slug",
+            "required": true,
+            "schema": {
+              "description": "Project slug",
+              "examples": [
+                "my-project"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Epic reference, e.g. PROJ-E1",
+            "in": "path",
+            "name": "epicRef",
+            "required": true,
+            "schema": {
+              "description": "Epic reference, e.g. PROJ-E1",
+              "examples": [
+                "PROJ-E1"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/Comment"
+                  },
+                  "type": [
+                    "array",
+                    "null"
+                  ]
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "List comments on an epic",
+        "tags": [
+          "Comments"
+        ]
+      },
+      "post": {
+        "operationId": "add-comment-to-epic",
+        "parameters": [
+          {
+            "description": "Project slug",
+            "in": "path",
+            "name": "slug",
+            "required": true,
+            "schema": {
+              "description": "Project slug",
+              "examples": [
+                "my-project"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Epic reference, e.g. PROJ-E1",
+            "in": "path",
+            "name": "epicRef",
+            "required": true,
+            "schema": {
+              "description": "Epic reference, e.g. PROJ-E1",
+              "examples": [
+                "PROJ-E1"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Add-comment-to-epicRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Comment"
+                }
+              }
+            },
+            "description": "Created"
+          },
+          "default": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Add a comment to an epic",
+        "tags": [
+          "Comments"
         ]
       }
     },

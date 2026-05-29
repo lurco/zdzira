@@ -279,8 +279,40 @@ function openEpicDetail(ref) {
     .then(epic =>
       fetch(`${base}/issues?epic_id=${epic.id}`)
         .then(r => r.json())
-        .then(issues => window.openDialog('tmpl-epic-detail', { ...epic, issues, projectSlug: PROJECT })),
+        .then(issues => {
+          window.openDialog('tmpl-epic-detail', { ...epic, issues, projectSlug: PROJECT })
+          loadEpicComments(epic.ref)
+        }),
     )
+}
+
+function loadEpicComments(epicRef) {
+  const listEl = document.getElementById('epicCommentsList')
+  if (!listEl) return
+
+  fetch(`/api/v1/projects/${PROJECT}/epics/${epicRef}/comments`)
+    .then(r => r.json())
+    .then(comments => {
+      listEl.innerHTML = renderTemplate('tmpl-epic-comments', comments)
+    })
+
+  const form = document.getElementById('epicCommentForm')
+  if (!form || form.dataset.wired) return
+  form.dataset.wired = '1'
+  form.addEventListener('submit', e => {
+    e.preventDefault()
+    const textarea = form.querySelector('[name="contents"]')
+    const text = textarea?.value.trim()
+    if (!text) return
+    fetch(`/api/v1/projects/${PROJECT}/epics/${epicRef}/comments`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ contents: text }),
+    })
+      .then(r => { if (!r.ok) throw new Error(r.status) })
+      .then(() => { textarea.value = ''; loadEpicComments(epicRef) })
+      .catch(() => window.showToast('Failed to post comment'))
+  })
 }
 
 function openAddIssueDialog(laneId, laneName) {
