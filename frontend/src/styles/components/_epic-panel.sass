@@ -1,0 +1,76 @@
+@use '../abstracts/mixins' as *
+
+.epic-panel
+  background: var(--paper-2)
+  border-bottom: var(--border) solid var(--line)
+  padding: 12px 24px
+  +flex-center
+  gap: 10px
+  flex-wrap: wrap
+  overflow-x: auto
+
+  &__list
+    +flex-center
+    gap: 10px
+    flex-wrap: wrap
+    flex: 1
+
+  &__add
+    appearance: none
+    border: 2px dashed var(--line)
+    background: transparent
+    color: var(--muted)
+    +mono
+    font-size: 11px
+    font-weight: 700
+    text-transform: uppercase
+    letter-spacing: 0.06em
+    padding: 6px 12px
+    cursor: pointer
+    white-space: nowrap
+
+    &:hover
+      color: var(--ink)
+      border-color: var(--ink)
+
+.epic-card
+  +flex-center
+  gap: 8px
+  background: var(--paper)
+  border: var(--border) solid var(--line)
+  box-shadow: var(--shadow-sm)
+  padding: 6px 10px
+  cursor: pointer
+  user-select: none
+
+  &:active
+    box-shadow: none
+    transform: translate(3px, 3px)
+
+  &__ref
+    +mono
+    font-size: 10px
+    font-weight: 700
+    color: var(--muted)
+
+  &__name
+    font-size: 12px
+    font-weight: 700
+    max-width: 160px
+    overflow: hidden
+    text-overflow: ellipsis
+    white-space: nowrap
+
+  &__count
+    +mono
+    font-size: 10px
+    background: var(--ink)
+    color: var(--paper)
+    padding: 1px 5px
+
+.epic-panel__empty
+  +mono
+  font-size: 11px
+  color: var(--muted)
+  text-transform: uppercase
+  letter-spacing: 0.06em

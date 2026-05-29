@@ -1,12 +1,18 @@
 @use '../abstracts/mixins' as *
 
 .app
-  display: grid
   height: 100vh
   width: 100vw
 
   &--board
-    grid-template-rows: auto auto 1fr
+    display: flex
+    flex-direction: column
+    overflow: hidden
 
   &--two-row
+    display: grid
     grid-template-rows: auto 1fr
+
+.board-wrap
+  flex: 1
+  min-height: 0

@@ -1,4 +1,5 @@
 import '../styles/main.sass'
+import './mode'
 import './topbar'
 
 // ── config ────────────────────────────────────────────────────────────────────
@@ -6,12 +7,13 @@ const params  = new URLSearchParams(location.search)
 const PROJECT = params.get('project') || 'main'
 const API     = `/api/v1/projects/${PROJECT}`
 
-const PRIORITY_CLASS = { IMMEDIATE: 'p0', HIGH: 'p1', MEDIUM: 'p2', LOW: 'p3' }
+const PRIORITY_CLASS = { IMMEDIATE: 'p0', HIGH: 'p1', LOW: 'p3' }
 const LANE_COLORS = ['#2A6FDB','#F5D547','#7A4FD6','#E63946','#2A9D5A','#6B655A','#0A0908']
 
 // ── state ─────────────────────────────────────────────────────────────────────
 let swimlanes = []   // [{ id, name, color, position }]
 let issues    = []   // [{ ref, swimlane_id, name, type, priority }]
+let epics     = []   // [{ id, ref, name }]
 
 // ── DOM refs ──────────────────────────────────────────────────────────────────
 const boardEl      = document.getElementById('board')
@@ -44,12 +46,14 @@ async function api(path, opts = {}) {
 }
 
 async function loadBoard() {
-  const [sw, iss] = await Promise.all([
+  const [sw, iss, ep] = await Promise.all([
     api(`/projects/${PROJECT}/swimlanes`),
     api(`/projects/${PROJECT}/issues`),
+    api(`/projects/${PROJECT}/epics`),
   ])
   swimlanes = sw ?? []
   issues    = iss ?? []
+  epics     = ep ?? []
 }
 
 // ── render ────────────────────────────────────────────────────────────────────
@@ -154,7 +158,7 @@ function renderCard(issue, lane) {
 
   el.addEventListener('click', e => {
     if (e.shiftKey) deleteIssue(issue.ref, el)
-    else location.href = `/issue.html?project=${PROJECT}&issue=${issue.ref}`
+    else location.href = `/issue.html?project=${PROJECT}&ref=${issue.ref}`
   })
 
   return el
@@ -171,6 +175,10 @@ function beginAddCard(laneId, bodyEl, footerEl) {
 
   const form = document.createElement('div')
   form.className = 'new-card-form'
+  const epicOptions = epics.length
+    ? epics.map(e => `<option value="${escHtml(e.ref)}">${escHtml(e.ref)} ${escHtml(e.name)}</option>`).join('')
+    : ''
+
   form.innerHTML = `
     <textarea class="new-card-form__textarea" placeholder="What needs doing?"></textarea>
     <div class="new-card-form__row">
@@ -180,11 +188,11 @@ function beginAddCard(laneId, bodyEl, footerEl) {
         <option value="STORY">Story</option>
       </select>
       <select class="mini-select" data-k="priority">
-        <option value="MEDIUM" selected>Medium</option>
+        <option value="HIGH" selected>High</option>
         <option value="IMMEDIATE">Immediate</option>
-        <option value="HIGH">High</option>
         <option value="LOW">Low</option>
       </select>
+      ${epicOptions ? `<select class="mini-select" data-k="epic"><option value="">No epic</option>${epicOptions}</select>` : ''}
       <span style="flex:1"></span>
       <button class="btn primary" data-act="save" style="padding:6px 10px;font-size:11px">Add</button>
       <button class="btn ghost"   data-act="cancel" style="padding:6px 10px;font-size:11px">Esc</button>
@@ -202,10 +210,13 @@ function beginAddCard(laneId, bodyEl, footerEl) {
     if (!name) { cancel(); return }
     const type     = form.querySelector('[data-k="type"]').value
     const priority = form.querySelector('[data-k="priority"]').value
+    const epicRef  = form.querySelector('[data-k="epic"]')?.value || ''
     try {
+      const body = { name, type, priority, swimlane_id: laneId }
+      if (epicRef) body.epic_ref = epicRef
       const issue = await api(`/projects/${PROJECT}/issues`, {
         method: 'POST',
-        body: { name, type, priority, swimlane_id: laneId },
+        body,
       })
       issues.push(issue)
       render()
@@ -245,7 +256,7 @@ async function addLane() {
   try {
     const sw = await api(`/projects/${PROJECT}/swimlanes`, {
       method: 'POST',
-      body: { name: 'New lane', color },
+      body: { name: 'New lane' },
     })
     swimlanes.push(sw)
     render()
@@ -342,6 +353,48 @@ function wireHandlers() {
     })
   })
 }
+
+// ── epics panel ───────────────────────────────────────────────────────────────
+const epicPanel     = document.getElementById('epicPanel')
+const epicList      = document.getElementById('epicList')
+const epicToggleBtn = document.getElementById('epicToggleBtn')
+const addEpicBtn    = document.getElementById('addEpicBtn')
+
+function renderEpicPanel() {
+  if (!epicList) return
+  if (epics.length === 0) {
+    epicList.innerHTML = '<span class="epic-panel__empty">No epics yet</span>'
+    return
+  }
+  epicList.innerHTML = ''
+  epics.forEach(epic => {
+    const count = issues.filter(i => i.epic_id === epic.id).length
+    const card = document.createElement('div')
+    card.className = 'epic-card'
+    card.title = epic.name
+    card.innerHTML = `
+      <span class="epic-card__ref">${escHtml(epic.ref)}</span>
+      <span class="epic-card__name">${escHtml(epic.name)}</span>
+      <span class="epic-card__count">${count}</span>
+    `
+    epicList.appendChild(card)
+  })
+}
+
+epicToggleBtn?.addEventListener('click', () => {
+  const open = epicToggleBtn.getAttribute('aria-pressed') === 'true'
+  epicToggleBtn.setAttribute('aria-pressed', String(!open))
+  epicPanel.hidden = open
+  if (!open) renderEpicPanel()
+})
+
+addEpicBtn?.addEventListener('click', () => {
+  const name = prompt('Epic name:')
+  if (!name) return
+  api(`/projects/${PROJECT}/epics`, { method: 'POST', body: { name } })
+    .then(epic => { epics.push(epic); renderEpicPanel() })
+    .catch(e => alert('Failed to create epic: ' + e.message))
+})
 
 // ── toolbar filters ───────────────────────────────────────────────────────────
 document.getElementById('searchInput')?.addEventListener('input', e => {

@@ -9,8 +9,19 @@ div.toolbar
     button.filter-chip(data-filter='priority', data-val='HIGH', aria-pressed='false')
       span.dot(style='background:var(--acc-yellow)')
       | High
+    button.filter-chip(data-filter='priority', data-val='LOW', aria-pressed='false')
+      span.dot(style='background:var(--acc-green)')
+      | Low
+    span.filter-divider
     button.filter-chip(data-filter='type', data-val='BUG', aria-pressed='false')
       span.dot(style='background:var(--acc-red)')
       | Bug
+    button.filter-chip(data-filter='type', data-val='TASK', aria-pressed='false')
+      span.dot(style='background:var(--acc-blue)')
+      | Task
+    button.filter-chip(data-filter='type', data-val='STORY', aria-pressed='false')
+      span.dot(style='background:var(--acc-violet)')
+      | Story
   .toolbar-right
+    button.btn.ghost#epicToggleBtn(aria-pressed='false') Epics
     button.btn.primary#addIssueBtn + Issue

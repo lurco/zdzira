@@ -13,6 +13,10 @@
     <div class="app app--board">
       <pug src="includes/topbar.pug" />
       <pug src="includes/toolbar.pug" />
+      <section class="epic-panel" id="epicPanel" hidden aria-label="Epics">
+        <div class="epic-panel__list" id="epicList"></div>
+        <button class="epic-panel__add" id="addEpicBtn">+ New epic</button>
+      </section>
       <pug src="includes/board-shell.pug" />
     </div>
     <pug src="includes/statusbar.pug" />
