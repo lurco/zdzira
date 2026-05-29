@@ -172,7 +172,9 @@ document.addEventListener('click', event => {
   if (confirmDeleteComment && currentIssue) {
     const id = confirmDeleteComment.dataset.confirmDeleteComment
     fetch(`/api/v1/projects/${PROJECT}/issues/${currentIssue.ref}/comments/${id}`, { method: 'DELETE' })
+      .then(r => { if (!r.ok) throw new Error(r.status) })
       .then(() => loadComments(currentIssue.ref))
+      .catch(() => window.showToast('Failed to delete comment'))
     return
   }
 
@@ -260,7 +262,10 @@ function wireLaneSelect(issueRef) {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ swimlane_id: Number(select.value), position: 0 }),
-    }).then(() => refreshBoard())
+    })
+      .then(r => { if (!r.ok) throw new Error(r.status) })
+      .then(() => refreshBoard())
+      .catch(() => window.showToast('Failed to move issue'))
   })
 }
 
@@ -286,10 +291,10 @@ function loadComments(issueRef) {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ contents: text }),
-    }).then(() => {
-      textarea.value = ''
-      loadComments(issueRef)
     })
+      .then(r => { if (!r.ok) throw new Error(r.status) })
+      .then(() => { textarea.value = ''; loadComments(issueRef) })
+      .catch(() => window.showToast('Failed to post comment'))
   })
 }
 
