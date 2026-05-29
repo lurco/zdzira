@@ -8,10 +8,14 @@ const templateCache = new Map()
 function getCompiled(templateId) {
   if (templateCache.has(templateId)) return templateCache.get(templateId)
   const el = document.getElementById(templateId)
-  if (!el) throw new Error(`dialog template not found: ${templateId}`)
+  if (!el) throw new Error(`template not found: ${templateId}`)
   const compiled = Handlebars.compile(el.innerHTML)
   templateCache.set(templateId, compiled)
   return compiled
+}
+
+export function renderTemplate(templateId, data = {}) {
+  return getCompiled(templateId)(data)
 }
 
 function getModal() {

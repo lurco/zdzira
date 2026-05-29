@@ -5,6 +5,7 @@ import '../styles/main.sass'
 import './mode'
 import './topbar'
 import './board-dnd'
+import { renderTemplate } from './dialog'
 import { PROJECT, refreshBoard } from './project'
 
 const boardEl = document.getElementById('board')
@@ -40,9 +41,33 @@ document.addEventListener('click', event => {
     return
   }
 
+  const addBtn = event.target.closest('.add-card-btn')
+  if (addBtn) {
+    openAddIssueForm(Number(addBtn.dataset.laneId))
+    return
+  }
+
+  if (event.target.closest('[data-add-issue-cancel]')) {
+    document.querySelectorAll('.new-card-form').forEach(form => form.remove())
+    return
+  }
+
   if (event.target.closest('[data-lane-popover]')) return
   closeAllLanePopovers()
 })
+
+function openAddIssueForm(laneId) {
+  const laneBody = document.querySelector(`.lane-body[data-lane-id="${laneId}"]`)
+  if (!laneBody) return
+  document.querySelectorAll('.new-card-form').forEach(form => form.remove())
+  const html = renderTemplate('tmpl-add-issue-form', { laneId, projectSlug: PROJECT })
+  const wrapper = document.createElement('div')
+  wrapper.innerHTML = html
+  const form = wrapper.firstElementChild
+  laneBody.appendChild(form)
+  window.htmx.process(form)
+  form.querySelector('textarea[name="name"]')?.focus()
+}
 
 function closeIssuePanel() {
   const panel = document.getElementById('issuePanel')

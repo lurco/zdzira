@@ -64,6 +64,31 @@ script#tmpl-board(type="text/x-handlebars-template")
   |   <span class="plus">+</span> Add lane
   | </button>
 
+script#tmpl-add-issue-form(type="text/x-handlebars-template")
+  | <form class="new-card-form"
+  |       hx-post="/api/v1/projects/{{projectSlug}}/issues"
+  |       hx-ext="json-enc"
+  |       hx-swap="none">
+  |   <input type="hidden" name="swimlane_id" value="{{laneId}}">
+  |   <textarea class="new-card-form__textarea" name="name" placeholder="What needs doing?" required autofocus></textarea>
+  |   <textarea class="new-card-form__textarea new-card-form__description" name="description" placeholder="Description (optional)"></textarea>
+  |   <div class="new-card-form__row">
+  |     <select class="mini-select" name="type">
+  |       <option value="TASK" selected>Task</option>
+  |       <option value="BUG">Bug</option>
+  |       <option value="STORY">Story</option>
+  |     </select>
+  |     <select class="mini-select" name="priority">
+  |       <option value="HIGH" selected>High</option>
+  |       <option value="IMMEDIATE">Immediate</option>
+  |       <option value="LOW">Low</option>
+  |     </select>
+  |     <span class="new-card-form__spacer"></span>
+  |     <button type="submit" class="btn primary new-card-form__btn">Add</button>
+  |     <button type="button" class="btn ghost new-card-form__btn" data-add-issue-cancel>Esc</button>
+  |   </div>
+  | </form>
+
 script#tmpl-issue-panel(type="text/x-handlebars-template")
   | <div class="issue-panel__inner">
   |   <header class="issue-panel__header">
