@@ -110,6 +110,7 @@ function openAddIssueForm(laneId) {
   laneBody.appendChild(form)
   window.htmx.process(form)
   form.querySelector('textarea[name="name"]')?.focus()
+  form.scrollIntoView({ block: 'end', behavior: 'smooth' })
 }
 
 function closeIssuePanel() {
