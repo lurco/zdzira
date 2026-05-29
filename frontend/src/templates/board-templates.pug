@@ -118,6 +118,9 @@ script#tmpl-issue-panel(type="text/x-handlebars-template")
   |     <span class="badge {{priorityClass priority}}">{{priority}}</span>
   |     <span class="tag tag-{{lower type}}">{{type}}</span>
   |     <button type="button" class="btn ghost" data-issue-edit>Edit</button>
+  |     <button type="button" class="btn ghost"
+  |             data-dialog-open="tmpl-confirm-delete-issue"
+  |             data-dialog-data='{"ref":"{{ref}}","name":"{{name}}"}'>Delete</button>
   |     <button type="button" class="issue-panel__close" data-issue-panel-close aria-label="Close">×</button>
   |   </header>
   |   <h2 class="issue-panel__title">{{name}}</h2>
@@ -155,6 +158,20 @@ script#tmpl-issue-edit-form(type="text/x-handlebars-template")
   |     </select>
   |   </div>
   | </form>
+
+script#tmpl-confirm-delete-issue(type="text/x-handlebars-template")
+  | <div class="modal__form">
+  |   <h2 class="modal__title">Delete {{ref}}?</h2>
+  |   <p class="modal__hint">"{{name}}" will be removed permanently.</p>
+  |   <div class="modal__actions">
+  |     <button class="modal__btn modal__btn--cancel" type="button" data-dialog-close>Cancel</button>
+  |     <button class="modal__btn modal__btn--submit" type="button"
+  |             hx-delete="/api/v1/projects/{{projectSlug}}/issues/{{ref}}"
+  |             hx-swap="none"
+  |             data-dialog-close
+  |             data-issue-deleted="{{ref}}">Delete</button>
+  |   </div>
+  | </div>
 
 script#tmpl-confirm-delete-lane(type="text/x-handlebars-template")
   | <div class="modal__form">

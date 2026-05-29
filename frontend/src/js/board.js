@@ -58,6 +58,12 @@ document.addEventListener('click', event => {
     return
   }
 
+  if (event.target.closest('[data-issue-deleted]')) {
+    closeIssuePanel()
+    currentIssue = null
+    return
+  }
+
   if (event.target.closest('[data-issue-edit]') && currentIssue) {
     const panel = document.getElementById('issuePanel')
     panel.innerHTML = renderTemplate('tmpl-issue-edit-form', { ...currentIssue, projectSlug: PROJECT })
