@@ -6,8 +6,6 @@ services:
     restart: unless-stopped
     volumes:
       - db-data:/data
-    environment:
-      BASE_URL: http://localhost:3400/mcp
     expose:
       - "8080"
 

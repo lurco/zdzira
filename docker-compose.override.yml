@@ -5,6 +5,10 @@
 # Production: docker compose -f docker-compose.yml up --build
 
 services:
+  backend:
+    ports:
+      - "8080:8080"
+
   nginx:
     build: !reset null
     image: nginx:alpine

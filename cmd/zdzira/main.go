@@ -2,7 +2,6 @@ package main
 
 import (
 	"flag"
-	"fmt"
 	"log"
 	"log/slog"
 	"net/http"
@@ -33,16 +32,11 @@ func main() {
 	stores := store.New(db)
 	svcs := service.New(stores)
 
-	baseURL := os.Getenv("BASE_URL")
-	if baseURL == "" {
-		baseURL = fmt.Sprintf("http://localhost%s", *addr)
-	}
-
 	r := chi.NewRouter()
 	r.Mount("/", api.NewRouter(svcs, logger))
-	r.Mount("/mcp", zdziramcp.NewSSEHandler(svcs, baseURL))
+	r.Mount("/mcp", zdziramcp.NewHandler(svcs))
 
-	logger.Info("starting", "addr", *addr, "db", *dbPath, "docs", baseURL+"/docs")
+	logger.Info("starting", "addr", *addr, "db", *dbPath)
 	if err := http.ListenAndServe(*addr, r); err != nil {
 		log.Fatalf("server: %v", err)
 	}

@@ -19,7 +19,7 @@ By default, it listens on `:8080` and stores data in `./zdzira.db` (`SQLite`). B
 
 ## MCP
 
-The MCP server runs at `http://localhost:8080/mcp` over SSE. Add it to your Claude Desktop config:
+The MCP server runs at `http://localhost:8080/mcp` over streamable HTTP. Add it to your Claude Desktop config:
 
 ```json
 {

@@ -27,6 +27,6 @@ func NewServer(svcs *service.Services) *Server {
 	return s
 }
 
-func NewSSEHandler(svcs *service.Services, baseURL string) http.Handler {
-	return server.NewSSEServer(NewServer(svcs), server.WithBaseURL(baseURL))
+func NewHandler(svcs *service.Services) http.Handler {
+	return server.NewStreamableHTTPServer(NewServer(svcs))
 }
