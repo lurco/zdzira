@@ -12,23 +12,27 @@ const boardEl = document.getElementById('board')
 let currentIssue = null
 let currentEpics = []
 
-function syncBoardURL() {
+function boardPath() {
   const epic = new URLSearchParams(location.search).get('epic') || ''
-  const path = epic
+  return epic
     ? `/api/v1/projects/${PROJECT}/board?epic=${encodeURIComponent(epic)}`
     : `/api/v1/projects/${PROJECT}/board`
-  boardEl.setAttribute('hx-get', path)
+}
+
+// htmx captures hx-get once at process time, so it can't follow the epic
+// filter. Drive the fetch ourselves on every boardUpdated, reading the
+// current URL each time.
+function loadBoard() {
+  if (!boardEl) return
+  window.htmx.ajax('GET', boardPath(), { source: boardEl, target: boardEl, swap: 'innerHTML' })
 }
 
 if (boardEl) {
-  syncBoardURL()
-  boardEl.setAttribute('hx-trigger', 'boardUpdated from:body')
   boardEl.setAttribute('hx-ext', 'client-side-templates')
   boardEl.setAttribute('handlebars-template', 'tmpl-board')
-  boardEl.setAttribute('hx-target', 'this')
-  boardEl.setAttribute('hx-swap', 'innerHTML')
   window.htmx.process(boardEl)
-  refreshBoard()
+  document.body.addEventListener('boardUpdated', loadBoard)
+  loadBoard()
 }
 
 const epicFilterEl = document.getElementById('epicFilter')
@@ -42,7 +46,6 @@ if (epicFilterEl) {
     if (epicFilterEl.value) url.searchParams.set('epic', epicFilterEl.value)
     else url.searchParams.delete('epic')
     history.replaceState({}, '', url)
-    syncBoardURL()
     refreshBoard()
   })
 }
@@ -140,6 +143,15 @@ document.body.addEventListener('epicsChanged', () => {
   })
 })
 
+function updateStatusBar(view) {
+  const lanes = view.swimlanes || []
+  const total = lanes.reduce((sum, lane) => sum + (lane.issues ? lane.issues.length : 0), 0)
+  const totalEl = document.getElementById('totalCount')
+  const laneEl = document.getElementById('laneCount')
+  if (totalEl) totalEl.textContent = total
+  if (laneEl) laneEl.textContent = lanes.length
+}
+
 function openEpicDetail(ref) {
   const base = `/api/v1/projects/${PROJECT}`
   fetch(`${base}/epics/${ref}`)
@@ -200,6 +212,7 @@ document.body.addEventListener('htmx:afterRequest', event => {
     try {
       const view = JSON.parse(event.detail.xhr.responseText)
       currentEpics = view.epics || []
+      updateStatusBar(view)
     } catch {}
   }
 
