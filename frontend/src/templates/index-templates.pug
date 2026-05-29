@@ -1,0 +1,31 @@
+script#tmpl-project-grid(type="text/x-handlebars-template")
+  | {{#if length}}
+  |   {{#each this}}
+  |     <a class="project-card" href="/board.html?project={{slug}}">
+  |       <span class="project-card__shortcut">{{shortcut}}</span>
+  |       <span class="project-card__name">{{name}}</span>
+  |     </a>
+  |   {{/each}}
+  | {{else}}
+  |   <p class="project-list__empty">No projects yet.</p>
+  | {{/if}}
+
+script#tmpl-new-project-form(type="text/x-handlebars-template")
+  | <form class="modal__form"
+  |       id="newProjectForm"
+  |       hx-post="/api/v1/projects"
+  |       hx-ext="json-enc"
+  |       hx-swap="none">
+  |   <h2 class="modal__title">New project</h2>
+  |   <label class="modal__label" for="projectName">Name</label>
+  |   <input class="modal__input" id="projectName" name="name" type="text"
+  |          placeholder="My Project" required autocomplete="off" autofocus>
+  |   <label class="modal__label" for="projectShortcut">Issue prefix</label>
+  |   <input class="modal__input" id="projectShortcut" name="shortcut" type="text"
+  |          placeholder="PROJ" maxlength="6" required autocomplete="off">
+  |   <p class="modal__error" id="newProjectError" hidden></p>
+  |   <div class="modal__actions">
+  |     <button class="modal__btn modal__btn--cancel" type="button" data-dialog-close>Cancel</button>
+  |     <button class="modal__btn modal__btn--submit" type="submit">Create</button>
+  |   </div>
+  | </form>

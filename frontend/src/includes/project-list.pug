@@ -1,0 +1,15 @@
+main.project-list
+  p.project-list__heading Projects
+  .project-list__grid(
+    hx-get="/api/v1/projects",
+    hx-trigger="load",
+    hx-ext="client-side-templates",
+    handlebars-template="tmpl-project-grid",
+    hx-target="this",
+    hx-swap="innerHTML"
+  )
+    p.project-list__empty Loading&hellip;
+  button.project-new(
+    type="button",
+    data-dialog-open="tmpl-new-project-form"
+  ) + New project

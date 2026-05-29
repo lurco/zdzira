@@ -12,28 +12,9 @@
   <body>
     <div class="app app--two-row">
       <pug src="includes/topbar.pug" />
-      <main class="project-list">
-        <p class="project-list__heading">Projects</p>
-        <div class="project-list__grid" id="projectGrid">
-          <p class="project-list__empty">Loading&hellip;</p>
-        </div>
-        <button class="project-new" id="newProjectBtn">+ New project</button>
-      </main>
+      <pug src="includes/project-list.pug" />
     </div>
-
-    <dialog class="modal" id="newProjectDialog">
-      <form class="modal__form" id="newProjectForm" method="dialog">
-        <h2 class="modal__title">New project</h2>
-        <label class="modal__label" for="projectName">Name</label>
-        <input class="modal__input" id="projectName" type="text" placeholder="My Project" required autocomplete="off" />
-        <label class="modal__label" for="projectShortcut">Issue prefix</label>
-        <input class="modal__input" id="projectShortcut" type="text" placeholder="PROJ" maxlength="6" required autocomplete="off" />
-        <p class="modal__error" id="newProjectError" hidden></p>
-        <div class="modal__actions">
-          <button class="modal__btn modal__btn--cancel" type="button" id="newProjectCancel">Cancel</button>
-          <button class="modal__btn modal__btn--submit" type="submit">Create</button>
-        </div>
-      </form>
-    </dialog>
+    <pug src="includes/shared-modal.pug" />
+    <pug src="templates/index-templates.pug" />
   </body>
 </html>
