@@ -1,0 +1,352 @@
+{
+  "info": {
+    "name": "Zdzira API",
+    "_postman_id": "zdzira-api-v1",
+    "description": "Local issue tracker REST API. Use the DEV environment for direct backend access, or the Nginx environment when running the full docker-compose stack.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl",    "value": "http://localhost:8080" },
+    { "key": "slug",       "value": "zdzira" },
+    { "key": "epicRef",    "value": "ZDZ-E1" },
+    { "key": "issueRef",   "value": "ZDZ-1" },
+    { "key": "swimlaneId", "value": "1" },
+    { "key": "commentId",  "value": "1" }
+  ],
+  "item": [
+    {
+      "name": "health",
+      "item": [
+        {
+          "name": "/health",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/health", "host": ["{{baseUrl}}"], "path": ["health"] }
+          }
+        },
+        {
+          "name": "/ready",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/ready", "host": ["{{baseUrl}}"], "path": ["ready"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "projects",
+      "item": [
+        {
+          "name": "/",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{baseUrl}}/api/v1/projects", "host": ["{{baseUrl}}"], "path": ["api", "v1", "projects"] }
+          }
+        },
+        {
+          "name": "/",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"My Project\",\n  \"shortcut\": \"PROJ\",\n  \"description\": \"Optional description\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/api/v1/projects", "host": ["{{baseUrl}}"], "path": ["api", "v1", "projects"] }
+          }
+        },
+        {
+          "name": "/{slug}",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/api/v1/projects/{{slug}}", "host": ["{{baseUrl}}"], "path": ["api", "v1", "projects", "{{slug}}"] }
+          }
+        },
+        {
+          "name": "/{slug}",
+          "request": {
+            "method": "DELETE",
+            "url": { "raw": "{{baseUrl}}/api/v1/projects/{{slug}}", "host": ["{{baseUrl}}"], "path": ["api", "v1", "projects", "{{slug}}"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "epics",
+      "item": [
+        {
+          "name": "/",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/api/v1/projects/{{slug}}/epics", "host": ["{{baseUrl}}"], "path": ["api", "v1", "projects", "{{slug}}", "epics"] }
+          }
+        },
+        {
+          "name": "/",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Epic name\",\n  \"description\": \"Optional description\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/api/v1/projects/{{slug}}/epics", "host": ["{{baseUrl}}"], "path": ["api", "v1", "projects", "{{slug}}", "epics"] }
+          }
+        },
+        {
+          "name": "/{epicRef}",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/api/v1/projects/{{slug}}/epics/{{epicRef}}", "host": ["{{baseUrl}}"], "path": ["api", "v1", "projects", "{{slug}}", "epics", "{{epicRef}}"] }
+          }
+        },
+        {
+          "name": "/{epicRef}",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Updated epic name\",\n  \"description\": \"Updated description\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/api/v1/projects/{{slug}}/epics/{{epicRef}}", "host": ["{{baseUrl}}"], "path": ["api", "v1", "projects", "{{slug}}", "epics", "{{epicRef}}"] }
+          }
+        },
+        {
+          "name": "/{epicRef}",
+          "request": {
+            "method": "DELETE",
+            "url": { "raw": "{{baseUrl}}/api/v1/projects/{{slug}}/epics/{{epicRef}}", "host": ["{{baseUrl}}"], "path": ["api", "v1", "projects", "{{slug}}", "epics", "{{epicRef}}"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "issues",
+      "item": [
+        {
+          "name": "/",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/projects/{{slug}}/issues",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "projects", "{{slug}}", "issues"],
+              "query": [
+                { "key": "type",     "value": "BUG",  "disabled": true },
+                { "key": "priority", "value": "HIGH", "disabled": true },
+                { "key": "epic_id",  "value": "1",    "disabled": true }
+              ]
+            }
+          }
+        },
+        {
+          "name": "/",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Issue title\",\n  \"description\": \"Optional description\",\n  \"type\": \"TASK\",\n  \"priority\": \"LOW\",\n  \"swimlane_id\": {{swimlaneId}},\n  \"epic_ref\": \"\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/api/v1/projects/{{slug}}/issues", "host": ["{{baseUrl}}"], "path": ["api", "v1", "projects", "{{slug}}", "issues"] }
+          }
+        },
+        {
+          "name": "/{issueRef}",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/api/v1/projects/{{slug}}/issues/{{issueRef}}", "host": ["{{baseUrl}}"], "path": ["api", "v1", "projects", "{{slug}}", "issues", "{{issueRef}}"] }
+          }
+        },
+        {
+          "name": "/{issueRef}",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Updated title\",\n  \"description\": \"Updated description\",\n  \"type\": \"BUG\",\n  \"priority\": \"HIGH\",\n  \"epic_ref\": \"{{epicRef}}\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/api/v1/projects/{{slug}}/issues/{{issueRef}}", "host": ["{{baseUrl}}"], "path": ["api", "v1", "projects", "{{slug}}", "issues", "{{issueRef}}"] }
+          }
+        },
+        {
+          "name": "/{issueRef}/move",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"swimlane_id\": {{swimlaneId}},\n  \"position\": 0\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/api/v1/projects/{{slug}}/issues/{{issueRef}}/move", "host": ["{{baseUrl}}"], "path": ["api", "v1", "projects", "{{slug}}", "issues", "{{issueRef}}", "move"] }
+          }
+        },
+        {
+          "name": "/{issueRef}",
+          "request": {
+            "method": "DELETE",
+            "url": { "raw": "{{baseUrl}}/api/v1/projects/{{slug}}/issues/{{issueRef}}", "host": ["{{baseUrl}}"], "path": ["api", "v1", "projects", "{{slug}}", "issues", "{{issueRef}}"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "swimlanes",
+      "item": [
+        {
+          "name": "/",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/api/v1/projects/{{slug}}/swimlanes", "host": ["{{baseUrl}}"], "path": ["api", "v1", "projects", "{{slug}}", "swimlanes"] }
+          }
+        },
+        {
+          "name": "/",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"In Review\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/api/v1/projects/{{slug}}/swimlanes", "host": ["{{baseUrl}}"], "path": ["api", "v1", "projects", "{{slug}}", "swimlanes"] }
+          }
+        },
+        {
+          "name": "/{id}",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Updated lane name\",\n  \"color\": \"#2A9D5A\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/api/v1/projects/{{slug}}/swimlanes/{{swimlaneId}}", "host": ["{{baseUrl}}"], "path": ["api", "v1", "projects", "{{slug}}", "swimlanes", "{{swimlaneId}}"] }
+          }
+        },
+        {
+          "name": "/reorder",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"ids\": [1, 2, 3]\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/api/v1/projects/{{slug}}/swimlanes/reorder", "host": ["{{baseUrl}}"], "path": ["api", "v1", "projects", "{{slug}}", "swimlanes", "reorder"] }
+          }
+        },
+        {
+          "name": "/{id}",
+          "request": {
+            "method": "DELETE",
+            "url": { "raw": "{{baseUrl}}/api/v1/projects/{{slug}}/swimlanes/{{swimlaneId}}", "host": ["{{baseUrl}}"], "path": ["api", "v1", "projects", "{{slug}}", "swimlanes", "{{swimlaneId}}"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "board",
+      "item": [
+        {
+          "name": "/",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/projects/{{slug}}/board",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "projects", "{{slug}}", "board"],
+              "query": [
+                { "key": "epic", "value": "{{epicRef}}", "disabled": true }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "comments",
+      "item": [
+        {
+          "name": "/",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/api/v1/projects/{{slug}}/issues/{{issueRef}}/comments", "host": ["{{baseUrl}}"], "path": ["api", "v1", "projects", "{{slug}}", "issues", "{{issueRef}}", "comments"] }
+          }
+        },
+        {
+          "name": "/",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"contents\": \"This is a comment.\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/api/v1/projects/{{slug}}/issues/{{issueRef}}/comments", "host": ["{{baseUrl}}"], "path": ["api", "v1", "projects", "{{slug}}", "issues", "{{issueRef}}", "comments"] }
+          }
+        },
+        {
+          "name": "/{id}",
+          "request": {
+            "method": "DELETE",
+            "url": { "raw": "{{baseUrl}}/api/v1/projects/{{slug}}/issues/{{issueRef}}/comments/{{commentId}}", "host": ["{{baseUrl}}"], "path": ["api", "v1", "projects", "{{slug}}", "issues", "{{issueRef}}", "comments", "{{commentId}}"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "links",
+      "item": [
+        {
+          "name": "/",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/api/v1/projects/{{slug}}/issues/{{issueRef}}/links", "host": ["{{baseUrl}}"], "path": ["api", "v1", "projects", "{{slug}}", "issues", "{{issueRef}}", "links"] }
+          }
+        },
+        {
+          "name": "/",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"target_ref\": \"ZDZ-2\",\n  \"type\": \"BLOCKS\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/api/v1/projects/{{slug}}/issues/{{issueRef}}/links", "host": ["{{baseUrl}}"], "path": ["api", "v1", "projects", "{{slug}}", "issues", "{{issueRef}}", "links"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "audit",
+      "item": [
+        {
+          "name": "/",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/api/v1/projects/{{slug}}/audit", "host": ["{{baseUrl}}"], "path": ["api", "v1", "projects", "{{slug}}", "audit"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "events",
+      "item": [
+        {
+          "name": "/events",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Accept", "value": "text/event-stream" }],
+            "url": { "raw": "{{baseUrl}}/api/v1/events", "host": ["{{baseUrl}}"], "path": ["api", "v1", "events"] },
+            "description": "Server-Sent Events stream. Sends 'refresh' on every board mutation. Connect with EventSource in the browser or curl --no-buffer."
+          }
+        }
+      ]
+    }
+  ]
+}
