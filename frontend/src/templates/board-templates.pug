@@ -273,11 +273,7 @@ script#tmpl-issue-panel(type="text/x-handlebars-template")
   | </div>
 
 script#tmpl-issue-edit-form(type="text/x-handlebars-template")
-  | <form class="issue-panel__inner"
-  |       hx-put="/api/v1/projects/{{projectSlug}}/issues/{{ref}}"
-  |       hx-ext="json-enc"
-  |       hx-target="#issuePanel"
-  |       hx-swap="innerHTML">
+  | <form class="issue-panel__inner" data-issue-edit-form>
   |   <header class="issue-panel__header">
   |     <span class="issue-panel__ref mono">{{ref}}</span>
   |     <span class="issue-panel__spacer"></span>

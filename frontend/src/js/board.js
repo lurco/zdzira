@@ -131,6 +131,7 @@ document.addEventListener('click', event => {
     return
   }
 
+
   const addBtn = event.target.closest('.add-card-btn')
   if (addBtn) {
     const lane = addBtn.closest('.lane')
@@ -180,6 +181,34 @@ document.addEventListener('click', event => {
 
   if (event.target.closest('[data-lane-popover]')) return
   closeAllLanePopovers()
+})
+
+document.body.addEventListener('submit', event => {
+  const form = event.target.closest('[data-issue-edit-form]')
+  if (!form || !currentIssue) return
+  event.preventDefault()
+  const raw = Object.fromEntries(new FormData(form))
+  const body = { name: raw.name, type: raw.type, priority: raw.priority }
+  if (raw.description !== undefined) body.description = raw.description
+  if (raw.epic_ref !== undefined) body.epic_ref = raw.epic_ref
+  fetch(`/api/v1/projects/${PROJECT}/issues/${currentIssue.ref}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  })
+    .then(r => { if (!r.ok) throw new Error(r.status) })
+    .then(r => r.json())
+    .then(issue => {
+      currentIssue = issue
+      const panel = document.getElementById('issuePanel')
+      panel.innerHTML = renderTemplate('tmpl-issue-panel', currentIssue)
+      window.htmx.process(panel)
+      loadComments(currentIssue.ref)
+      loadLinks(currentIssue.ref)
+      wireLaneSelect(currentIssue.ref)
+      refreshBoard()
+    })
+    .catch(() => window.showToast('Failed to save issue'))
 })
 
 document.body.addEventListener('epicsChanged', () => {
