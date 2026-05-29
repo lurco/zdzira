@@ -5,6 +5,7 @@ import '../styles/main.sass'
 import './mode'
 import './topbar'
 import './board-dnd'
+import './board-filter'
 import { renderTemplate } from './dialog'
 import { PROJECT, refreshBoard } from './project'
 

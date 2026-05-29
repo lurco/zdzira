@@ -32,7 +32,7 @@ script#tmpl-board(type="text/x-handlebars-template")
   |     <div class="lane-body" data-lane-id="{{id}}">
   |       {{#if issues.length}}
   |         {{#each issues}}
-  |           <div class="card" draggable="true" data-drag-kind="card" data-card-ref="{{ref}}" data-lane-id="{{swimlane_id}}"
+  |           <div class="card" draggable="true" data-drag-kind="card" data-card-ref="{{ref}}" data-lane-id="{{swimlane_id}}" data-priority="{{priority}}" data-type="{{type}}"
   |                hx-get="/api/v1/projects/{{projectSlug}}/issues/{{ref}}"
   |                hx-target="#issuePanel"
   |                hx-trigger="click"
