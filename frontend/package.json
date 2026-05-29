@@ -15,6 +15,8 @@
     "vite-plugin-pug": "^0.4.1"
   },
   "dependencies": {
+    "handlebars": "^4.7.9",
+    "htmx-ext-client-side-templates": "^2.0.2",
     "htmx.org": "^2.0.4"
   }
 }
