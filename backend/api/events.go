@@ -3,6 +3,7 @@ package api
 import (
 	"fmt"
 	"net/http"
+	"time"
 )
 
 func eventsHandler(b *Broadcaster) http.HandlerFunc {
@@ -23,10 +24,16 @@ func eventsHandler(b *Broadcaster) http.HandlerFunc {
 		fmt.Fprintf(w, "data: connected\n\n")
 		flusher.Flush()
 
+		ticker := time.NewTicker(15 * time.Second)
+		defer ticker.Stop()
+
 		for {
 			select {
 			case <-ch:
 				fmt.Fprintf(w, "data: refresh\n\n")
+				flusher.Flush()
+			case <-ticker.C:
+				fmt.Fprintf(w, ": keepalive\n\n")
 				flusher.Flush()
 			case <-r.Context().Done():
 				return

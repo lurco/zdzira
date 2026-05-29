@@ -13,10 +13,23 @@ import Handlebars from 'handlebars'
 // SSE: refresh the board when any agent or other tab mutates the API.
 // Debounced to avoid double-render when a local htmx mutation also fires.
 let sseRefreshTimer = null
+let sseConnected = false
 const es = new EventSource('/api/v1/events')
-es.onmessage = () => {
+es.onopen = () => {
+  if (sseConnected) {
+    // Reconnect after a drop — board may have missed events, force a refresh.
+    clearTimeout(sseRefreshTimer)
+    sseRefreshTimer = setTimeout(refreshBoard, 100)
+  }
+  sseConnected = true
+}
+es.onmessage = (e) => {
+  if (e.data === 'connected') return
   clearTimeout(sseRefreshTimer)
   sseRefreshTimer = setTimeout(refreshBoard, 300)
+}
+es.onerror = () => {
+  // EventSource auto-retries; onopen fires on reconnect and refreshes the board
 }
 
 const boardEl = document.getElementById('board')
