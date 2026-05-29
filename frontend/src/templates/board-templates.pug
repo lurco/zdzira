@@ -267,6 +267,15 @@ script#tmpl-issue-edit-form(type="text/x-handlebars-template")
   |       <option value="LOW" {{#if (eq priority "LOW")}}selected{{/if}}>Low</option>
   |     </select>
   |   </div>
+  |   {{#if epics.length}}
+  |     <label class="modal__label">Epic</label>
+  |     <select class="mini-select issue-panel__edit-epic" name="epic_ref">
+  |       <option value="">No epic</option>
+  |       {{#each epics}}
+  |         <option value="{{ref}}" {{#if (eq ref ../epic_ref)}}selected{{/if}}>{{ref}} — {{name}}</option>
+  |       {{/each}}
+  |     </select>
+  |   {{/if}}
   | </form>
 
 script#tmpl-confirm-delete-issue(type="text/x-handlebars-template")

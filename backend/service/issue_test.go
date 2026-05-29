@@ -44,6 +44,99 @@ func TestIssueUpdate_ChangesFields(t *testing.T) {
 	assert.Equal(t, "updated name", fetched.Name)
 }
 
+func TestIssueUpdate_AssignsAndReassignsEpic(t *testing.T) {
+	svcs := newTestServices(t)
+	newProjectWithIssues(t, svcs)
+
+	first, err := svcs.Epics.Create(ctx, service.CreateEpicInput{ProjectSlug: "tracker", Name: "first epic"})
+	require.NoError(t, err)
+	second, err := svcs.Epics.Create(ctx, service.CreateEpicInput{ProjectSlug: "tracker", Name: "second epic"})
+	require.NoError(t, err)
+
+	firstRef := "TRK-E1"
+	_, err = svcs.Issues.Create(ctx, service.CreateIssueInput{
+		ProjectSlug: "tracker",
+		Name:        "moving issue",
+		Type:        "STORY",
+		Priority:    "HIGH",
+		EpicRef:     &firstRef,
+	})
+	require.NoError(t, err)
+
+	secondRef := "TRK-E2"
+	updated, err := svcs.Issues.Update(ctx, service.UpdateIssueInput{
+		ProjectSlug: "tracker",
+		IssueRef:    "TRK-1",
+		Name:        "moving issue",
+		Type:        "STORY",
+		Priority:    "HIGH",
+		EpicRef:     &secondRef,
+	})
+	require.NoError(t, err)
+	require.NotNil(t, updated.EpicID)
+	assert.Equal(t, second.ID, *updated.EpicID)
+	assert.NotEqual(t, first.ID, *updated.EpicID)
+}
+
+func TestIssueUpdate_EmptyEpicRefUnassignsEpic(t *testing.T) {
+	svcs := newTestServices(t)
+	newProjectWithIssues(t, svcs)
+
+	_, err := svcs.Epics.Create(ctx, service.CreateEpicInput{ProjectSlug: "tracker", Name: "an epic"})
+	require.NoError(t, err)
+
+	epicRef := "TRK-E1"
+	_, err = svcs.Issues.Create(ctx, service.CreateIssueInput{
+		ProjectSlug: "tracker",
+		Name:        "attached issue",
+		Type:        "TASK",
+		Priority:    "LOW",
+		EpicRef:     &epicRef,
+	})
+	require.NoError(t, err)
+
+	emptyRef := ""
+	updated, err := svcs.Issues.Update(ctx, service.UpdateIssueInput{
+		ProjectSlug: "tracker",
+		IssueRef:    "TRK-1",
+		Name:        "attached issue",
+		Type:        "TASK",
+		Priority:    "LOW",
+		EpicRef:     &emptyRef,
+	})
+	require.NoError(t, err)
+	assert.Nil(t, updated.EpicID)
+}
+
+func TestIssueUpdate_NilEpicRefLeavesEpicUnchanged(t *testing.T) {
+	svcs := newTestServices(t)
+	newProjectWithIssues(t, svcs)
+
+	epic, err := svcs.Epics.Create(ctx, service.CreateEpicInput{ProjectSlug: "tracker", Name: "kept epic"})
+	require.NoError(t, err)
+
+	epicRef := "TRK-E1"
+	_, err = svcs.Issues.Create(ctx, service.CreateIssueInput{
+		ProjectSlug: "tracker",
+		Name:        "attached issue",
+		Type:        "TASK",
+		Priority:    "LOW",
+		EpicRef:     &epicRef,
+	})
+	require.NoError(t, err)
+
+	updated, err := svcs.Issues.Update(ctx, service.UpdateIssueInput{
+		ProjectSlug: "tracker",
+		IssueRef:    "TRK-1",
+		Name:        "renamed, epic untouched",
+		Type:        "TASK",
+		Priority:    "LOW",
+	})
+	require.NoError(t, err)
+	require.NotNil(t, updated.EpicID)
+	assert.Equal(t, epic.ID, *updated.EpicID)
+}
+
 func TestIssueUpdate_NonexistentIssue(t *testing.T) {
 	svcs := newTestServices(t)
 	newProjectWithIssues(t, svcs)

@@ -164,6 +164,7 @@ type UpdateIssueInput struct {
 	Description *string         `json:"description,omitempty" doc:"Updated description"`
 	Type        model.IssueType `json:"type"        doc:"Updated issue type"     example:"BUG"`
 	Priority    model.Priority  `json:"priority"    doc:"Updated priority level" example:"IMMEDIATE"`
+	EpicRef     *string         `json:"epic_ref,omitempty" doc:"Epic reference to assign, or empty string to unassign, e.g. PROJ-E1" example:"PROJ-E1"`
 }
 
 func (s *IssueService) Update(ctx context.Context, in UpdateIssueInput) (*model.Issue, error) {
@@ -179,6 +180,17 @@ func (s *IssueService) Update(ctx context.Context, in UpdateIssueInput) (*model.
 	issue.Description = in.Description
 	issue.Type = in.Type
 	issue.Priority = in.Priority
+	if in.EpicRef != nil {
+		if *in.EpicRef == "" {
+			issue.EpicID = nil
+		} else {
+			epic, err := s.resolveEpicRef(ctx, p, *in.EpicRef)
+			if err != nil {
+				return nil, err
+			}
+			issue.EpicID = &epic.ID
+		}
+	}
 	if err := s.stores.Issues.Update(ctx, issue); err != nil {
 		return nil, err
 	}

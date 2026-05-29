@@ -79,7 +79,7 @@ document.addEventListener('click', event => {
 
   if (event.target.closest('[data-issue-edit]') && currentIssue) {
     const panel = document.getElementById('issuePanel')
-    panel.innerHTML = renderTemplate('tmpl-issue-edit-form', { ...currentIssue, projectSlug: PROJECT })
+    panel.innerHTML = renderTemplate('tmpl-issue-edit-form', { ...currentIssue, epics: currentEpics, projectSlug: PROJECT })
     window.htmx.process(panel)
     return
   }
