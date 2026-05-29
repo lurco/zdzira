@@ -26,7 +26,7 @@ func TestSwimlaneCreate_AppendsToProject(t *testing.T) {
 	assert.Len(t, all, 4)
 }
 
-func TestSwimlaneRename_ChangesName(t *testing.T) {
+func TestSwimlaneUpdate_ChangesName(t *testing.T) {
 	svcs := newTestServices(t)
 	p, err := svcs.Projects.Create(ctx, service.CreateProjectInput{Name: "Board", Shortcut: "BRD"})
 	require.NoError(t, err)
@@ -35,11 +35,40 @@ func TestSwimlaneRename_ChangesName(t *testing.T) {
 	require.NoError(t, err)
 	backlog := swimlanes[0]
 
-	updated, err := svcs.Swimlanes.Rename(ctx, service.RenameSwimlaneInput{
+	newName := "Todo"
+	updated, err := svcs.Swimlanes.Update(ctx, service.UpdateSwimlaneInput{
 		ProjectSlug: "board",
 		ID:          backlog.ID,
-		Name:        "Todo",
+		Name:        &newName,
 	})
 	require.NoError(t, err)
 	assert.Equal(t, "Todo", updated.Name)
+}
+
+func TestSwimlaneUpdate_SetsAndClearsColor(t *testing.T) {
+	svcs := newTestServices(t)
+	p, err := svcs.Projects.Create(ctx, service.CreateProjectInput{Name: "Board", Shortcut: "BRD"})
+	require.NoError(t, err)
+	swimlanes, err := svcs.Swimlanes.ListByProject(ctx, p.ID)
+	require.NoError(t, err)
+	lane := swimlanes[0]
+
+	color := "#ffe082"
+	updated, err := svcs.Swimlanes.Update(ctx, service.UpdateSwimlaneInput{
+		ProjectSlug: "board",
+		ID:          lane.ID,
+		Color:       &color,
+	})
+	require.NoError(t, err)
+	require.NotNil(t, updated.Color)
+	assert.Equal(t, "#ffe082", *updated.Color)
+
+	cleared := ""
+	updated, err = svcs.Swimlanes.Update(ctx, service.UpdateSwimlaneInput{
+		ProjectSlug: "board",
+		ID:          lane.ID,
+		Color:       &cleared,
+	})
+	require.NoError(t, err)
+	assert.Nil(t, updated.Color)
 }

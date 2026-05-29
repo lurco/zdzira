@@ -24,10 +24,11 @@ type Project struct {
 }
 
 type Swimlane struct {
-	ID        uint   `gorm:"primarykey"     json:"id"`
-	ProjectID uint   `gorm:"not null;index" json:"project_id"`
-	Name      string `gorm:"not null"       json:"name"`
-	Position  uint   `gorm:"not null"       json:"position"`
+	ID        uint    `gorm:"primarykey"     json:"id"`
+	ProjectID uint    `gorm:"not null;index" json:"project_id"`
+	Name      string  `gorm:"not null"       json:"name"`
+	Position  uint    `gorm:"not null"       json:"position"`
+	Color     *string `                      json:"color,omitempty"`
 	SoftDelete
 }
 

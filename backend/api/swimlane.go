@@ -46,19 +46,19 @@ func registerSwimlaneRoutes(api huma.API, svcs *service.Services) {
 	})
 
 	huma.Register(api, huma.Operation{
-		OperationID: "rename-swimlane",
-		Method:      http.MethodPut,
+		OperationID: "update-swimlane",
+		Method:      http.MethodPatch,
 		Path:        "/projects/{slug}/swimlanes/{id}",
-		Summary:     "Rename a swimlane",
+		Summary:     "Update a swimlane (name and/or colour)",
 		Tags:        []string{"Swimlanes"},
 	}, func(ctx context.Context, input *struct {
 		Slug string `path:"slug" doc:"Project slug"  example:"my-project"`
 		ID   uint   `path:"id"   doc:"Swimlane ID"`
-		Body service.RenameSwimlaneInput
+		Body service.UpdateSwimlaneInput
 	}) (*struct{ Body *model.Swimlane }, error) {
 		input.Body.ProjectSlug = input.Slug
 		input.Body.ID = input.ID
-		sl, err := svcs.Swimlanes.Rename(ctx, input.Body)
+		sl, err := svcs.Swimlanes.Update(ctx, input.Body)
 		if err != nil {
 			return nil, huma.Error422UnprocessableEntity(err.Error())
 		}
