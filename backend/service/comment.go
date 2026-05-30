@@ -82,6 +82,17 @@ func (s *CommentService) UpdateContents(ctx context.Context, id uint, contents s
 	return c, nil
 }
 
+// CountsByIssueIDs returns issue ID → comment count for a batch of issues, so
+// list and board views can surface a comment cue without an N+1 of list calls.
+func (s *CommentService) CountsByIssueIDs(ctx context.Context, issueIDs []uint) (map[uint]uint, error) {
+	return s.stores.Comments.CountByIssueIDs(ctx, issueIDs)
+}
+
+// CountsByEpicIDs is the epic-keyed counterpart of CountsByIssueIDs.
+func (s *CommentService) CountsByEpicIDs(ctx context.Context, epicIDs []uint) (map[uint]uint, error) {
+	return s.stores.Comments.CountByEpicIDs(ctx, epicIDs)
+}
+
 func (s *CommentService) Delete(ctx context.Context, id uint) error {
 	return s.stores.Comments.Delete(ctx, id)
 }

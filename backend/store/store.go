@@ -88,6 +88,8 @@ type CommentStore interface {
 	ListByIssue(ctx context.Context, issueID uint) ([]model.Comment, error)
 	ListByEpic(ctx context.Context, epicID uint) ([]model.Comment, error)
 	ListByProject(ctx context.Context, projectID uint) ([]model.Comment, error)
+	CountByIssueIDs(ctx context.Context, issueIDs []uint) (map[uint]uint, error)
+	CountByEpicIDs(ctx context.Context, epicIDs []uint) (map[uint]uint, error)
 	Delete(ctx context.Context, id uint) error
 	DeleteByProject(ctx context.Context, projectID uint) error
 }

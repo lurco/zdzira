@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"strings"
+	"time"
 	"zdzira/backend/model"
 	"zdzira/backend/service"
 
@@ -23,8 +24,11 @@ func newListResult[T any](items []T) (*mcp.CallToolResult, error) {
 	return mcp.NewToolResultText(string(b)), nil
 }
 
-// issueSummary is the AI-facing issue shape: human-readable names instead
-// of internal IDs, only the fields an agent actually needs.
+// issueSummary is the AI-facing issue shape for list and board views: a
+// scannable index row. It deliberately omits the description (fetch the full
+// text with get_issue) to keep large boards from flooding the context window,
+// and carries comment_count so an agent always sees that feedback exists and
+// knows to drill in.
 type issueSummary struct {
 	Ref          string `json:"ref"`
 	Name         string `json:"name"`
@@ -32,14 +36,10 @@ type issueSummary struct {
 	Priority     string `json:"priority"`
 	SwimlaneName string `json:"swimlane_name"`
 	EpicRef      string `json:"epic_ref,omitempty"`
-	Description  string `json:"description,omitempty"`
+	CommentCount uint   `json:"comment_count"`
 }
 
-func toIssueSummary(iss model.Issue, slName string) issueSummary {
-	desc := ""
-	if iss.Description != nil {
-		desc = *iss.Description
-	}
+func toIssueSummary(iss model.Issue, slName string, commentCount uint) issueSummary {
 	return issueSummary{
 		Ref:          iss.Ref,
 		Name:         iss.Name,
@@ -47,8 +47,75 @@ func toIssueSummary(iss model.Issue, slName string) issueSummary {
 		Priority:     string(iss.Priority),
 		SwimlaneName: slName,
 		EpicRef:      iss.EpicRef,
-		Description:  desc,
+		CommentCount: commentCount,
 	}
+}
+
+// commentView is the AI-facing comment shape: the text and when it was written,
+// without internal foreign keys.
+type commentView struct {
+	ID        uint      `json:"id"`
+	Contents  string    `json:"contents"`
+	CreatedAt time.Time `json:"created_at"`
+}
+
+func toCommentViews(comments []model.Comment) []commentView {
+	views := make([]commentView, len(comments))
+	for i, c := range comments {
+		views[i] = commentView{ID: c.ID, Contents: c.Contents, CreatedAt: c.CreatedAt}
+	}
+	return views
+}
+
+// issueDetail is the AI-facing shape for get_issue: everything about one issue
+// in a single call. Comments and links are inlined here so an agent picking up
+// an issue cannot miss human feedback or dependencies.
+type issueDetail struct {
+	Ref          string                 `json:"ref"`
+	Name         string                 `json:"name"`
+	Type         string                 `json:"type"`
+	Priority     string                 `json:"priority"`
+	SwimlaneName string                 `json:"swimlane_name"`
+	EpicRef      string                 `json:"epic_ref,omitempty"`
+	EpicName     string                 `json:"epic_name,omitempty"`
+	Description  string                 `json:"description,omitempty"`
+	CommentCount uint                   `json:"comment_count"`
+	Comments     []commentView          `json:"comments"`
+	Links        []service.EnrichedLink `json:"links"`
+	CreatedAt    time.Time              `json:"created_at"`
+	UpdatedAt    time.Time              `json:"updated_at"`
+}
+
+// epicSummary mirrors issueSummary for list_epics: name, description, and a
+// comment cue.
+type epicSummary struct {
+	Ref          string `json:"ref"`
+	Name         string `json:"name"`
+	Description  string `json:"description,omitempty"`
+	CommentCount uint   `json:"comment_count"`
+}
+
+// epicDetail mirrors issueDetail for get_epic: the summary plus inlined comments.
+type epicDetail struct {
+	epicSummary
+	Comments []commentView `json:"comments"`
+}
+
+func stringValue(s *string) string {
+	if s == nil {
+		return ""
+	}
+	return *s
+}
+
+// commentCountsForIssues batches the comment counts for a set of issues so list
+// and board views avoid an N+1 query.
+func commentCountsForIssues(ctx context.Context, svcs *service.Services, issues []model.Issue) (map[uint]uint, error) {
+	ids := make([]uint, len(issues))
+	for i, iss := range issues {
+		ids[i] = iss.ID
+	}
+	return svcs.Comments.CountsByIssueIDs(ctx, ids)
 }
 
 // swimlaneNameMap builds id→name and lowercase-name→id maps for a project.
@@ -127,7 +194,7 @@ func registerProjectTools(s *server.MCPServer, svcs *service.Services) {
 func registerEpicTools(s *server.MCPServer, svcs *service.Services) {
 	s.AddTool(
 		mcp.NewTool("list_epics",
-			mcp.WithDescription("List all epics in a project."),
+			mcp.WithDescription("List all epics in a project. Each row carries a comment_count flagging epics with feedback; use get_epic for the full epic and its comments."),
 			mcp.WithString("project", mcp.Required(), mcp.Description("Project slug")),
 		),
 		func(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
@@ -139,7 +206,24 @@ func registerEpicTools(s *server.MCPServer, svcs *service.Services) {
 			if err != nil {
 				return mcp.NewToolResultError(err.Error()), nil
 			}
-			return newListResult(epics)
+			ids := make([]uint, len(epics))
+			for i, e := range epics {
+				ids[i] = e.ID
+			}
+			counts, err := svcs.Comments.CountsByEpicIDs(ctx, ids)
+			if err != nil {
+				return mcp.NewToolResultError(err.Error()), nil
+			}
+			summaries := make([]epicSummary, len(epics))
+			for i, e := range epics {
+				summaries[i] = epicSummary{
+					Ref:          e.Ref,
+					Name:         e.Name,
+					Description:  stringValue(e.Description),
+					CommentCount: counts[e.ID],
+				}
+			}
+			return newListResult(summaries)
 		},
 	)
 
@@ -174,7 +258,7 @@ func registerEpicTools(s *server.MCPServer, svcs *service.Services) {
 
 	s.AddTool(
 		mcp.NewTool("get_epic",
-			mcp.WithDescription("Get an epic by its ref (e.g. PROJ-E1)."),
+			mcp.WithDescription("Get an epic by its ref (e.g. PROJ-E1), including its comments. Read the comments before acting on an epic — they carry human feedback."),
 			mcp.WithString("project", mcp.Required(), mcp.Description("Project slug")),
 			mcp.WithString("epic_ref", mcp.Required(), mcp.Description("Epic reference, e.g. PROJ-E1")),
 		),
@@ -191,7 +275,19 @@ func registerEpicTools(s *server.MCPServer, svcs *service.Services) {
 			if err != nil {
 				return mcp.NewToolResultError(err.Error()), nil
 			}
-			return mcp.NewToolResultJSON(e)
+			comments, err := svcs.Comments.ListForEpic(ctx, slug, ref)
+			if err != nil {
+				return mcp.NewToolResultError(err.Error()), nil
+			}
+			return mcp.NewToolResultJSON(epicDetail{
+				epicSummary: epicSummary{
+					Ref:          e.Ref,
+					Name:         e.Name,
+					Description:  stringValue(e.Description),
+					CommentCount: uint(len(comments)),
+				},
+				Comments: toCommentViews(comments),
+			})
 		},
 	)
 }
@@ -199,7 +295,7 @@ func registerEpicTools(s *server.MCPServer, svcs *service.Services) {
 func registerIssueTools(s *server.MCPServer, svcs *service.Services) {
 	s.AddTool(
 		mcp.NewTool("list_issues",
-			mcp.WithDescription("List issues in a project. Returns human-readable swimlane names. Use optional filters to narrow scope."),
+			mcp.WithDescription("List issues in a project as a lightweight index (no descriptions). Each row carries a comment_count flagging issues with feedback. Use optional filters to narrow scope, then get_issue for full text, comments, and links."),
 			mcp.WithString("project", mcp.Required(), mcp.Description("Project slug")),
 			mcp.WithString("swimlane", mcp.Description("Filter by swimlane name, e.g. \"In Progress\", \"Backlog\", \"Done\"")),
 			mcp.WithString("type", mcp.Description("Filter by type: TASK, BUG, or STORY")),
@@ -239,9 +335,13 @@ func registerIssueTools(s *server.MCPServer, svcs *service.Services) {
 				return mcp.NewToolResultError(err.Error()), nil
 			}
 
+			counts, err := commentCountsForIssues(ctx, svcs, issues)
+			if err != nil {
+				return mcp.NewToolResultError(err.Error()), nil
+			}
 			summaries := make([]issueSummary, len(issues))
 			for i, iss := range issues {
-				summaries[i] = toIssueSummary(iss, byID[iss.SwimlaneID])
+				summaries[i] = toIssueSummary(iss, byID[iss.SwimlaneID], counts[iss.ID])
 			}
 			return newListResult(summaries)
 		},
@@ -249,7 +349,7 @@ func registerIssueTools(s *server.MCPServer, svcs *service.Services) {
 
 	s.AddTool(
 		mcp.NewTool("get_board",
-			mcp.WithDescription("Get the full board for a project — all swimlanes with their issues. Best starting point for understanding the current project state."),
+			mcp.WithDescription("Get the full board for a project — all swimlanes with their issues. Best starting point for understanding the current project state. Returns a lightweight index (no descriptions); comment_count flags issues with feedback. Drill into any issue with get_issue."),
 			mcp.WithString("project", mcp.Required(), mcp.Description("Project slug")),
 		),
 		func(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
@@ -266,11 +366,21 @@ func registerIssueTools(s *server.MCPServer, svcs *service.Services) {
 				Name   string         `json:"name"`
 				Issues []issueSummary `json:"issues"`
 			}
+
+			var allIssues []model.Issue
+			for _, lane := range view.Swimlanes {
+				allIssues = append(allIssues, lane.Issues...)
+			}
+			counts, err := commentCountsForIssues(ctx, svcs, allIssues)
+			if err != nil {
+				return mcp.NewToolResultError(err.Error()), nil
+			}
+
 			lanes := make([]laneSummary, len(view.Swimlanes))
 			for i, lane := range view.Swimlanes {
 				issueSums := make([]issueSummary, len(lane.Issues))
 				for j, iss := range lane.Issues {
-					issueSums[j] = toIssueSummary(iss, lane.Name)
+					issueSums[j] = toIssueSummary(iss, lane.Name, counts[iss.ID])
 				}
 				lanes[i] = laneSummary{Name: lane.Name, Issues: issueSums}
 			}
@@ -284,7 +394,7 @@ func registerIssueTools(s *server.MCPServer, svcs *service.Services) {
 
 	s.AddTool(
 		mcp.NewTool("get_issue",
-			mcp.WithDescription("Get full details for a single issue by its ref (e.g. PROJ-42)."),
+			mcp.WithDescription("Get full details for a single issue by its ref (e.g. PROJ-42), including its description, comments, and links. Always read the comments before acting on an issue — they carry human feedback and instructions."),
 			mcp.WithString("project", mcp.Required(), mcp.Description("Project slug")),
 			mcp.WithString("issue_ref", mcp.Required(), mcp.Description("Issue reference, e.g. PROJ-42")),
 		),
@@ -303,7 +413,31 @@ func registerIssueTools(s *server.MCPServer, svcs *service.Services) {
 			}
 			swimlanes, _ := svcs.Swimlanes.ListForProject(ctx, slug)
 			byID, _ := swimlaneNameMap(swimlanes)
-			return mcp.NewToolResultJSON(toIssueSummary(*issue, byID[issue.SwimlaneID]))
+
+			comments, err := svcs.Comments.ListForIssue(ctx, slug, ref)
+			if err != nil {
+				return mcp.NewToolResultError(err.Error()), nil
+			}
+			links, err := svcs.Links.ListForIssue(ctx, slug, ref)
+			if err != nil {
+				return mcp.NewToolResultError(err.Error()), nil
+			}
+
+			return mcp.NewToolResultJSON(issueDetail{
+				Ref:          issue.Ref,
+				Name:         issue.Name,
+				Type:         string(issue.Type),
+				Priority:     string(issue.Priority),
+				SwimlaneName: byID[issue.SwimlaneID],
+				EpicRef:      issue.EpicRef,
+				EpicName:     issue.EpicName,
+				Description:  stringValue(issue.Description),
+				CommentCount: uint(len(comments)),
+				Comments:     toCommentViews(comments),
+				Links:        links,
+				CreatedAt:    issue.CreatedAt,
+				UpdatedAt:    issue.UpdatedAt,
+			})
 		},
 	)
 

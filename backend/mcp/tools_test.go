@@ -150,6 +150,107 @@ func TestUpdateEpicTool_NonexistentEpic(t *testing.T) {
 	assert.True(t, isToolError(result))
 }
 
+// getResultArray decodes a list tool's JSON-array text payload.
+func getResultArray(t *testing.T, result map[string]any) []map[string]any {
+	t.Helper()
+	res := result["result"].(map[string]any)
+	content := res["content"].([]any)
+	raw := content[0].(map[string]any)["text"].(string)
+	var out []map[string]any
+	require.NoError(t, json.Unmarshal([]byte(raw), &out))
+	return out
+}
+
+func TestGetIssueTool_InlinesCommentsAndLinks(t *testing.T) {
+	s, svcs := newTestMCPServer(t)
+	ctx := context.Background()
+
+	_, err := svcs.Projects.Create(ctx, service.CreateProjectInput{Name: "Detail", Shortcut: "DET"})
+	require.NoError(t, err)
+	_, err = svcs.Issues.Create(ctx, service.CreateIssueInput{ProjectSlug: "detail", Name: "main", Type: "TASK", Priority: "LOW"})
+	require.NoError(t, err)
+	_, err = svcs.Issues.Create(ctx, service.CreateIssueInput{ProjectSlug: "detail", Name: "other", Type: "TASK", Priority: "LOW"})
+	require.NoError(t, err)
+	_, err = svcs.Comments.AddToIssue(ctx, "detail", "DET-1", "human feedback here")
+	require.NoError(t, err)
+	_, err = svcs.Links.Create(ctx, service.CreateLinkInput{ProjectSlug: "detail", SourceRef: "DET-1", TargetRef: "DET-2", Type: "BLOCKS"})
+	require.NoError(t, err)
+
+	result := callTool(t, s, "get_issue", map[string]any{"project": "detail", "issue_ref": "DET-1"})
+	assert.False(t, isToolError(result), fmt.Sprintf("expected success, got: %v", result))
+
+	out := getResultJSON(t, result)
+	assert.Equal(t, float64(1), out["comment_count"])
+	comments := out["comments"].([]any)
+	require.Len(t, comments, 1)
+	assert.Equal(t, "human feedback here", comments[0].(map[string]any)["contents"])
+	assert.Len(t, out["links"].([]any), 1)
+}
+
+func TestListIssuesTool_OmitsDescriptionAddsCommentCount(t *testing.T) {
+	s, svcs := newTestMCPServer(t)
+	ctx := context.Background()
+
+	_, err := svcs.Projects.Create(ctx, service.CreateProjectInput{Name: "Index", Shortcut: "IDX"})
+	require.NoError(t, err)
+	desc := "should not appear in the list view"
+	_, err = svcs.Issues.Create(ctx, service.CreateIssueInput{ProjectSlug: "index", Name: "one", Type: "TASK", Priority: "LOW", Description: &desc})
+	require.NoError(t, err)
+	_, err = svcs.Comments.AddToIssue(ctx, "index", "IDX-1", "a comment")
+	require.NoError(t, err)
+
+	result := callTool(t, s, "list_issues", map[string]any{"project": "index"})
+	assert.False(t, isToolError(result), fmt.Sprintf("expected success, got: %v", result))
+
+	rows := getResultArray(t, result)
+	require.Len(t, rows, 1)
+	_, hasDescription := rows[0]["description"]
+	assert.False(t, hasDescription, "list view must omit description to protect the context window")
+	assert.Equal(t, float64(1), rows[0]["comment_count"])
+}
+
+func TestGetBoardTool_SurfacesCommentCount(t *testing.T) {
+	s, svcs := newTestMCPServer(t)
+	ctx := context.Background()
+
+	_, err := svcs.Projects.Create(ctx, service.CreateProjectInput{Name: "Board", Shortcut: "BRD"})
+	require.NoError(t, err)
+	_, err = svcs.Issues.Create(ctx, service.CreateIssueInput{ProjectSlug: "board", Name: "one", Type: "TASK", Priority: "LOW"})
+	require.NoError(t, err)
+	_, err = svcs.Comments.AddToIssue(ctx, "board", "BRD-1", "feedback")
+	require.NoError(t, err)
+
+	result := callTool(t, s, "get_board", map[string]any{"project": "board"})
+	assert.False(t, isToolError(result), fmt.Sprintf("expected success, got: %v", result))
+
+	lanes := getResultArray(t, result)
+	require.NotEmpty(t, lanes)
+	issues := lanes[0]["issues"].([]any)
+	require.Len(t, issues, 1)
+	assert.Equal(t, float64(1), issues[0].(map[string]any)["comment_count"])
+}
+
+func TestGetEpicTool_InlinesComments(t *testing.T) {
+	s, svcs := newTestMCPServer(t)
+	ctx := context.Background()
+
+	_, err := svcs.Projects.Create(ctx, service.CreateProjectInput{Name: "Epicc", Shortcut: "EPC"})
+	require.NoError(t, err)
+	_, err = svcs.Epics.Create(ctx, service.CreateEpicInput{ProjectSlug: "epicc", Name: "big work"})
+	require.NoError(t, err)
+	_, err = svcs.Comments.AddToEpic(ctx, "epicc", "EPC-E1", "epic feedback")
+	require.NoError(t, err)
+
+	result := callTool(t, s, "get_epic", map[string]any{"project": "epicc", "epic_ref": "EPC-E1"})
+	assert.False(t, isToolError(result), fmt.Sprintf("expected success, got: %v", result))
+
+	out := getResultJSON(t, result)
+	assert.Equal(t, float64(1), out["comment_count"])
+	comments := out["comments"].([]any)
+	require.Len(t, comments, 1)
+	assert.Equal(t, "epic feedback", comments[0].(map[string]any)["contents"])
+}
+
 func TestDeleteIssueTool_RemovesIssue(t *testing.T) {
 	s, svcs := newTestMCPServer(t)
 

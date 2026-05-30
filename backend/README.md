@@ -83,3 +83,14 @@ Agent-facing tools exposed at `/mcp`:
 | `add_comment` / `list_comments` | Comments on an issue or epic (one of `issue_ref` / `epic_ref`) |
 | `link_issues` / `list_links` | Issue links |
 | `list_swimlanes` | Swimlanes in a project |
+
+### Read model (agent-facing)
+
+MCP read tools return projections shaped for an agent's attention and context budget, not the raw models — see
+[ADR 0008](../docs/adr/0008-mcp-agent-read-model.md):
+
+- **Detail calls inline feedback.** `get_issue` returns the description plus the issue's `comments` and `links`;
+  `get_epic` inlines its `comments`. An agent acting on an entity always sees the feedback attached to it.
+- **List/board calls are a scannable index.** `list_issues`, `get_board`, and `list_epics` omit descriptions and carry a
+  `comment_count` per row — the cue to drill in with `get_issue` / `get_epic`. Counts are batched (one grouped query),
+  so there is no N+1 on the board.
