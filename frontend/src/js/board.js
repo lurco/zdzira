@@ -71,12 +71,29 @@ function boardPath() {
     : `/api/v1/projects/${PROJECT}/board`
 }
 
+function saveLaneScrolls() {
+  const map = {}
+  document.querySelectorAll('.lane-body[data-lane-id]').forEach(el => {
+    map[el.dataset.laneId] = el.scrollTop
+  })
+  return map
+}
+
+function restoreLaneScrolls(map) {
+  document.querySelectorAll('.lane-body[data-lane-id]').forEach(el => {
+    const saved = map[el.dataset.laneId]
+    if (saved) el.scrollTop = saved
+  })
+}
+
 // htmx captures hx-get once at process time, so it can't follow the epic
 // filter. Drive the fetch ourselves on every boardUpdated, reading the
 // current URL each time.
 function loadBoard() {
   if (!boardEl) return
+  const scrolls = saveLaneScrolls()
   window.htmx.ajax('GET', boardPath(), { source: boardEl, target: boardEl, swap: 'innerHTML' })
+    .then(() => restoreLaneScrolls(scrolls))
 }
 
 if (boardEl) {
