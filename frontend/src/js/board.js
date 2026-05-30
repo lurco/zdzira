@@ -8,6 +8,7 @@ import './board-dnd'
 import './board-filter'
 import { renderTemplate } from './dialog'
 import { PROJECT, refreshBoard } from './project'
+import { initTextareas } from './textarea'
 import Handlebars from 'handlebars'
 
 // Backend connection markers in the statusbar: API, MCP and SSE.
@@ -150,6 +151,7 @@ document.addEventListener('click', event => {
     const panel = document.getElementById('issuePanel')
     panel.innerHTML = renderTemplate('tmpl-issue-edit-form', { ...currentIssue, epics: currentEpics, projectSlug: PROJECT })
     window.htmx.process(panel)
+    initTextareas(panel)
     return
   }
 
@@ -157,6 +159,7 @@ document.addEventListener('click', event => {
     const panel = document.getElementById('issuePanel')
     panel.innerHTML = renderTemplate('tmpl-issue-panel', currentIssue)
     window.htmx.process(panel)
+    initTextareas(panel)
     return
   }
 
@@ -208,9 +211,12 @@ document.addEventListener('click', event => {
   const editCommentBtn = event.target.closest('[data-edit-comment]')
   if (editCommentBtn && currentIssue) {
     const item = editCommentBtn.closest('.comment-item')
+    const parent = item.parentElement
     const id = editCommentBtn.dataset.editComment
     const contents = item.querySelector('.comment-item__text').textContent
     item.outerHTML = renderTemplate('tmpl-comment-edit', { id, contents })
+    const editor = parent.querySelector('.comment-edit')
+    if (editor) initTextareas(editor)
     return
   }
 
@@ -273,6 +279,7 @@ document.body.addEventListener('submit', event => {
       const panel = document.getElementById('issuePanel')
       panel.innerHTML = renderTemplate('tmpl-issue-panel', currentIssue)
       window.htmx.process(panel)
+      initTextareas(panel)
       loadComments(currentIssue.ref)
       loadLinks(currentIssue.ref)
       wireLaneSelect(currentIssue.ref)

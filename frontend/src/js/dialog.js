@@ -1,4 +1,5 @@
 import Handlebars from 'handlebars'
+import { initTextareas } from './textarea'
 
 const MODAL_ID = 'sharedModal'
 const BODY_ID = 'sharedModalBody'
@@ -31,6 +32,7 @@ export function openDialog(templateId, data = {}) {
     if (!body) throw new Error(`#${BODY_ID} not in DOM`)
     body.innerHTML = getCompiled(templateId)(data)
     window.htmx.process(body)
+    initTextareas(body)
     if (modal.open) modal.close()
     modal.showModal()
   } catch (err) {
