@@ -410,6 +410,9 @@ script#tmpl-audit-log(type="text/x-handlebars-template")
   |   {{else}}
   |     <p class="modal__hint">No activity recorded yet.</p>
   |   {{/if}}
+  |   <div class="modal__actions">
+  |     <button class="modal__btn modal__btn--cancel" type="button" data-dialog-close>Close</button>
+  |   </div>
   | </div>
 
 script#tmpl-confirm-delete-comment(type="text/x-handlebars-template")

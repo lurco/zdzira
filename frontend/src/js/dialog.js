@@ -44,6 +44,11 @@ export function closeDialog() {
 }
 
 document.addEventListener('click', event => {
+  if (event.target.id === MODAL_ID) {
+    closeDialog()
+    return
+  }
+
   const trigger = event.target.closest('[data-dialog-open]')
   if (trigger) {
     event.preventDefault()
